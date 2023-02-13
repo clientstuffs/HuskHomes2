@@ -161,7 +161,7 @@ public class EditWarpCommand extends CommandBase implements TabCompletable {
                 });
                 break;
             }
-            default:{
+            default: {
                 plugin.getLocales().getLocale("error_invalid_syntax",
                         "/editwarp <name> [" + String.join("|", EDIT_WARP_COMPLETIONS) + "] [args]")
                     .ifPresent(editor::sendMessage);
@@ -240,16 +240,19 @@ public class EditWarpCommand extends CommandBase implements TabCompletable {
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         switch (args.length) {
             case 0:
-            case 1: return plugin.getCache().warps
-                .stream()
-                .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
-                .sorted()
-                .collect(Collectors.toList());
-            case 2: return Arrays.stream(EDIT_WARP_COMPLETIONS)
-                .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
-                .sorted()
-                .collect(Collectors.toList());
-            default: return Collections.emptyList();
+            case 1:
+                return plugin.getCache().warps
+                    .stream()
+                    .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+                    .sorted()
+                    .collect(Collectors.toList());
+            case 2:
+                return Arrays.stream(EDIT_WARP_COMPLETIONS)
+                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .sorted()
+                    .collect(Collectors.toList());
+            default:
+                return Collections.emptyList();
         }
     }
 }

@@ -66,7 +66,8 @@ public final class BukkitAdapter {
                 environment = net.william278.huskhomes.position.World.Environment.CUSTOM;
                 break;
             }
-            default: throw new UnsupportedOperationException();
+            default:
+                throw new UnsupportedOperationException();
         }
         return Optional.of(new net.william278.huskhomes.position.World(world.getName(), world.getUID(), environment));
     }

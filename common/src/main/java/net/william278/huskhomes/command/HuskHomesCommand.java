@@ -134,7 +134,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
             return;
         }
         switch (args[0].toLowerCase()) {
-            case "about":{
+            case "about": {
                 Arrays.stream(aboutMenu.toString().split("\n")).forEach(message ->
                     plugin.getLoggingAdapter().log(Level.INFO, message));
                 break;
@@ -182,16 +182,19 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                         return;
                     }
                     switch (args[2]) {
-                        case "start": migrator.start().thenAccept(succeeded -> {
-                            if (succeeded) {
-                                plugin.getLoggingAdapter().log(Level.INFO, "Migration completed successfully!");
-                            } else {
-                                plugin.getLoggingAdapter().log(Level.WARNING, "Migration failed!");
-                            }
-                        });
-                        case "set": migrator.handleConfigurationCommand(Arrays.copyOfRange(args, 3, args.length));
-                        default: plugin.getLoggingAdapter().log(Level.INFO,
-                            "Invalid syntax. Console usage: \"huskhomes migrate " + args[1] + " <start/set>");
+                        case "start":
+                            migrator.start().thenAccept(succeeded -> {
+                                if (succeeded) {
+                                    plugin.getLoggingAdapter().log(Level.INFO, "Migration completed successfully!");
+                                } else {
+                                    plugin.getLoggingAdapter().log(Level.WARNING, "Migration failed!");
+                                }
+                            });
+                        case "set":
+                            migrator.handleConfigurationCommand(Arrays.copyOfRange(args, 3, args.length));
+                        default:
+                            plugin.getLoggingAdapter().log(Level.INFO,
+                                "Invalid syntax. Console usage: \"huskhomes migrate " + args[1] + " <start/set>");
                     }
                 }, () -> {
                     plugin.getLoggingAdapter().log(Level.INFO,

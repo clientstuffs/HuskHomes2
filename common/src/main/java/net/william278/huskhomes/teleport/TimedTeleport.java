@@ -181,14 +181,22 @@ public class TimedTeleport extends Teleport {
      */
     private void sendStatusMessage(@NotNull MineDown message) {
         switch (plugin.getSettings().teleportWarmupDisplay) {
-            case ACTION_BAR:
+            case ACTION_BAR: {
                 teleporter.sendActionBar(message);
-            case SUBTITLE:
+                break;
+            }
+            case SUBTITLE: {
                 teleporter.sendTitle(message, true);
-            case TITLE:
+                break;
+            }
+            case TITLE: {
                 teleporter.sendTitle(message, false);
-            case MESSAGE:
+                break;
+            }
+            case MESSAGE: {
                 teleporter.sendMessage(message);
+                break;
+            }
         }
     }
 

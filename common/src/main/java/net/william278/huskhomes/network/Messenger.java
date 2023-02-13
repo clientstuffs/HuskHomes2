@@ -145,9 +145,11 @@ public abstract class Messenger implements AutoCloseable {
     protected final void handleMessage(@NotNull OnlineUser receiver, @NotNull Request request) {
         switch (request.getRelayType()) {
             // Handle a message and send reply
-            case MESSAGE:
+            case MESSAGE: {
                 handleRequest(receiver, request);
-                // Handle a reply message
+                break;
+            }
+            // Handle a reply message
             case REPLY: {
                 if (processingMessages.containsKey(request.getUuid())) {
                     final Request finalRequest = request;
@@ -155,6 +157,7 @@ public abstract class Messenger implements AutoCloseable {
                     return;
                 }
                 plugin.getLoggingAdapter().log(Level.WARNING, "Received a reply to a message that was not sent by this server");
+                break;
             }
         }
     }
@@ -178,9 +181,12 @@ public abstract class Messenger implements AutoCloseable {
                     return;
                 }
                 request.reply(receiver, Payload.empty(), plugin);
+                break;
             }
-            case POSITION_REQUEST:
+            case POSITION_REQUEST: {
                 request.reply(receiver, Payload.withPosition(receiver.getPosition()), plugin);
+                break;
+            }
             case TELEPORT_REQUEST: {
                 if (request.getPayload().teleportRequest != null) {
                     request.reply(receiver, plugin.getRequestManager()
@@ -190,6 +196,7 @@ public abstract class Messenger implements AutoCloseable {
                     return;
                 }
                 request.reply(receiver, Payload.empty(), plugin);
+                break;
             }
             case TELEPORT_REQUEST_RESPONSE: {
                 if (request.getPayload().teleportRequest != null) {
@@ -198,6 +205,7 @@ public abstract class Messenger implements AutoCloseable {
                     return;
                 }
                 request.reply(receiver, Payload.empty(), plugin);
+                break;
             }
         }
     }

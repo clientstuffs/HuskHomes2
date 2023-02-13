@@ -30,7 +30,7 @@ public class LocalesTests {
                                                                                               && !file.getName().equals("en-gb.yml")))) {
                 final Set<String> fileKeys = Annotaml.create(file, Locales.class).get().rawLocales.keySet();
                 keys.forEach(key -> Assertions.assertTrue(fileKeys.contains(key),
-                        "Locale key " + key + " is missing from " + file.getName()));
+                    "Locale key " + key + " is missing from " + file.getName()));
             }
         } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);

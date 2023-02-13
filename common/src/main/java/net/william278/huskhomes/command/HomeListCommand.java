@@ -22,7 +22,8 @@ public class HomeListCommand extends CommandBase implements ConsoleExecutable {
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0: showHomeList(onlineUser, onlineUser.username, 1);
+            case 0:
+                showHomeList(onlineUser, onlineUser.username, 1);
             case 1: {
                 try {
                     int pageNumber = Integer.parseInt(args[0]);
@@ -40,8 +41,9 @@ public class HomeListCommand extends CommandBase implements ConsoleExecutable {
                         .ifPresent(onlineUser::sendMessage);
                 }
             }
-            default: plugin.getLocales().getLocale("error_invalid_syntax", "/homelist [page]")
-                .ifPresent(onlineUser::sendMessage);
+            default:
+                plugin.getLocales().getLocale("error_invalid_syntax", "/homelist [page]")
+                    .ifPresent(onlineUser::sendMessage);
         }
     }
 

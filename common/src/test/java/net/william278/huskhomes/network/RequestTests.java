@@ -11,18 +11,18 @@ import java.util.UUID;
 public class RequestTests {
 
     private final static Request DUMMY_NO_PAYLOAD = Request.builder()
-            .withType(Request.MessageType.TELEPORT_REQUEST)
-            .withTargetPlayer("TestTarget")
-            .withPayload(Payload.empty())
-            .build();
+        .withType(Request.MessageType.TELEPORT_REQUEST)
+        .withTargetPlayer("TestTarget")
+        .withPayload(Payload.empty())
+        .build();
 
     private final static Request DUMMY_PAYLOAD = Request.builder()
-            .withType(Request.MessageType.TELEPORT_REQUEST)
-            .withTargetPlayer("TestTarget")
-            .withPayload(Payload.withPosition(
-                    new Position(63.25, 127.43, -32, 180f, -94.3f,
-                            new World("TestWorld", UUID.randomUUID()), new Server("TestServer"))))
-            .build();
+        .withType(Request.MessageType.TELEPORT_REQUEST)
+        .withTargetPlayer("TestTarget")
+        .withPayload(Payload.withPosition(
+            new Position(63.25, 127.43, -32, 180f, -94.3f,
+                new World("TestWorld", UUID.randomUUID()), new Server("TestServer"))))
+        .build();
 
     @Test
     public void testMessageSerializationWithEmptyPayload() {

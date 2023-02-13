@@ -246,7 +246,8 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
                         permissionDefault = PermissionDefault.FALSE;
                         break;
                     }
-                    default: throw new UnsupportedOperationException();
+                    default:
+                        throw new UnsupportedOperationException();
                 }
                 getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.node, permissionDefault));
             });

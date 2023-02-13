@@ -14,11 +14,6 @@ import java.util.UUID;
 
 public class NormalDistributionTests {
 
-    @Test
-    public void testNormalDistributionRandomizer() {
-        Assertions.assertEquals(1000, generateLocations(1000).size());
-    }
-
     // Plots location distribution
     public static void generateRtpLocationDistributionImage() {
         final List<Location> locations = generateLocations(2000);
@@ -29,16 +24,16 @@ public class NormalDistributionTests {
             zValues[i] = locations.get(i).z;
         }
         final Plot plot = Plot.plot(Plot.plotOpts()
-                        .title("RTP Normal Distribution demo")
-                        .legend(Plot.LegendFormat.BOTTOM))
-                .xAxis("x", Plot.axisOpts().range(-3250, 3250))
-                .yAxis("z", Plot.axisOpts().range(-3250, 3250))
-                .series("Data", Plot.data()
-                                .xy(xValues, zValues),
-                        Plot.seriesOpts()
-                                .marker(Plot.Marker.CIRCLE)
-                                .markerColor(new Color(0, 60, 255, 180))
-                                .color(new Color(0, 0, 0, 0)));
+                .title("RTP Normal Distribution demo")
+                .legend(Plot.LegendFormat.BOTTOM))
+            .xAxis("x", Plot.axisOpts().range(-3250, 3250))
+            .yAxis("z", Plot.axisOpts().range(-3250, 3250))
+            .series("Data", Plot.data()
+                    .xy(xValues, zValues),
+                Plot.seriesOpts()
+                    .marker(Plot.Marker.CIRCLE)
+                    .markerColor(new Color(0, 60, 255, 180))
+                    .color(new Color(0, 0, 0, 0)));
         try {
             plot.save("images/rtp-location-distribution", "png");
         } catch (IOException e) {
@@ -50,10 +45,15 @@ public class NormalDistributionTests {
         final List<Location> locations = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             locations.add(NormalDistributionEngine.generateLocation(
-                    new Location(0, 0, 0, 0, 0, new World("TestWorld", UUID.randomUUID())),
-                    0.75f, 2f, 500f, 3000f));
+                new Location(0, 0, 0, 0, 0, new World("TestWorld", UUID.randomUUID())),
+                0.75f, 2f, 500f, 3000f));
         }
         return locations;
+    }
+
+    @Test
+    public void testNormalDistributionRandomizer() {
+        Assertions.assertEquals(1000, generateLocations(1000).size());
     }
 
 }
