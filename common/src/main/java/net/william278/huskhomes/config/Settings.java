@@ -135,6 +135,8 @@ public class Settings {
     public String globalSpawnName = "Spawn";
     @YamlKey("cross_server.global_respawning")
     public boolean globalRespawning = false;
+    @YamlKey("cross_server.queue")
+    public boolean queue = false;
     @YamlKey("cross_server.redis_credentials.host")
     public String redisHost = "localhost";
     @YamlKey("cross_server.redis_credentials.port")
