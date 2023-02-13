@@ -22,41 +22,43 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0 -> plugin.getDatabase().getWarps()
+            case 0:
+                plugin.getDatabase().getWarps()
                     .thenApply(warps -> warps.stream()
-                            .filter(warp -> warp.hasPermission(plugin.getSettings().permissionRestrictWarps, onlineUser))
-                            .collect(Collectors.toList()))
+                        .filter(warp -> warp.hasPermission(plugin.getSettings().permissionRestrictWarps, onlineUser))
+                        .collect(Collectors.toList()))
                     .thenAccept(warps -> {
                         if (warps.isEmpty()) {
                             plugin.getLocales().getLocale("error_no_warps_set")
-                                    .ifPresent(onlineUser::sendMessage);
+                                .ifPresent(onlineUser::sendMessage);
                             return;
                         }
                         plugin.getCache().getWarpList(onlineUser, plugin.getLocales(), warps,
-                                        plugin.getSettings().listItemsPerPage, 1)
-                                .ifPresent(onlineUser::sendMessage);
+                                plugin.getSettings().listItemsPerPage, 1)
+                            .ifPresent(onlineUser::sendMessage);
                     });
-            case 1 -> {
+            case 1: {
                 final String warpName = args[0];
                 plugin.getDatabase()
-                        .getWarp(warpName)
-                        .thenAccept(warpResult -> warpResult.ifPresentOrElse(warp -> {
-                                    // Handle permission restrictions
-                                    if (!warp.hasPermission(plugin.getSettings().permissionRestrictWarps, onlineUser)) {
-                                        plugin.getLocales().getLocale("error_no_permission")
-                                                .ifPresent(onlineUser::sendMessage);
-                                        return;
-                                    }
+                    .getWarp(warpName)
+                    .thenAccept(warpResult -> warpResult.ifPresentOrElse(warp -> {
+                            // Handle permission restrictions
+                            if (!warp.hasPermission(plugin.getSettings().permissionRestrictWarps, onlineUser)) {
+                                plugin.getLocales().getLocale("error_no_permission")
+                                    .ifPresent(onlineUser::sendMessage);
+                                return;
+                            }
 
-                                    Teleport.builder(plugin, onlineUser)
-                                            .setTarget(warp)
-                                            .toTimedTeleport()
-                                            .thenAccept(TimedTeleport::execute);
-                                },
-                                () -> plugin.getLocales().getLocale("error_warp_invalid", warpName)
-                                        .ifPresent(onlineUser::sendMessage)));
+                            Teleport.builder(plugin, onlineUser)
+                                .setTarget(warp)
+                                .toTimedTeleport()
+                                .thenAccept(TimedTeleport::execute);
+                        },
+                        () -> plugin.getLocales().getLocale("error_warp_invalid", warpName)
+                            .ifPresent(onlineUser::sendMessage)));
             }
-            default -> plugin.getLocales().getLocale("error_invalid_syntax", "/warp [name]")
+            default:
+                plugin.getLocales().getLocale("error_invalid_syntax", "/warp [name]")
                     .ifPresent(onlineUser::sendMessage);
         }
     }
@@ -64,10 +66,10 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
     @Override
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         return plugin.getCache().warps.stream()
-                .filter(s -> user == null || Warp.hasPermission(plugin.getSettings().permissionRestrictWarps, user, s))
-                .filter(s -> s.toLowerCase().startsWith(args.length >= 1 ? args[0].toLowerCase() : ""))
-                .sorted()
-                .collect(Collectors.toList());
+            .filter(s -> user == null || Warp.hasPermission(plugin.getSettings().permissionRestrictWarps, user, s))
+            .filter(s -> s.toLowerCase().startsWith(args.length >= 1 ? args[0].toLowerCase() : ""))
+            .sorted()
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -91,9 +93,9 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
 
             plugin.getLoggingAdapter().log(Level.INFO, "Teleporting " + playerToTeleport.username + " to " + warp.meta.name);
             Teleport.builder(plugin, playerToTeleport)
-                    .setTarget(warp)
-                    .toTimedTeleport()
-                    .thenAccept(TimedTeleport::execute);
+                .setTarget(warp)
+                .toTimedTeleport()
+                .thenAccept(TimedTeleport::execute);
         });
     }
 

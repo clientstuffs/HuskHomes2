@@ -23,29 +23,29 @@ public class TpHereCommand extends CommandBase implements TabCompletable {
         CompletableFuture.runAsync(() -> {
             if (args.length != 1) {
                 plugin.getLocales().getLocale("error_invalid_syntax", "/tphere <player>")
-                        .ifPresent(onlineUser::sendMessage);
+                    .ifPresent(onlineUser::sendMessage);
                 return;
             }
             final String targetPlayerName = args[0];
             plugin.findPlayer(onlineUser, targetPlayerName).thenAccept(teleporterName -> {
                 if (teleporterName.isEmpty()) {
                     plugin.getLocales().getLocale("error_player_not_found", targetPlayerName)
-                            .ifPresent(onlineUser::sendMessage);
+                        .ifPresent(onlineUser::sendMessage);
                     return;
                 }
 
                 Teleport.builder(plugin, onlineUser)
-                        .setTeleporter(teleporterName.get())
-                        .setTarget(onlineUser.getPosition())
-                        .toTeleport()
-                        .thenAccept(teleport -> teleport.execute().thenAccept(result -> {
-                            if (result.successful()) {
-                                result.getTeleporter()
-                                        .flatMap(teleporter -> plugin.getLocales().getLocale("teleporting_other_complete",
-                                                teleporter.username, onlineUser.username))
-                                        .ifPresent(onlineUser::sendMessage);
-                            }
-                        }));
+                    .setTeleporter(teleporterName.get())
+                    .setTarget(onlineUser.getPosition())
+                    .toTeleport()
+                    .thenAccept(teleport -> teleport.execute().thenAccept(result -> {
+                        if (result.successful()) {
+                            result.getTeleporter()
+                                .flatMap(teleporter -> plugin.getLocales().getLocale("teleporting_other_complete",
+                                    teleporter.username, onlineUser.username))
+                                .ifPresent(onlineUser::sendMessage);
+                        }
+                    }));
             });
 
         });
@@ -54,7 +54,7 @@ public class TpHereCommand extends CommandBase implements TabCompletable {
     @Override
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         return args.length <= 1 ? plugin.getCache().players.stream()
-                .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
-                .sorted().collect(Collectors.toList()) : Collections.emptyList();
+            .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+            .sorted().collect(Collectors.toList()) : Collections.emptyList();
     }
 }

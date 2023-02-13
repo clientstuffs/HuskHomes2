@@ -44,7 +44,7 @@ public class TimedTeleport extends Teleport {
         // If the target has not been resolved, fail the teleport
         if (target == null) {
             return CompletableFuture.completedFuture(TeleportResult.FAILED_TARGET_NOT_RESOLVED)
-                    .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
         }
 
         // Check if the teleporter can bypass warmup
@@ -55,21 +55,21 @@ public class TimedTeleport extends Teleport {
         // Check if the teleporter is already warming up to teleport
         if (plugin.getCache().currentlyOnWarmup.contains(teleporter.uuid)) {
             return CompletableFuture.completedFuture(TeleportResult.FAILED_ALREADY_TELEPORTING)
-                    .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
         }
 
         // Check economy actions
         for (Settings.EconomyAction economyAction : economyActions) {
             if (!plugin.validateEconomyCheck(executor, economyAction)) {
                 return CompletableFuture.completedFuture(TeleportResult.CANCELLED_ECONOMY)
-                        .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+                    .thenApply(resultState -> CompletedTeleport.from(resultState, this));
             }
         }
 
         // Check if they are moving at the start of the teleport
         if (teleporter.isMoving()) {
             return CompletableFuture.completedFuture(TeleportResult.FAILED_MOVING)
-                    .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
         }
 
         // Process the warmup and execute the teleport
@@ -100,7 +100,7 @@ public class TimedTeleport extends Teleport {
             // Mark the player as warming up and display the message
             plugin.getCache().currentlyOnWarmup.add(teleporter.uuid);
             plugin.getLocales().getLocale("teleporting_warmup_start", Integer.toString(timeLeft))
-                    .ifPresent(teleporter::sendMessage);
+                .ifPresent(teleporter::sendMessage);
 
             // Create a scheduled executor to tick the timed teleport
             final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -108,12 +108,12 @@ public class TimedTeleport extends Teleport {
                 // Display countdown action bar message
                 if (timeLeft > 0) {
                     plugin.getSettings().getSoundEffect(Settings.SoundEffectAction.TELEPORTATION_WARMUP)
-                            .ifPresent(teleporter::playSound);
+                        .ifPresent(teleporter::playSound);
                     plugin.getLocales().getLocale("teleporting_action_bar_warmup", Integer.toString(timeLeft))
-                            .ifPresent(this::sendStatusMessage);
+                        .ifPresent(this::sendStatusMessage);
                 } else {
                     plugin.getLocales().getLocale("teleporting_action_bar_processing")
-                            .ifPresent(this::sendStatusMessage);
+                        .ifPresent(this::sendStatusMessage);
                 }
 
                 // Tick (decrement) the timed teleport timer and end it if done
@@ -148,11 +148,11 @@ public class TimedTeleport extends Teleport {
         // Cancel the timed teleport if the player takes damage
         if (hasTeleporterTakenDamage()) {
             plugin.getLocales().getLocale("teleporting_cancelled_damage")
-                    .ifPresent(teleporter::sendMessage);
+                .ifPresent(teleporter::sendMessage);
             plugin.getLocales().getLocale("teleporting_action_bar_cancelled")
-                    .ifPresent(this::sendStatusMessage);
+                .ifPresent(this::sendStatusMessage);
             plugin.getSettings().getSoundEffect(Settings.SoundEffectAction.TELEPORTATION_CANCELLED)
-                    .ifPresent(teleporter::playSound);
+                .ifPresent(teleporter::playSound);
             cancelled = true;
             return true;
         }
@@ -160,11 +160,11 @@ public class TimedTeleport extends Teleport {
         // Cancel the timed teleport if the player moves
         if (hasTeleporterMoved()) {
             plugin.getLocales().getLocale("teleporting_cancelled_movement")
-                    .ifPresent(teleporter::sendMessage);
+                .ifPresent(teleporter::sendMessage);
             plugin.getLocales().getLocale("teleporting_action_bar_cancelled")
-                    .ifPresent(this::sendStatusMessage);
+                .ifPresent(this::sendStatusMessage);
             plugin.getSettings().getSoundEffect(Settings.SoundEffectAction.TELEPORTATION_CANCELLED)
-                    .ifPresent(teleporter::playSound);
+                .ifPresent(teleporter::playSound);
             cancelled = true;
             return true;
         }
@@ -181,10 +181,14 @@ public class TimedTeleport extends Teleport {
      */
     private void sendStatusMessage(@NotNull MineDown message) {
         switch (plugin.getSettings().teleportWarmupDisplay) {
-            case ACTION_BAR -> teleporter.sendActionBar(message);
-            case SUBTITLE -> teleporter.sendTitle(message, true);
-            case TITLE -> teleporter.sendTitle(message, false);
-            case MESSAGE -> teleporter.sendMessage(message);
+            case ACTION_BAR:
+                teleporter.sendActionBar(message);
+            case SUBTITLE:
+                teleporter.sendTitle(message, true);
+            case TITLE:
+                teleporter.sendTitle(message, false);
+            case MESSAGE:
+                teleporter.sendMessage(message);
         }
     }
 

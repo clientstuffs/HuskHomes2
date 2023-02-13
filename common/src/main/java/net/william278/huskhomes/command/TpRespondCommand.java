@@ -27,7 +27,7 @@ public class TpRespondCommand extends CommandBase implements TabCompletable {
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         if (args.length > 1) {
             plugin.getLocales().getLocale("error_invalid_syntax", "/" + command + " [player]")
-                    .ifPresent(onlineUser::sendMessage);
+                .ifPresent(onlineUser::sendMessage);
             return;
         }
 
@@ -43,7 +43,7 @@ public class TpRespondCommand extends CommandBase implements TabCompletable {
     @Override
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         return args.length <= 1 ? plugin.getCache().players.stream()
-                .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
-                .sorted().collect(Collectors.toList()) : Collections.emptyList();
+            .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+            .sorted().collect(Collectors.toList()) : Collections.emptyList();
     }
 }

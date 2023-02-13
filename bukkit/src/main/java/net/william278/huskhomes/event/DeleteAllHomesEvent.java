@@ -9,14 +9,17 @@ import org.jetbrains.annotations.NotNull;
 public class DeleteAllHomesEvent extends Event implements IDeleteAllHomesEvent, Cancellable {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
-
-    private boolean cancelled;
-
     @NotNull
     private final User homeOwner;
+    private boolean cancelled;
 
     public DeleteAllHomesEvent(@NotNull User homeOwner) {
         this.homeOwner = homeOwner;
+    }
+
+    @SuppressWarnings("unused")
+    public static HandlerList getHandlerList() {
+        return HANDLER_LIST;
     }
 
     @NotNull
@@ -25,19 +28,14 @@ public class DeleteAllHomesEvent extends Event implements IDeleteAllHomesEvent, 
         return HANDLER_LIST;
     }
 
-    @SuppressWarnings("unused")
-    public static HandlerList getHandlerList() {
-        return HANDLER_LIST;
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
     }
 
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
     }
 
     @Override

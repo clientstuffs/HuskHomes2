@@ -7,15 +7,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@YamlFile(header = """
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-        ┃      Unsafe /rtp Blocks      ┃
-        ┃    Developed by William278   ┃
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛""")
+@YamlFile(header = "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+                   "┃      Unsafe /rtp Blocks      ┃\n" +
+                   "┃    Developed by William278   ┃\n" +
+                   "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 public class UnsafeBlocks {
 
     @YamlKey("unsafe_blocks")
     public List<String> unsafeBlocks;
+
+    @SuppressWarnings("unused")
+    public UnsafeBlocks() {
+    }
 
     /**
      * Returns if the block, by provided identifier, is unsafe
@@ -28,10 +31,6 @@ public class UnsafeBlocks {
             blockId = Key.MINECRAFT_NAMESPACE + ":" + blockId;
         }
         return unsafeBlocks.contains(blockId);
-    }
-
-    @SuppressWarnings("unused")
-    public UnsafeBlocks() {
     }
 
 }

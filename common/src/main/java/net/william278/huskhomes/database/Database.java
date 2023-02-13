@@ -111,6 +111,22 @@ public abstract class Database {
     private final Logger logger;
 
     /**
+     * Create a database instance, pulling table names from the plugin config
+     *
+     * @param implementor the implementing plugin instance
+     */
+    protected Database(@NotNull HuskHomes implementor) {
+        this.plugin = implementor;
+        this.playerTableName = implementor.getSettings().getTableName(Settings.TableName.PLAYER_DATA);
+        this.positionsTableName = implementor.getSettings().getTableName(Settings.TableName.POSITION_DATA);
+        this.savedPositionsTableName = implementor.getSettings().getTableName(Settings.TableName.SAVED_POSITION_DATA);
+        this.homesTableName = implementor.getSettings().getTableName(Settings.TableName.HOME_DATA);
+        this.warpsTableName = implementor.getSettings().getTableName(Settings.TableName.WARP_DATA);
+        this.teleportsTableName = implementor.getSettings().getTableName(Settings.TableName.TELEPORT_DATA);
+        this.logger = implementor.getLoggingAdapter();
+    }
+
+    /**
      * Returns the {@link Logger} used to log database errors
      *
      * @return the {@link Logger} instance
@@ -128,9 +144,9 @@ public abstract class Database {
      */
     protected final String[] getSchemaStatements(@NotNull String schemaFileName) throws IOException {
         return formatStatementTables(
-                new String(Objects.requireNonNull(plugin.getResource(schemaFileName)).readAllBytes(),
-                        StandardCharsets.UTF_8))
-                .split(";");
+            new String(Objects.requireNonNull(plugin.getResource(schemaFileName)).readAllBytes(),
+                StandardCharsets.UTF_8))
+            .split(";");
     }
 
     /**
@@ -141,28 +157,12 @@ public abstract class Database {
      */
     protected final String formatStatementTables(@NotNull String sql) {
         return sql
-                .replaceAll("%positions_table%", positionsTableName)
-                .replaceAll("%players_table%", playerTableName)
-                .replaceAll("%teleports_table%", teleportsTableName)
-                .replaceAll("%saved_positions_table%", savedPositionsTableName)
-                .replaceAll("%homes_table%", homesTableName)
-                .replaceAll("%warps_table%", warpsTableName);
-    }
-
-    /**
-     * Create a database instance, pulling table names from the plugin config
-     *
-     * @param implementor the implementing plugin instance
-     */
-    protected Database(@NotNull HuskHomes implementor) {
-        this.plugin = implementor;
-        this.playerTableName = implementor.getSettings().getTableName(Settings.TableName.PLAYER_DATA);
-        this.positionsTableName = implementor.getSettings().getTableName(Settings.TableName.POSITION_DATA);
-        this.savedPositionsTableName = implementor.getSettings().getTableName(Settings.TableName.SAVED_POSITION_DATA);
-        this.homesTableName = implementor.getSettings().getTableName(Settings.TableName.HOME_DATA);
-        this.warpsTableName = implementor.getSettings().getTableName(Settings.TableName.WARP_DATA);
-        this.teleportsTableName = implementor.getSettings().getTableName(Settings.TableName.TELEPORT_DATA);
-        this.logger = implementor.getLoggingAdapter();
+            .replaceAll("%positions_table%", positionsTableName)
+            .replaceAll("%players_table%", playerTableName)
+            .replaceAll("%teleports_table%", teleportsTableName)
+            .replaceAll("%saved_positions_table%", savedPositionsTableName)
+            .replaceAll("%homes_table%", homesTableName)
+            .replaceAll("%warps_table%", warpsTableName);
     }
 
     /**
@@ -272,12 +272,12 @@ public abstract class Database {
         try {
             final Server server = plugin.getServerName();
             return getWarps().thenApplyAsync(warps -> warps.stream()
-                    .filter(warp -> warp.server.equals(server))
-                    .collect(Collectors.toList()));
+                .filter(warp -> warp.server.equals(server))
+                .collect(Collectors.toList()));
         } catch (HuskHomesException e) {
             return getWarps().thenApplyAsync(warps -> warps.stream()
-                    .filter(warp -> plugin.getWorlds().stream().anyMatch(world -> world.equals(warp.world)))
-                    .collect(Collectors.toList()));
+                .filter(warp -> plugin.getWorlds().stream().anyMatch(world -> world.equals(warp.world)))
+                .collect(Collectors.toList()));
         }
     }
 
@@ -299,12 +299,12 @@ public abstract class Database {
         try {
             final Server server = plugin.getServerName();
             return getPublicHomes().thenApplyAsync(homes -> homes.stream()
-                    .filter(home -> home.server.equals(server))
-                    .collect(Collectors.toList()));
+                .filter(home -> home.server.equals(server))
+                .collect(Collectors.toList()));
         } catch (HuskHomesException e) {
             return plugin.getDatabase().getPublicHomes().thenApplyAsync(homes -> homes.stream()
-                    .filter(home -> plugin.getWorlds().stream().anyMatch(world -> world.equals(home.world)))
-                    .collect(Collectors.toList()));
+                .filter(home -> plugin.getWorlds().stream().anyMatch(world -> world.equals(home.world)))
+                .collect(Collectors.toList()));
         }
     }
 

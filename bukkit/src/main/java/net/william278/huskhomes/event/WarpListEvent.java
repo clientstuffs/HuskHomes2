@@ -23,14 +23,14 @@ public class WarpListEvent extends Event implements IWarpListEvent, Cancellable 
         this.onlineUser = onlineUser;
     }
 
-    @NotNull
-    @Override
-    public HandlerList getHandlers() {
+    @SuppressWarnings("unused")
+    public static HandlerList getHandlerList() {
         return HANDLER_LIST;
     }
 
-    @SuppressWarnings("unused")
-    public static HandlerList getHandlerList() {
+    @NotNull
+    @Override
+    public HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 
@@ -47,12 +47,12 @@ public class WarpListEvent extends Event implements IWarpListEvent, Cancellable 
     }
 
     @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
+    public boolean isCancelled() {
+        return cancelled;
     }
 
     @Override
-    public boolean isCancelled() {
-        return cancelled;
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }

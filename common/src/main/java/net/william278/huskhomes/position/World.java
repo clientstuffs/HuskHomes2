@@ -42,6 +42,16 @@ public class World {
     public World() {
     }
 
+    @Override
+    public boolean equals(@NotNull Object obj) {
+        if (obj instanceof World) {
+            final var world = (World) obj;
+
+            return world.uuid.equals(uuid);
+        }
+        return super.equals(obj);
+    }
+
     /**
      * Identifies the environment of the world
      */
@@ -50,13 +60,5 @@ public class World {
         NETHER,
         THE_END,
         CUSTOM
-    }
-
-    @Override
-    public boolean equals(@NotNull Object obj) {
-        if (obj instanceof World world) {
-            return world.uuid.equals(uuid);
-        }
-        return super.equals(obj);
     }
 }

@@ -95,7 +95,7 @@ public class Cache {
                 this.publicHomes.get(home.owner.username).add(home.meta.name);
             }));
             database.getWarps().thenAccept(warpsList -> warpsList.forEach(warp ->
-                    this.warps.add(warp.meta.name)));
+                this.warps.add(warp.meta.name)));
         });
     }
 
@@ -107,18 +107,18 @@ public class Cache {
     public CompletableFuture<Set<String>> updatePlayerListCache(@NotNull HuskHomes plugin, @NotNull OnlineUser requester) {
         players.clear();
         players.addAll(plugin.getOnlinePlayers()
-                .stream()
-                .filter(player -> !player.isVanished())
-                .map(onlineUser -> onlineUser.username)
-                .toList());
+            .stream()
+            .filter(player -> !player.isVanished())
+            .map(onlineUser -> onlineUser.username)
+            .collect(Collectors.toList()));
 
         if (plugin.getSettings().crossServer) {
             return plugin.getMessenger()
-                    .getOnlinePlayerNames(requester)
-                    .thenApply(networkedPlayers -> {
-                        players.addAll(Set.of(networkedPlayers));
-                        return players;
-                    });
+                .getOnlinePlayerNames(requester)
+                .thenApply(networkedPlayers -> {
+                    players.addAll(Set.of(networkedPlayers));
+                    return players;
+                });
         }
         return CompletableFuture.completedFuture(players);
     }
@@ -137,25 +137,25 @@ public class Cache {
     @NotNull
     private ListOptions.Builder getBaseList(@NotNull Locales locales, int itemsPerPage) {
         return new ListOptions.Builder().setFooterFormat(locales.getRawLocale("list_footer",
-                        "%previous_page_button%", "%current_page%",
-                        "%total_pages%", "%next_page_button%", "%page_jumpers%").orElse(""))
-                .setNextButtonFormat(locales.getRawLocale("list_next_page_button",
-                        "%next_page_index%", "%command%").orElse(""))
-                .setPreviousButtonFormat(locales.getRawLocale("list_previous_page_button",
-                        "%previous_page_index%", "%command%").orElse(""))
-                .setPageJumpersFormat(locales.getRawLocale("list_page_jumpers",
-                        "%page_jump_buttons%").orElse(""))
-                .setPageJumperPageFormat(locales.getRawLocale("list_page_jumper_button",
-                        "%target_page_index%", "%command%").orElse(""))
-                .setPageJumperCurrentPageFormat(locales.getRawLocale("list_page_jumper_current_page",
-                        "%current_page%").orElse(""))
-                .setPageJumperPageSeparator(locales.getRawLocale("list_page_jumper_separator").orElse(""))
-                .setPageJumperGroupSeparator(locales.getRawLocale("list_page_jumper_group_separator").orElse(""))
-                .setItemSeparator(locales.getRawLocale("list_item_divider").orElse(" "))
-                .setItemsPerPage(itemsPerPage)
-                .setEscapeItemsMineDown(false)
-                .setSpaceAfterHeader(false)
-                .setSpaceBeforeFooter(false);
+                "%previous_page_button%", "%current_page%",
+                "%total_pages%", "%next_page_button%", "%page_jumpers%").orElse(""))
+            .setNextButtonFormat(locales.getRawLocale("list_next_page_button",
+                "%next_page_index%", "%command%").orElse(""))
+            .setPreviousButtonFormat(locales.getRawLocale("list_previous_page_button",
+                "%previous_page_index%", "%command%").orElse(""))
+            .setPageJumpersFormat(locales.getRawLocale("list_page_jumpers",
+                "%page_jump_buttons%").orElse(""))
+            .setPageJumperPageFormat(locales.getRawLocale("list_page_jumper_button",
+                "%target_page_index%", "%command%").orElse(""))
+            .setPageJumperCurrentPageFormat(locales.getRawLocale("list_page_jumper_current_page",
+                "%current_page%").orElse(""))
+            .setPageJumperPageSeparator(locales.getRawLocale("list_page_jumper_separator").orElse(""))
+            .setPageJumperGroupSeparator(locales.getRawLocale("list_page_jumper_group_separator").orElse(""))
+            .setItemSeparator(locales.getRawLocale("list_item_divider").orElse(" "))
+            .setItemsPerPage(itemsPerPage)
+            .setEscapeItemsMineDown(false)
+            .setSpaceAfterHeader(false)
+            .setSpaceBeforeFooter(false);
     }
 
     @NotNull
@@ -166,15 +166,15 @@ public class Cache {
         }
         final String homeListArguments = !onlineUser.equals(homeOwner) ? " " + homeOwner.username : "";
         final PaginatedList homeList = PaginatedList.of(homes.stream().map(home ->
-                locales.getRawLocale("home_list_item",
-                                Locales.escapeMineDown(home.meta.name),
-                                Locales.escapeMineDown(home.owner.username + "." + home.meta.name),
-                                Locales.escapeMineDown(locales.formatDescription(home.meta.description)))
-                        .orElse(home.meta.name)).sorted().collect(Collectors.toList()), getBaseList(locales, itemsPerPage)
-                .setHeaderFormat(locales.getRawLocale("home_list_page_title",
-                        homeOwner.username, "%first_item_on_page_index%",
-                        "%last_item_on_page_index%", "%total_items%").orElse(""))
-                .setCommand("/huskhomes:homelist" + homeListArguments).build());
+            locales.getRawLocale("home_list_item",
+                    Locales.escapeMineDown(home.meta.name),
+                    Locales.escapeMineDown(home.owner.username + "." + home.meta.name),
+                    Locales.escapeMineDown(locales.formatDescription(home.meta.description)))
+                .orElse(home.meta.name)).sorted().collect(Collectors.toList()), getBaseList(locales, itemsPerPage)
+            .setHeaderFormat(locales.getRawLocale("home_list_page_title",
+                homeOwner.username, "%first_item_on_page_index%",
+                "%last_item_on_page_index%", "%total_items%").orElse(""))
+            .setCommand("/huskhomes:homelist" + homeListArguments).build());
         this.privateHomeLists.put(homeOwner.username, homeList);
         return Optional.of(homeList.getNearestValidPage(page));
     }
@@ -186,16 +186,16 @@ public class Cache {
             return Optional.empty();
         }
         final PaginatedList publicHomeList = PaginatedList.of(publicHomes.stream().map(home ->
-                locales.getRawLocale("public_home_list_item",
-                                Locales.escapeMineDown(home.meta.name),
-                                Locales.escapeMineDown(home.owner.username + "." + home.meta.name),
-                                Locales.escapeMineDown(home.owner.username),
-                                Locales.escapeMineDown(locales.formatDescription(home.meta.description)))
-                        .orElse(home.meta.name)).sorted().collect(Collectors.toList()), getBaseList(locales, itemsPerPage)
-                .setHeaderFormat(locales.getRawLocale("public_home_list_page_title",
-                        "%first_item_on_page_index%", "%last_item_on_page_index%",
-                        "%total_items%").orElse(""))
-                .setCommand("/huskhomes:publichomelist").build());
+            locales.getRawLocale("public_home_list_item",
+                    Locales.escapeMineDown(home.meta.name),
+                    Locales.escapeMineDown(home.owner.username + "." + home.meta.name),
+                    Locales.escapeMineDown(home.owner.username),
+                    Locales.escapeMineDown(locales.formatDescription(home.meta.description)))
+                .orElse(home.meta.name)).sorted().collect(Collectors.toList()), getBaseList(locales, itemsPerPage)
+            .setHeaderFormat(locales.getRawLocale("public_home_list_page_title",
+                "%first_item_on_page_index%", "%last_item_on_page_index%",
+                "%total_items%").orElse(""))
+            .setCommand("/huskhomes:publichomelist").build());
         publicHomeLists.put(onlineUser.uuid, publicHomeList);
         return Optional.of(publicHomeList.getNearestValidPage(page));
     }
@@ -207,14 +207,14 @@ public class Cache {
             return Optional.empty();
         }
         final PaginatedList warpList = PaginatedList.of(warps.stream()
-                .map(warp -> locales.getRawLocale("warp_list_item",
-                                Locales.escapeMineDown(warp.meta.name),
-                                Locales.escapeMineDown(locales.formatDescription(warp.meta.description)))
-                        .orElse(warp.meta.name)).sorted().collect(Collectors.toList()), getBaseList(locales, itemsPerPage)
-                .setHeaderFormat(locales.getRawLocale("warp_list_page_title",
-                        "%first_item_on_page_index%", "%last_item_on_page_index%",
-                        "%total_items%").orElse(""))
-                .setCommand("/huskhomes:warplist").build());
+            .map(warp -> locales.getRawLocale("warp_list_item",
+                    Locales.escapeMineDown(warp.meta.name),
+                    Locales.escapeMineDown(locales.formatDescription(warp.meta.description)))
+                .orElse(warp.meta.name)).sorted().collect(Collectors.toList()), getBaseList(locales, itemsPerPage)
+            .setHeaderFormat(locales.getRawLocale("warp_list_page_title",
+                "%first_item_on_page_index%", "%last_item_on_page_index%",
+                "%total_items%").orElse(""))
+            .setCommand("/huskhomes:warplist").build());
         warpLists.put(onlineUser.uuid, warpList);
         return Optional.of(warpList.getNearestValidPage(page));
     }
@@ -223,19 +223,19 @@ public class Cache {
     public MineDown getCommandList(@NotNull OnlineUser onlineUser, @NotNull Locales locales,
                                    @NotNull List<CommandBase> commands, final int itemsPerPage, final int page) {
         return PaginatedList.of(commands.stream()
-                                .filter(command -> onlineUser.hasPermission(command.permission))
-                                .map(command -> locales.getRawLocale("command_list_item",
-                                                Locales.escapeMineDown(command.command),
-                                                Locales.escapeMineDown(command.getDescription().length() > 50
-                                                        ? command.getDescription().substring(0, 49).trim() + "…"
-                                                        : command.getDescription()),
-                                                Locales.escapeMineDown(locales.formatDescription(command.getDescription())))
-                                        .orElse(command.command))
-                                .collect(Collectors.toList()),
-                        getBaseList(locales, Math.min(itemsPerPage, 6))
-                                .setHeaderFormat(locales.getRawLocale("command_list_title").orElse(""))
-                                .setItemSeparator("\n").setCommand("/huskhomes:huskhomes help").build())
-                .getNearestValidPage(page);
+                    .filter(command -> onlineUser.hasPermission(command.permission))
+                    .map(command -> locales.getRawLocale("command_list_item",
+                            Locales.escapeMineDown(command.command),
+                            Locales.escapeMineDown(command.getDescription().length() > 50
+                                ? command.getDescription().substring(0, 49).trim() + "…"
+                                : command.getDescription()),
+                            Locales.escapeMineDown(locales.formatDescription(command.getDescription())))
+                        .orElse(command.command))
+                    .collect(Collectors.toList()),
+                getBaseList(locales, Math.min(itemsPerPage, 6))
+                    .setHeaderFormat(locales.getRawLocale("command_list_title").orElse(""))
+                    .setItemSeparator("\n").setCommand("/huskhomes:huskhomes help").build())
+            .getNearestValidPage(page);
     }
 
 }

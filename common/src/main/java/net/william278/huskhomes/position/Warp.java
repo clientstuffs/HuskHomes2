@@ -45,10 +45,12 @@ public class Warp extends SavedPosition {
      *
      * @param restrictWarps Whether to restrict warps to permission nodes
      * @param user          The {@link OnlineUser} to check
+     * @param warp          The warp name to check
      * @return true if the user has permission to teleport to this warp
      */
-    public boolean hasPermission(boolean restrictWarps, @NotNull OnlineUser user) {
-        return hasPermission(restrictWarps, user, meta.name);
+    public static boolean hasPermission(boolean restrictWarps, @NotNull OnlineUser user, @NotNull String warp) {
+        return !restrictWarps || (user.hasPermission(Permission.COMMAND_SET_WARP.node)
+                                  || user.hasPermission(getPermissionNode(warp)));
     }
 
     /**
@@ -56,12 +58,10 @@ public class Warp extends SavedPosition {
      *
      * @param restrictWarps Whether to restrict warps to permission nodes
      * @param user          The {@link OnlineUser} to check
-     * @param warp          The warp name to check
      * @return true if the user has permission to teleport to this warp
      */
-    public static boolean hasPermission(boolean restrictWarps, @NotNull OnlineUser user, @NotNull String warp) {
-        return !restrictWarps || (user.hasPermission(Permission.COMMAND_SET_WARP.node)
-                                  || user.hasPermission(getPermissionNode(warp)));
+    public boolean hasPermission(boolean restrictWarps, @NotNull OnlineUser user) {
+        return hasPermission(restrictWarps, user, meta.name);
     }
 
 }

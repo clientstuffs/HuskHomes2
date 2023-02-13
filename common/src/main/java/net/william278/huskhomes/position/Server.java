@@ -7,11 +7,10 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Represents a server on a proxied network
  */
-@YamlFile(header = """
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-        ┃ Server ID cache. Must match  ┃
-        ┃ server name in proxy config. ┃
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛""")
+@YamlFile(header = "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+                   "┃ Server ID cache. Must match  ┃\n" +
+                   "┃ server name in proxy config. ┃\n" +
+                   "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 public class Server {
 
     /**
@@ -36,7 +35,9 @@ public class Server {
     @Override
     public boolean equals(@NotNull Object other) {
         // If the name of this server matches another, the servers are the same.
-        if (other instanceof Server server) {
+        if (other instanceof Server) {
+            final var server = (Server) other;
+
             return server.name.equalsIgnoreCase(this.name);
         }
         return super.equals(other);

@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * A cross-platform representation of a logged-in {@link User}
@@ -75,8 +76,8 @@ public abstract class OnlineUser extends User {
      */
     public final void sendTitle(@NotNull MineDown mineDown, boolean subTitle) {
         getAudience().sendTitlePart(subTitle ? TitlePart.SUBTITLE : TitlePart.TITLE, mineDown
-                .disable(MineDownParser.Option.SIMPLE_FORMATTING)
-                .replace().toComponent());
+            .disable(MineDownParser.Option.SIMPLE_FORMATTING)
+            .replace().toComponent());
     }
 
     /**
@@ -86,8 +87,8 @@ public abstract class OnlineUser extends User {
      */
     public final void sendActionBar(@NotNull MineDown mineDown) {
         getAudience().sendActionBar(mineDown
-                .disable(MineDownParser.Option.SIMPLE_FORMATTING)
-                .replace().toComponent());
+            .disable(MineDownParser.Option.SIMPLE_FORMATTING)
+            .replace().toComponent());
     }
 
 
@@ -98,8 +99,8 @@ public abstract class OnlineUser extends User {
      */
     public final void sendMessage(@NotNull MineDown mineDown) {
         getAudience().sendMessage(mineDown
-                .disable(MineDownParser.Option.SIMPLE_FORMATTING)
-                .replace().toComponent());
+            .disable(MineDownParser.Option.SIMPLE_FORMATTING)
+            .replace().toComponent());
     }
 
     /**
@@ -124,7 +125,7 @@ public abstract class OnlineUser extends User {
                                 @NotNull String soundEffect) throws IllegalArgumentException {
         try {
             getAudience().playSound(Sound.sound(Key.key(soundEffect), Sound.Source.PLAYER,
-                    1.0f, 1.0f), Sound.Emitter.self());
+                1.0f, 1.0f), Sound.Emitter.self());
         } catch (InvalidKeyException e) {
             throw new IllegalArgumentException("Invalid sound effect name: " + soundEffect);
         }
@@ -225,19 +226,19 @@ public abstract class OnlineUser extends User {
      */
     private List<Integer> getNumericalPermissions(@NotNull String nodePrefix) {
         return getPermissions().entrySet().stream()
-                .filter(Map.Entry::getValue)
-                .filter(permission -> permission.getKey().startsWith(nodePrefix))
-                .filter(permission -> {
-                    try {
-                        // Remove node prefix from the permission and parse as an integer
-                        Integer.parseInt(permission.getKey().substring(nodePrefix.length()));
-                    } catch (final NumberFormatException e) {
-                        return false;
-                    }
-                    return true;
-                })
-                .map(permission -> Integer.parseInt(permission.getKey().substring(nodePrefix.length())))
-                .sorted(Collections.reverseOrder())
-                .toList();
+            .filter(Map.Entry::getValue)
+            .filter(permission -> permission.getKey().startsWith(nodePrefix))
+            .filter(permission -> {
+                try {
+                    // Remove node prefix from the permission and parse as an integer
+                    Integer.parseInt(permission.getKey().substring(nodePrefix.length()));
+                } catch (final NumberFormatException e) {
+                    return false;
+                }
+                return true;
+            })
+            .map(permission -> Integer.parseInt(permission.getKey().substring(nodePrefix.length())))
+            .sorted(Collections.reverseOrder())
+            .collect(Collectors.toList());
     }
 }

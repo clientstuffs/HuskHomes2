@@ -10,16 +10,15 @@ import java.util.UUID;
 public abstract class SavedPosition extends Position implements Comparable<SavedPosition> {
 
     /**
-     * Metadata about this position (name, description)
-     */
-    @NotNull
-    public PositionMeta meta;
-
-    /**
      * A unique ID representing this position
      */
     @NotNull
     public final UUID uuid;
+    /**
+     * Metadata about this position (name, description)
+     */
+    @NotNull
+    public PositionMeta meta;
 
     protected SavedPosition(double x, double y, double z, float yaw, float pitch,
                             @NotNull World world, @NotNull Server server,
@@ -37,7 +36,7 @@ public abstract class SavedPosition extends Position implements Comparable<Saved
      */
     protected SavedPosition(@NotNull Position position, @NotNull PositionMeta meta) {
         super(position.x, position.y, position.z, position.yaw, position.pitch,
-                position.world, position.server);
+            position.world, position.server);
         this.meta = meta;
         this.uuid = UUID.randomUUID();
     }

@@ -1,10 +1,11 @@
 package net.william278.huskhomes.util;
 
-import java.util.Optional;
-import java.util.regex.Pattern;
-
 import net.william278.huskhomes.position.PositionMeta;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * Provides a number of utility regular expressions for checking home name patterns
@@ -45,20 +46,58 @@ public final class RegexUtil {
 
     /**
      * Represents an identifier for a home or warp {@link PositionMeta} that is disambiguated by the owner's name
-     *
-     * @param ownerName the username of a home's owner
-     * @param homeName  the name of a home
      */
-    public record DisambiguatedHomeIdentifier(String ownerName, String homeName) {
+    public static final class DisambiguatedHomeIdentifier {
 
+        /**
+         * the username of a home's owner
+         */
+        private final String ownerName;
+
+        /**
+         * the name of a home
+         */
+        private final String homeName;
+
+        public DisambiguatedHomeIdentifier(String ownerName, String homeName) {
+            this.ownerName = ownerName;
+            this.homeName = homeName;
+        }
+
+        public String ownerName() {
+            return ownerName;
+        }
+
+        public String homeName() {
+            return homeName;
+        }
 
         /**
          * Get the period-separated formatted disambiguated home identifier
          *
          * @return the formatted disambiguated home identifier (e.g. {@code ownerName.homeName})
          */
+        @Override
         public String toString() {
             return ownerName + "." + homeName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            DisambiguatedHomeIdentifier that = (DisambiguatedHomeIdentifier) o;
+
+            if (!Objects.equals(ownerName, that.ownerName)) return false;
+            return Objects.equals(homeName, that.homeName);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = ownerName != null ? ownerName.hashCode() : 0;
+            result = 31 * result + (homeName != null ? homeName.hashCode() : 0);
+            return result;
         }
     }
 

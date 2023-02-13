@@ -17,7 +17,7 @@ public class TpIgnoreCommand extends CommandBase {
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         if (args.length != 0) {
             plugin.getLocales().getLocale("error_invalid_syntax", "/tpignore")
-                    .ifPresent(onlineUser::sendMessage);
+                .ifPresent(onlineUser::sendMessage);
             return;
         }
 
@@ -27,10 +27,10 @@ public class TpIgnoreCommand extends CommandBase {
 
         // Update value on the database and send a message | todo: Clean this up
         plugin.getDatabase().getUserData(onlineUser.uuid)
-                .thenAcceptAsync(userData -> userData.ifPresent(data -> plugin.getDatabase()
-                        .updateUserData(new UserData(onlineUser, data.homeSlots(), isIgnoringRequests, data.rtpCooldown()))
-                        .thenRun(() -> plugin.getLocales().getRawLocale("tpignore_toggle_" + (isIgnoringRequests ? "on" : "off"),
-                                        plugin.getLocales().getRawLocale("tpignore_toggle_button").orElse(""))
-                                .ifPresent(locale -> onlineUser.sendMessage(new MineDown(locale))))));
+            .thenAcceptAsync(userData -> userData.ifPresent(data -> plugin.getDatabase()
+                .updateUserData(new UserData(onlineUser, data.homeSlots(), isIgnoringRequests, data.rtpCooldown()))
+                .thenRun(() -> plugin.getLocales().getRawLocale("tpignore_toggle_" + (isIgnoringRequests ? "on" : "off"),
+                        plugin.getLocales().getRawLocale("tpignore_toggle_button").orElse(""))
+                    .ifPresent(locale -> onlineUser.sendMessage(new MineDown(locale))))));
     }
 }

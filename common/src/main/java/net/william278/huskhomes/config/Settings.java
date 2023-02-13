@@ -13,15 +13,14 @@ import java.util.Optional;
 /**
  * Plugin settings, read from config.yml
  */
-@YamlFile(header = """
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-        ┃       HuskHomes Config       ┃
-        ┃    Developed by William278   ┃
-        ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-        ┣╸ Information: https://william278.net/project/huskhomes
-        ┗╸ Documentation: https://william278.net/docs/huskhomes""",
+@YamlFile(header = "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+                   "┃       HuskHomes Config       ┃\n" +
+                   "┃    Developed by William278   ┃\n" +
+                   "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n" +
+                   "┣╸ Information: https://william278.net/project/huskhomes\n" +
+                   "┗╸ Documentation: https://william278.net/docs/huskhomes",
 
-        versionField = "config_version", versionNumber = 11)
+    versionField = "config_version", versionNumber = 11)
 public class Settings {
 
     // Top-level settings
@@ -75,75 +74,128 @@ public class Settings {
 
     @YamlKey("database.table_names")
     public Map<String, String> tableNames = Map.of(
-            TableName.PLAYER_DATA.name().toLowerCase(), TableName.PLAYER_DATA.defaultName,
-            TableName.POSITION_DATA.name().toLowerCase(), TableName.POSITION_DATA.defaultName,
-            TableName.SAVED_POSITION_DATA.name().toLowerCase(), TableName.SAVED_POSITION_DATA.defaultName,
-            TableName.HOME_DATA.name().toLowerCase(), TableName.HOME_DATA.defaultName,
-            TableName.WARP_DATA.name().toLowerCase(), TableName.WARP_DATA.defaultName,
-            TableName.TELEPORT_DATA.name().toLowerCase(), TableName.TELEPORT_DATA.defaultName
+        TableName.PLAYER_DATA.name().toLowerCase(), TableName.PLAYER_DATA.defaultName,
+        TableName.POSITION_DATA.name().toLowerCase(), TableName.POSITION_DATA.defaultName,
+        TableName.SAVED_POSITION_DATA.name().toLowerCase(), TableName.SAVED_POSITION_DATA.defaultName,
+        TableName.HOME_DATA.name().toLowerCase(), TableName.HOME_DATA.defaultName,
+        TableName.WARP_DATA.name().toLowerCase(), TableName.WARP_DATA.defaultName,
+        TableName.TELEPORT_DATA.name().toLowerCase(), TableName.TELEPORT_DATA.defaultName
     );
+    // General settings
+    @YamlComment("General plugin settings")
+    @YamlKey("general.max_homes")
+    public int maxHomes = 10;
+    @YamlKey("general.max_public_homes")
+    public int maxPublicHomes = 10;
+    @YamlKey("general.stack_permission_limits")
+    public boolean stackPermissionLimits = true;
+    @YamlKey("general.permission_restrict_warps")
+    public boolean permissionRestrictWarps = false;
+    @YamlKey("general.overwrite_existing_homes_warps")
+    public boolean overwriteExistingHomesWarps = true;
+    @YamlKey("general.teleport_warmup_time")
+    public int teleportWarmupTime = 5;
+    @YamlKey("general.teleport_warmup_display")
+    public MessageDisplayType teleportWarmupDisplay = MessageDisplayType.ACTION_BAR;
+    @YamlKey("general.teleport_request_expiry_time")
+    public int teleportRequestExpiryTime = 60;
+    @YamlKey("general.strict_tpa_here_requests")
+    public boolean strictTpaHereRequests = true;
+    @YamlKey("general.allow_unicode_names")
+    public boolean allowUnicodeNames = false;
+    @YamlKey("general.allow_unicode_descriptions")
+    public boolean allowUnicodeDescriptions = true;
+    @YamlKey("general.back_command_return_by_death")
+    public boolean backCommandReturnByDeath = true;
+    @YamlKey("general.back_command_save_teleport_event")
+    public boolean backCommandSaveOnTeleportEvent = false;
+    @YamlKey("general.list_items_per_page")
+    public int listItemsPerPage = 12;
+    @YamlKey("general.asynchronous_teleports")
+    public boolean asynchronousTeleports = true;
+    @YamlKey("general.play_sound_effects")
+    public boolean playSoundEffects = true;
+    @YamlKey("general.sound_effects")
+    public Map<String, String> soundEffects = Map.of(
+        SoundEffectAction.TELEPORTATION_COMPLETE.name().toLowerCase(), SoundEffectAction.TELEPORTATION_COMPLETE.defaultSoundEffect,
+        SoundEffectAction.TELEPORTATION_WARMUP.name().toLowerCase(), SoundEffectAction.TELEPORTATION_WARMUP.defaultSoundEffect,
+        SoundEffectAction.TELEPORTATION_CANCELLED.name().toLowerCase(), SoundEffectAction.TELEPORTATION_CANCELLED.defaultSoundEffect
+    );
+    // Cross-server settings
+    @YamlComment("Enable teleporting across proxied servers. Requires MySQL")
+    @YamlKey("cross_server.enabled")
+    public boolean crossServer = false;
+    @YamlKey("cross_server.messenger_type")
+    public MessengerType messengerType = MessengerType.PLUGIN_MESSAGE;
+    @YamlKey("cross_server.cluster_id")
+    public String clusterId = "";
+    @YamlKey("cross_server.global_spawn.enabled")
+    public boolean globalSpawn = false;
+    @YamlKey("cross_server.global_spawn.warp_name")
+    public String globalSpawnName = "Spawn";
+    @YamlKey("cross_server.global_respawning")
+    public boolean globalRespawning = false;
+    @YamlKey("cross_server.redis_credentials.host")
+    public String redisHost = "localhost";
+    @YamlKey("cross_server.redis_credentials.port")
+    public int redisPort = 6379;
+    @YamlKey("cross_server.redis_credentials.password")
+    public String redisPassword = "";
+    @YamlKey("cross_server.redis_credentials.use_ssl")
+    public boolean redisUseSsl = false;
+    // Rtp command settings
+    @YamlComment("Random teleport (/rtp) command settings")
+    @YamlKey("rtp.cooldown_length")
+    public int rtpCooldownLength = 10;
+    @YamlKey("rtp.radius")
+    public int rtpRadius = 5000;
+    @YamlKey("rtp.spawn_radius")
+    public int rtpSpawnRadius = 500;
+    @YamlKey("rtp.distribution_mean")
+    public float rtpDistributionMean = 0.75f;
+    @YamlKey("rtp.distribution_deviation")
+    public float rtpDistributionStandardDeviation = 2f;
+    @YamlKey("rtp.restricted_worlds")
+    public List<String> rtpRestrictedWorlds = List.of("world_nether", "world_the_end");
+    // Economy settings
+    @YamlComment("Charge for certain actions (requires Vault)")
+    @YamlKey("economy.enabled")
+    public boolean economy = false;
+    @YamlComment("Use this currency for payments (works only with RedisEconomy), defaults to Vault currency")
+    @YamlKey("economy.redis_economy_name")
+    public String redisEconomyName = "vault";
+    @YamlKey("economy.free_home_slots")
+    public int freeHomeSlots = 5;
+    @YamlKey("economy.costs")
+    public Map<String, Double> economyCosts = Map.of(
+        EconomyAction.ADDITIONAL_HOME_SLOT.name().toLowerCase(), EconomyAction.ADDITIONAL_HOME_SLOT.defaultCost,
+        EconomyAction.MAKE_HOME_PUBLIC.name().toLowerCase(), EconomyAction.MAKE_HOME_PUBLIC.defaultCost,
+        EconomyAction.RANDOM_TELEPORT.name().toLowerCase(), EconomyAction.RANDOM_TELEPORT.defaultCost,
+        EconomyAction.BACK_COMMAND.name().toLowerCase(), EconomyAction.BACK_COMMAND.defaultCost
+    );
+    // Mapping plugins
+    @YamlComment("Display public homes/warps on web maps (DYNMAP, BLUEMAP)")
+    @YamlKey("map_hook.enabled")
+    public boolean doMapHook = false;
+    @YamlKey("map_hook.map_plugin")
+    public MappingPlugin mappingPlugin = MappingPlugin.DYNMAP;
+    @YamlKey("map_hook.show_public_homes")
+    public boolean publicHomesOnMap = true;
+    @YamlKey("map_hook.show_warps")
+    public boolean warpsOnMap = true;
+    // Disabled commands
+    @YamlComment("Disabled commands (e.g. ['/home', '/warp'] to disable /home and /warp)")
+    @YamlKey("disabled_commands")
+    public List<String> disabledCommands = Collections.emptyList();
+
+    @SuppressWarnings("unused")
+    public Settings() {
+    }
 
     @NotNull
     public String getTableName(@NotNull TableName tableName) {
         return Optional.ofNullable(tableNames.get(tableName.name().toLowerCase())).orElse(tableName.defaultName);
     }
-
-
-    // General settings
-    @YamlComment("General plugin settings")
-    @YamlKey("general.max_homes")
-    public int maxHomes = 10;
-
-    @YamlKey("general.max_public_homes")
-    public int maxPublicHomes = 10;
-
-    @YamlKey("general.stack_permission_limits")
-    public boolean stackPermissionLimits = true;
-
-    @YamlKey("general.permission_restrict_warps")
-    public boolean permissionRestrictWarps = false;
-
-    @YamlKey("general.overwrite_existing_homes_warps")
-    public boolean overwriteExistingHomesWarps = true;
-
-    @YamlKey("general.teleport_warmup_time")
-    public int teleportWarmupTime = 5;
-
-    @YamlKey("general.teleport_warmup_display")
-    public MessageDisplayType teleportWarmupDisplay = MessageDisplayType.ACTION_BAR;
-
-    @YamlKey("general.teleport_request_expiry_time")
-    public int teleportRequestExpiryTime = 60;
-    @YamlKey("general.strict_tpa_here_requests")
-    public boolean strictTpaHereRequests = true;
-
-    @YamlKey("general.allow_unicode_names")
-    public boolean allowUnicodeNames = false;
-
-    @YamlKey("general.allow_unicode_descriptions")
-    public boolean allowUnicodeDescriptions = true;
-
-    @YamlKey("general.back_command_return_by_death")
-    public boolean backCommandReturnByDeath = true;
-
-    @YamlKey("general.back_command_save_teleport_event")
-    public boolean backCommandSaveOnTeleportEvent = false;
-
-    @YamlKey("general.list_items_per_page")
-    public int listItemsPerPage = 12;
-
-    @YamlKey("general.asynchronous_teleports")
-    public boolean asynchronousTeleports = true;
-
-    @YamlKey("general.play_sound_effects")
-    public boolean playSoundEffects = true;
-
-    @YamlKey("general.sound_effects")
-    public Map<String, String> soundEffects = Map.of(
-            SoundEffectAction.TELEPORTATION_COMPLETE.name().toLowerCase(), SoundEffectAction.TELEPORTATION_COMPLETE.defaultSoundEffect,
-            SoundEffectAction.TELEPORTATION_WARMUP.name().toLowerCase(), SoundEffectAction.TELEPORTATION_WARMUP.defaultSoundEffect,
-            SoundEffectAction.TELEPORTATION_CANCELLED.name().toLowerCase(), SoundEffectAction.TELEPORTATION_CANCELLED.defaultSoundEffect
-    );
 
     public Optional<String> getSoundEffect(@NotNull SoundEffectAction action) {
         if (!playSoundEffects) {
@@ -151,81 +203,6 @@ public class Settings {
         }
         return Optional.ofNullable(soundEffects.get(action.name().toLowerCase()));
     }
-
-
-    // Cross-server settings
-    @YamlComment("Enable teleporting across proxied servers. Requires MySQL")
-    @YamlKey("cross_server.enabled")
-    public boolean crossServer = false;
-
-    @YamlKey("cross_server.messenger_type")
-    public MessengerType messengerType = MessengerType.PLUGIN_MESSAGE;
-
-    @YamlKey("cross_server.cluster_id")
-    public String clusterId = "";
-
-    @YamlKey("cross_server.global_spawn.enabled")
-    public boolean globalSpawn = false;
-
-    @YamlKey("cross_server.global_spawn.warp_name")
-    public String globalSpawnName = "Spawn";
-
-    @YamlKey("cross_server.global_respawning")
-    public boolean globalRespawning = false;
-
-    @YamlKey("cross_server.redis_credentials.host")
-    public String redisHost = "localhost";
-
-    @YamlKey("cross_server.redis_credentials.port")
-    public int redisPort = 6379;
-
-    @YamlKey("cross_server.redis_credentials.password")
-    public String redisPassword = "";
-
-    @YamlKey("cross_server.redis_credentials.use_ssl")
-    public boolean redisUseSsl = false;
-
-
-    // Rtp command settings
-    @YamlComment("Random teleport (/rtp) command settings")
-    @YamlKey("rtp.cooldown_length")
-    public int rtpCooldownLength = 10;
-
-    @YamlKey("rtp.radius")
-    public int rtpRadius = 5000;
-
-    @YamlKey("rtp.spawn_radius")
-    public int rtpSpawnRadius = 500;
-
-    @YamlKey("rtp.distribution_mean")
-    public float rtpDistributionMean = 0.75f;
-
-    @YamlKey("rtp.distribution_deviation")
-    public float rtpDistributionStandardDeviation = 2f;
-
-    @YamlKey("rtp.restricted_worlds")
-    public List<String> rtpRestrictedWorlds = List.of("world_nether", "world_the_end");
-
-
-    // Economy settings
-    @YamlComment("Charge for certain actions (requires Vault)")
-    @YamlKey("economy.enabled")
-    public boolean economy = false;
-
-    @YamlComment("Use this currency for payments (works only with RedisEconomy), defaults to Vault currency")
-    @YamlKey("economy.redis_economy_name")
-    public String redisEconomyName = "vault";
-
-    @YamlKey("economy.free_home_slots")
-    public int freeHomeSlots = 5;
-
-    @YamlKey("economy.costs")
-    public Map<String, Double> economyCosts = Map.of(
-            EconomyAction.ADDITIONAL_HOME_SLOT.name().toLowerCase(), EconomyAction.ADDITIONAL_HOME_SLOT.defaultCost,
-            EconomyAction.MAKE_HOME_PUBLIC.name().toLowerCase(), EconomyAction.MAKE_HOME_PUBLIC.defaultCost,
-            EconomyAction.RANDOM_TELEPORT.name().toLowerCase(), EconomyAction.RANDOM_TELEPORT.defaultCost,
-            EconomyAction.BACK_COMMAND.name().toLowerCase(), EconomyAction.BACK_COMMAND.defaultCost
-    );
 
     public Optional<Double> getEconomyCost(@NotNull EconomyAction action) {
         if (!economy) {
@@ -236,30 +213,6 @@ public class Settings {
             return Optional.of(cost);
         }
         return Optional.empty();
-    }
-
-    // Mapping plugins
-    @YamlComment("Display public homes/warps on web maps (DYNMAP, BLUEMAP)")
-    @YamlKey("map_hook.enabled")
-    public boolean doMapHook = false;
-
-    @YamlKey("map_hook.map_plugin")
-    public MappingPlugin mappingPlugin = MappingPlugin.DYNMAP;
-
-    @YamlKey("map_hook.show_public_homes")
-    public boolean publicHomesOnMap = true;
-
-    @YamlKey("map_hook.show_warps")
-    public boolean warpsOnMap = true;
-
-
-    // Disabled commands
-    @YamlComment("Disabled commands (e.g. ['/home', '/warp'] to disable /home and /warp)")
-    @YamlKey("disabled_commands")
-    public List<String> disabledCommands = Collections.emptyList();
-
-    @SuppressWarnings("unused")
-    public Settings() {
     }
 
     /**
@@ -313,9 +266,9 @@ public class Settings {
         RANDOM_TELEPORT(25.00, "economy_action_random_teleport"),
         BACK_COMMAND(0.00, "economy_action_back_command");
 
-        private final double defaultCost;
         @NotNull
         public final String confirmationLocaleId;
+        private final double defaultCost;
 
         EconomyAction(final double defaultCost, @NotNull String confirmationLocaleId) {
             this.defaultCost = defaultCost;

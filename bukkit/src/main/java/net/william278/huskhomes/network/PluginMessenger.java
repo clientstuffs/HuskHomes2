@@ -78,11 +78,11 @@ public class PluginMessenger extends Messenger implements PluginMessageListener 
         return fetchOnlineServerList(onlineUser).thenApply(onlineServers -> {
             // Ensure the server is online
             final Optional<String> targetServer = Arrays.stream(onlineServers)
-                    .filter(serverName -> serverName.equals(server.name))
-                    .findFirst();
+                .filter(serverName -> serverName.equals(server.name))
+                .findFirst();
             if (targetServer.isEmpty()) {
                 plugin.getLoggingAdapter().log(Level.WARNING,
-                        "Failed to send " + dispatcher.username + " to " + server.name + "; server offline?");
+                    "Failed to send " + dispatcher.username + " to " + server.name + "; server offline?");
                 return false;
             }
 
@@ -148,7 +148,7 @@ public class PluginMessenger extends Messenger implements PluginMessageListener 
         final ByteArrayDataInput pluginMessage = ByteStreams.newDataInput(messageBytes);
         final String subChannel = pluginMessage.readUTF();
         switch (subChannel) {
-            case NETWORK_MESSAGE_CHANNEL -> {
+            case NETWORK_MESSAGE_CHANNEL: {
                 final short messageLength = pluginMessage.readShort();
                 final byte[] messageBody = new byte[messageLength];
                 pluginMessage.readFully(messageBody);
@@ -165,14 +165,19 @@ public class PluginMessenger extends Messenger implements PluginMessageListener 
                     handleMessage(BukkitPlayer.adapt(player), request);
                 } catch (IOException e) {
                     plugin.getLoggingAdapter().log(Level.SEVERE,
-                            "Failed to read an inbound plugin message", e);
+                        "Failed to read an inbound plugin message", e);
                 }
+                break;
             }
-            case "PlayerList" -> {
+            case "PlayerList": {
                 pluginMessage.readUTF(); // Read the server name (unused)
                 handleArrayPluginMessage(pluginMessage, onlinePlayerNamesRequests);
+                break;
             }
-            case "GetServers" -> handleArrayPluginMessage(pluginMessage, onlineServersRequests);
+            case "GetServers": {
+                handleArrayPluginMessage(pluginMessage, onlineServersRequests);
+                break;
+            }
         }
     }
 

@@ -24,7 +24,7 @@ public class VaultEconomyHook extends EconomyHook {
     @Override
     public boolean initialize() throws HuskHomesInitializationException {
         final RegisteredServiceProvider<Economy> economyProvider = ((BukkitHuskHomes) plugin).getServer()
-                .getServicesManager().getRegistration(Economy.class);
+            .getServicesManager().getRegistration(Economy.class);
         if (economyProvider != null) {
             economy = economyProvider.getProvider();
             return true;

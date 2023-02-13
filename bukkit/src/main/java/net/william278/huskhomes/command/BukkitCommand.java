@@ -51,15 +51,19 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
-        if (sender instanceof Player player) {
+        if (sender instanceof Player) {
+            final var player = (Player) sender;
+
             this.command.onExecute(BukkitPlayer.adapt(player), args);
         } else {
-            if (this.command instanceof ConsoleExecutable consoleExecutable) {
+            if (this.command instanceof ConsoleExecutable) {
+                final var consoleExecutable = (ConsoleExecutable) this.command;
+
                 consoleExecutable.onConsoleExecute(args);
             } else {
                 plugin.getLoggingAdapter().log(Level.WARNING, plugin.getLocales()
-                        .getRawLocale("error_in_game_only")
-                        .orElse("Error: That command can only be run in-game."));
+                    .getRawLocale("error_in_game_only")
+                    .orElse("Error: That command can only be run in-game."));
             }
         }
         return true;
@@ -69,7 +73,9 @@ public class BukkitCommand implements CommandExecutor, TabExecutor {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                       @NotNull String alias, @NotNull String[] args) {
-        if (this.command instanceof TabCompletable tabCompletable) {
+        if (this.command instanceof TabCompletable) {
+            final var tabCompletable = (TabCompletable) this.command;
+
             return tabCompletable.onTabComplete(args, (sender instanceof Player ? BukkitPlayer.adapt((Player) sender) : null));
         }
         return Collections.emptyList();

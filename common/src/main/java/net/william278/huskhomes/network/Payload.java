@@ -32,6 +32,9 @@ public class Payload {
     @SerializedName("teleport_request")
     public TeleportRequest teleportRequest;
 
+    private Payload() {
+    }
+
     /**
      * Returns an empty cross-server message payload
      *
@@ -79,9 +82,6 @@ public class Payload {
         final Payload payload = new Payload();
         payload.teleportRequest = teleportRequest;
         return payload;
-    }
-
-    private Payload() {
     }
 
 }

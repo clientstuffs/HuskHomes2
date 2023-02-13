@@ -19,11 +19,11 @@ import net.william278.huskhomes.event.EventDispatcher;
 import net.william278.huskhomes.hook.*;
 import net.william278.huskhomes.listener.BukkitEventListener;
 import net.william278.huskhomes.listener.EventListener;
+import net.william278.huskhomes.migrator.LegacyMigrator;
+import net.william278.huskhomes.migrator.Migrator;
 import net.william278.huskhomes.network.Messenger;
 import net.william278.huskhomes.network.PluginMessenger;
 import net.william278.huskhomes.network.RedisMessenger;
-import net.william278.huskhomes.migrator.LegacyMigrator;
-import net.william278.huskhomes.migrator.Migrator;
 import net.william278.huskhomes.player.BukkitPlayer;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.Location;
@@ -64,6 +64,8 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
      * Metrics ID for <a href="https://bstats.org/plugin/bukkit/HuskHomes/8430">HuskHomes on Bukkit</a>.
      */
     private static final int METRICS_ID = 8430;
+    // Instance of the plugin
+    private static BukkitHuskHomes instance;
     private Settings settings;
     private Locales locales;
     private BukkitLogger logger;
@@ -80,15 +82,22 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
     private List<CommandBase> registeredCommands;
     private List<Migrator> migrators;
     private Server server;
-
     @Nullable
     private Messenger messenger;
-
     // Adventure audience
     private BukkitAudiences audiences;
 
-    // Instance of the plugin
-    private static BukkitHuskHomes instance;
+    // Default constructor
+    @SuppressWarnings("unused")
+    public BukkitHuskHomes() {
+        super();
+    }
+
+    // Super constructor for unit testing
+    @SuppressWarnings("unused")
+    protected BukkitHuskHomes(@NotNull JavaPluginLoader loader, @NotNull PluginDescriptionFile description, @NotNull File dataFolder, @NotNull File file) {
+        super(loader, description, dataFolder, file);
+    }
 
     public static BukkitHuskHomes getInstance() {
         return instance;
@@ -130,10 +139,16 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             // Initialize the database
             getLoggingAdapter().log(Level.INFO, "Attempting to establish connection to the database...");
             final Settings.DatabaseType databaseType = settings.databaseType;
-            this.database = switch (databaseType == null ? Settings.DatabaseType.MYSQL : databaseType) {
-                case MYSQL -> new MySqlDatabase(this);
-                case SQLITE -> new SqLiteDatabase(this);
-            };
+            switch (databaseType == null ? Settings.DatabaseType.MYSQL : databaseType) {
+                case MYSQL: {
+                    database = new MySqlDatabase(this);
+                    break;
+                }
+                case SQLITE: {
+                    database = new SqLiteDatabase(this);
+                    break;
+                }
+            }
             initialized.set(this.database.initialize());
             if (initialized.get()) {
                 getLoggingAdapter().log(Level.INFO, "Successfully established a connection to the database");
@@ -144,10 +159,16 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             // Initialize the network messenger if proxy mode is enabled
             if (getSettings().crossServer) {
                 getLoggingAdapter().log(Level.INFO, "Initializing the network messenger...");
-                messenger = switch (settings.messengerType) {
-                    case PLUGIN_MESSAGE -> new PluginMessenger();
-                    case REDIS -> new RedisMessenger();
-                };
+                switch (settings.messengerType) {
+                    case PLUGIN_MESSAGE: {
+                        messenger = new PluginMessenger();
+                        break;
+                    }
+                    case REDIS: {
+                        messenger = new RedisMessenger();
+                        break;
+                    }
+                }
                 messenger.initialize(this);
                 getLoggingAdapter().log(Level.INFO, "Successfully initialized the network messenger.");
             }
@@ -179,16 +200,18 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             }
             if (settings.doMapHook) {
                 switch (settings.mappingPlugin) {
-                    case DYNMAP -> {
+                    case DYNMAP: {
                         final Plugin dynmapPlugin = Bukkit.getPluginManager().getPlugin("Dynmap");
                         if (dynmapPlugin != null) {
                             pluginHooks.add(new DynMapHook(this, dynmapPlugin));
                         }
+                        break;
                     }
-                    case BLUEMAP -> {
+                    case BLUEMAP: {
                         if (Bukkit.getPluginManager().getPlugin("BlueMap") != null) {
                             pluginHooks.add(new BlueMapHook(this));
                         }
+                        break;
                     }
                 }
             }
@@ -208,11 +231,25 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
 
             // Register permissions
             getLoggingAdapter().log(Level.INFO, "Registering permissions & commands...");
-            Arrays.stream(Permission.values()).forEach(permission -> getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.node, switch (permission.defaultAccess) {
-                case EVERYONE -> PermissionDefault.TRUE;
-                case NOBODY -> PermissionDefault.FALSE;
-                case OPERATORS -> PermissionDefault.OP;
-            })));
+            Arrays.stream(Permission.values()).forEach(permission -> {
+                final PermissionDefault permissionDefault;
+                switch (permission.defaultAccess) {
+                    case EVERYONE: {
+                        permissionDefault = PermissionDefault.TRUE;
+                        break;
+                    }
+                    case OPERATORS: {
+                        permissionDefault = PermissionDefault.OP;
+                        break;
+                    }
+                    case NOBODY: {
+                        permissionDefault = PermissionDefault.FALSE;
+                        break;
+                    }
+                    default: throw new UnsupportedOperationException();
+                }
+                getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission.node, permissionDefault));
+            });
 
             // Register commands
             this.registeredCommands = new ArrayList<>();
@@ -314,7 +351,7 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
     @NotNull
     @Override
     public List<OnlineUser> getOnlinePlayers() {
-        return Bukkit.getOnlinePlayers().stream().map(player -> (OnlineUser) BukkitPlayer.adapt(player)).toList();
+        return Bukkit.getOnlinePlayers().stream().map(player -> (OnlineUser) BukkitPlayer.adapt(player)).collect(Collectors.toList());
     }
 
     @NotNull
@@ -525,18 +562,6 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
         } catch (Exception e) {
             getLoggingAdapter().log(Level.WARNING, "Failed to register metrics", e);
         }
-    }
-
-    // Default constructor
-    @SuppressWarnings("unused")
-    public BukkitHuskHomes() {
-        super();
-    }
-
-    // Super constructor for unit testing
-    @SuppressWarnings("unused")
-    protected BukkitHuskHomes(@NotNull JavaPluginLoader loader, @NotNull PluginDescriptionFile description, @NotNull File dataFolder, @NotNull File file) {
-        super(loader, description, dataFolder, file);
     }
 
 }

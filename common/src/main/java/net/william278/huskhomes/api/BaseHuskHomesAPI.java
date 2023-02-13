@@ -7,9 +7,9 @@ import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
 import net.william278.huskhomes.player.UserData;
 import net.william278.huskhomes.position.*;
+import net.william278.huskhomes.random.RandomTeleportEngine;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TeleportBuilder;
-import net.william278.huskhomes.random.RandomTeleportEngine;
 import net.william278.huskhomes.teleport.TeleportResult;
 import org.jetbrains.annotations.NotNull;
 
@@ -143,8 +143,8 @@ public abstract class BaseHuskHomesAPI {
      */
     public final CompletableFuture<List<Home>> getUserPublicHomes(@NotNull User user) {
         return getUserHomes(user).thenApply(homes -> homes.stream()
-                .filter(home -> home.isPublic)
-                .collect(Collectors.toList()));
+            .filter(home -> home.isPublic)
+            .collect(Collectors.toList()));
     }
 
     /**
@@ -354,8 +354,8 @@ public abstract class BaseHuskHomesAPI {
                                                                   final boolean timedTeleport) {
         final TeleportBuilder builder = teleportBuilder(user).setTarget(position);
         return timedTeleport
-                ? builder.toTimedTeleport().thenApplyAsync(teleport -> teleport.execute().join().getState())
-                : builder.toTeleport().thenApplyAsync(teleport -> teleport.execute().join().getState());
+            ? builder.toTimedTeleport().thenApplyAsync(teleport -> teleport.execute().join().getState())
+            : builder.toTeleport().thenApplyAsync(teleport -> teleport.execute().join().getState());
     }
 
     /**
@@ -389,21 +389,21 @@ public abstract class BaseHuskHomesAPI {
                                                                           final boolean timedTeleport,
                                                                           @NotNull String... rtpArgs) {
         return CompletableFuture.supplyAsync(() -> plugin.getRandomTeleportEngine()
-                .getRandomPosition(user.getPosition().world, rtpArgs)
-                .thenApply(position -> {
-                    if (position.isPresent()) {
-                        final TeleportBuilder builder = Teleport.builder(plugin, user)
-                                .setTarget(position.get());
+            .getRandomPosition(user.getPosition().world, rtpArgs)
+            .thenApply(position -> {
+                if (position.isPresent()) {
+                    final TeleportBuilder builder = Teleport.builder(plugin, user)
+                        .setTarget(position.get());
 
-                        return timedTeleport
-                                ? builder.toTimedTeleport()
-                                .thenApplyAsync(teleport -> teleport.execute().join().getState()).join()
-                                : builder.toTeleport()
-                                .thenApplyAsync(teleport -> teleport.execute().join().getState()).join();
-                    } else {
-                        return TeleportResult.CANCELLED;
-                    }
-                }).join());
+                    return timedTeleport
+                        ? builder.toTimedTeleport()
+                        .thenApplyAsync(teleport -> teleport.execute().join().getState()).join()
+                        : builder.toTeleport()
+                        .thenApplyAsync(teleport -> teleport.execute().join().getState()).join();
+                } else {
+                    return TeleportResult.CANCELLED;
+                }
+            }).join());
     }
 
     /**

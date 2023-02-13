@@ -17,19 +17,19 @@ public class SpawnCommand extends CommandBase {
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         if (args.length > 0) {
             plugin.getLocales().getLocale("error_invalid_syntax", "/spawn")
-                    .ifPresent(onlineUser::sendMessage);
+                .ifPresent(onlineUser::sendMessage);
             return;
         }
 
         plugin.getSpawn().thenAccept(position -> {
             if (position.isEmpty()) {
                 plugin.getLocales().getLocale("error_spawn_not_set")
-                        .ifPresent(onlineUser::sendMessage);
+                    .ifPresent(onlineUser::sendMessage);
                 return;
             }
             Teleport.builder(plugin, onlineUser)
-                    .setTarget(position.get())
-                    .toTimedTeleport().thenAccept(TimedTeleport::execute);
+                .setTarget(position.get())
+                .toTimedTeleport().thenAccept(TimedTeleport::execute);
         });
     }
 }

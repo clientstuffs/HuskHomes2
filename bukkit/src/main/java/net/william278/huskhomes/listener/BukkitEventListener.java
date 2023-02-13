@@ -55,7 +55,7 @@ public class BukkitEventListener extends EventListener implements Listener {
 
         final BukkitPlayer bukkitPlayer = BukkitPlayer.adapt(player);
         BukkitAdapter.adaptLocation(event.getFrom()).ifPresent(sourceLocation ->
-                handlePlayerTeleport(bukkitPlayer, new Position(sourceLocation, plugin.getServerName())));
+            handlePlayerTeleport(bukkitPlayer, new Position(sourceLocation, plugin.getServerName())));
     }
 
     //todo When defining paper-plugin.yml files gets merged, use the PlayerSetSpawnEvent in the paper module
@@ -74,9 +74,9 @@ public class BukkitEventListener extends EventListener implements Listener {
         BukkitAdapter.adaptLocation(location).ifPresent(adaptedLocation -> {
             final OnlineUser onlineUser = BukkitPlayer.adapt(event.getPlayer());
             super.handlePlayerUpdateSpawnPoint(onlineUser, new Position(
-                    adaptedLocation.x, adaptedLocation.y, adaptedLocation.z,
-                    adaptedLocation.yaw, adaptedLocation.pitch,
-                    adaptedLocation.world, plugin.getServerName()));
+                adaptedLocation.x, adaptedLocation.y, adaptedLocation.z,
+                adaptedLocation.yaw, adaptedLocation.pitch,
+                adaptedLocation.world, plugin.getServerName()));
         });
     }
 

@@ -14,15 +14,13 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class RandomTeleportEngine {
 
-    @NotNull
-    protected final HuskHomes plugin;
-
     /**
      * The name of the random teleport engine
      */
     @NotNull
     public final String name;
-
+    @NotNull
+    protected final HuskHomes plugin;
     /**
      * How many attempts to allow {@link #getRandomPosition} lookups before timing out
      */
@@ -46,14 +44,14 @@ public abstract class RandomTeleportEngine {
      */
     protected final Position getOrigin(@NotNull World world) {
         return plugin.getLocalCachedSpawn()
-                .flatMap(spawn -> {
-                    if (!spawn.worldUuid.equals(world.uuid.toString())) {
-                        return Optional.empty();
-                    }
-                    return spawn.getPosition(plugin.getServerName());
-                })
-                .orElse(new Position(0d, 128d, 0d, 0f, 0f,
-                        world, plugin.getServerName()));
+            .flatMap(spawn -> {
+                if (!spawn.worldUuid.equals(world.uuid.toString())) {
+                    return Optional.empty();
+                }
+                return spawn.getPosition(plugin.getServerName());
+            })
+            .orElse(new Position(0d, 128d, 0d, 0f, 0f,
+                world, plugin.getServerName()));
     }
 
     /**
@@ -79,8 +77,8 @@ public abstract class RandomTeleportEngine {
      */
     public CompletableFuture<Optional<Position>> getRandomPosition(@NotNull World world, @NotNull String[] args) {
         return CompletableFuture.supplyAsync(() -> generatePosition(world, args))
-                .orTimeout(10, TimeUnit.SECONDS)
-                .exceptionally(e -> Optional.empty());
+            .orTimeout(10, TimeUnit.SECONDS)
+            .exceptionally(e -> Optional.empty());
     }
 
 }

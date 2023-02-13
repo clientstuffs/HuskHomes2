@@ -29,11 +29,11 @@ public abstract class MapHook extends PluginHook {
         initializeMap().thenRun(() -> {
             if (plugin.getSettings().publicHomesOnMap) {
                 plugin.getDatabase().getLocalPublicHomes(plugin)
-                        .thenAcceptAsync(homes -> homes.forEach(this::updateHome));
+                    .thenAcceptAsync(homes -> homes.forEach(this::updateHome));
             }
             if (plugin.getSettings().warpsOnMap) {
                 plugin.getDatabase().getLocalWarps(plugin)
-                        .thenAcceptAsync(warps -> warps.forEach(this::updateWarp));
+                    .thenAcceptAsync(warps -> warps.forEach(this::updateWarp));
             }
         });
         return true;
@@ -106,8 +106,8 @@ public abstract class MapHook extends PluginHook {
             return position.server.equals(plugin.getServerName());
         } catch (HuskHomesException e) {
             return plugin.getWorlds().stream()
-                    .map(world -> world.uuid)
-                    .anyMatch(uuid -> uuid.equals(position.world.uuid));
+                .map(world -> world.uuid)
+                .anyMatch(uuid -> uuid.equals(position.world.uuid));
         }
     }
 

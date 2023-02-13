@@ -28,59 +28,75 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0 -> plugin.getDatabase().getHomes(onlineUser).thenAcceptAsync(homes -> {
-                // Send the home list if they have homes set. If they have just one home set, teleport the player
-                switch (homes.size()) {
-                    case 0 -> plugin.getLocales().getLocale("error_no_homes_set").ifPresent(onlineUser::sendMessage);
-                    case 1 -> Teleport.builder(plugin, onlineUser)
-                            .setTarget(homes.get(0))
-                            .toTimedTeleport().thenAccept(TimedTeleport::execute);
-                    default -> plugin.getCache().getHomeList(onlineUser, onlineUser,
+            case 0: {
+                plugin.getDatabase().getHomes(onlineUser).thenAcceptAsync(homes -> {
+                    // Send the home list if they have homes set. If they have just one home set, teleport the player
+                    switch (homes.size()) {
+                        case 0: {
+                            plugin.getLocales().getLocale("error_no_homes_set").ifPresent(onlineUser::sendMessage);
+                            break;
+                        }
+                        case 1: {
+                            Teleport.builder(plugin, onlineUser)
+                                .setTarget(homes.get(0))
+                                .toTimedTeleport().thenAccept(TimedTeleport::execute);
+                            break;
+                        }
+                        default: {
+                            plugin.getCache().getHomeList(onlineUser, onlineUser,
                                     plugin.getLocales(), homes, plugin.getSettings().listItemsPerPage, 1)
-                            .ifPresent(onlineUser::sendMessage);
-                }
-            });
-            case 1 -> {
+                                .ifPresent(onlineUser::sendMessage);
+                            break;
+                        }
+                    }
+                });
+                break;
+            }
+            case 1: {
                 // Parse the home name input and teleport the player to the home
                 final String homeName = args[0];
                 RegexUtil.matchDisambiguatedHomeIdentifier(homeName).ifPresentOrElse(
-                        homeIdentifier -> plugin.getDatabase().getUserDataByName(homeIdentifier.ownerName())
-                                .thenAccept(optionalUserData -> optionalUserData.ifPresentOrElse(
-                                        userData -> teleportToNamedHome(onlineUser, userData.user(), homeIdentifier.homeName()),
-                                        () -> plugin.getLocales().getLocale("error_home_invalid_other", homeIdentifier.ownerName(), homeIdentifier.homeName())
-                                                .ifPresent(onlineUser::sendMessage))),
-                        () -> teleportToNamedHome(onlineUser, onlineUser, homeName));
+                    homeIdentifier -> plugin.getDatabase().getUserDataByName(homeIdentifier.ownerName())
+                        .thenAccept(optionalUserData -> optionalUserData.ifPresentOrElse(
+                            userData -> teleportToNamedHome(onlineUser, userData.user(), homeIdentifier.homeName()),
+                            () -> plugin.getLocales().getLocale("error_home_invalid_other", homeIdentifier.ownerName(), homeIdentifier.homeName())
+                                .ifPresent(onlineUser::sendMessage))),
+                    () -> teleportToNamedHome(onlineUser, onlineUser, homeName));
+                break;
             }
-            default -> plugin.getLocales().getLocale("error_invalid_syntax", "/home [name]")
+            default: {
+                plugin.getLocales().getLocale("error_invalid_syntax", "/home [name]")
                     .ifPresent(onlineUser::sendMessage);
+                break;
+            }
         }
     }
 
     private void teleportToNamedHome(@NotNull OnlineUser teleporter, @NotNull User owner, @NotNull String homeName) {
         final boolean otherHome = !owner.equals(teleporter);
         plugin.getDatabase()
-                .getHome(owner, homeName)
-                .thenAccept(homeResult -> homeResult.ifPresentOrElse(home -> {
-                    if (otherHome && !home.isPublic) {
-                        if (!teleporter.hasPermission(Permission.COMMAND_HOME_OTHER.node)) {
-                            plugin.getLocales().getLocale("error_no_permission")
-                                    .ifPresent(teleporter::sendMessage);
-                            return;
-                        }
+            .getHome(owner, homeName)
+            .thenAccept(homeResult -> homeResult.ifPresentOrElse(home -> {
+                if (otherHome && !home.isPublic) {
+                    if (!teleporter.hasPermission(Permission.COMMAND_HOME_OTHER.node)) {
+                        plugin.getLocales().getLocale("error_no_permission")
+                            .ifPresent(teleporter::sendMessage);
+                        return;
                     }
-                    Teleport.builder(plugin, teleporter)
-                            .setTarget(home)
-                            .toTimedTeleport()
-                            .thenAccept(TimedTeleport::execute);
-                }, () -> {
-                    if (otherHome) {
-                        plugin.getLocales().getLocale("error_home_invalid_other", owner.username, homeName)
-                                .ifPresent(teleporter::sendMessage);
-                    } else {
-                        plugin.getLocales().getLocale("error_home_invalid", homeName)
-                                .ifPresent(teleporter::sendMessage);
-                    }
-                }));
+                }
+                Teleport.builder(plugin, teleporter)
+                    .setTarget(home)
+                    .toTimedTeleport()
+                    .thenAccept(TimedTeleport::execute);
+            }, () -> {
+                if (otherHome) {
+                    plugin.getLocales().getLocale("error_home_invalid_other", owner.username, homeName)
+                        .ifPresent(teleporter::sendMessage);
+                } else {
+                    plugin.getLocales().getLocale("error_home_invalid", homeName)
+                        .ifPresent(teleporter::sendMessage);
+                }
+            }));
     }
 
     @Override
@@ -97,12 +113,12 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
             }
             final AtomicReference<Home> matchedHome = new AtomicReference<>(null);
             RegexUtil.matchDisambiguatedHomeIdentifier(args[1]).ifPresentOrElse(
-                    identifier -> matchedHome.set(plugin.getDatabase().getUserDataByName(identifier.ownerName()).join()
-                            .flatMap(user -> plugin.getDatabase().getHome(user.user(), identifier.homeName()).join())
-                            .orElse(null)),
-                    () -> matchedHome.set(plugin.getDatabase().getUserDataByName(playerToTeleport.username).join()
-                            .flatMap(user -> plugin.getDatabase().getHome(user.user(), args[1]).join())
-                            .orElse(null)));
+                identifier -> matchedHome.set(plugin.getDatabase().getUserDataByName(identifier.ownerName()).join()
+                    .flatMap(user -> plugin.getDatabase().getHome(user.user(), identifier.homeName()).join())
+                    .orElse(null)),
+                () -> matchedHome.set(plugin.getDatabase().getUserDataByName(playerToTeleport.username).join()
+                    .flatMap(user -> plugin.getDatabase().getHome(user.user(), args[1]).join())
+                    .orElse(null)));
 
             final Home home = matchedHome.get();
             if (home == null) {
@@ -113,9 +129,9 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
             plugin.getLoggingAdapter().log(Level.INFO, "Teleporting " + playerToTeleport.username + " to "
                                                        + home.owner.username + "." + home.meta.name);
             Teleport.builder(plugin, playerToTeleport)
-                    .setTarget(home)
-                    .toTeleport()
-                    .thenAccept(Teleport::execute);
+                .setTarget(home)
+                .toTeleport()
+                .thenAccept(Teleport::execute);
         });
     }
 
@@ -125,10 +141,10 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
             return Collections.emptyList();
         }
         return args.length > 1 ? Collections.emptyList() : plugin.getCache().homes
-                .getOrDefault(user.uuid, new ArrayList<>())
-                .stream()
-                .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
-                .sorted()
-                .collect(Collectors.toList());
+            .getOrDefault(user.uuid, new ArrayList<>())
+            .stream()
+            .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+            .sorted()
+            .collect(Collectors.toList());
     }
 }

@@ -17,12 +17,12 @@ public class BackCommand extends CommandBase {
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         plugin.getDatabase().getLastPosition(onlineUser).thenAccept(lastPosition ->
-                lastPosition.ifPresentOrElse(position -> Teleport.builder(plugin, onlineUser)
-                                .setTarget(position)
-                                .setEconomyActions(Settings.EconomyAction.BACK_COMMAND)
-                                .toTimedTeleport()
-                                .thenApply(TimedTeleport::execute),
-                        () -> plugin.getLocales().getLocale("error_no_last_position").ifPresent(onlineUser::sendMessage)));
+            lastPosition.ifPresentOrElse(position -> Teleport.builder(plugin, onlineUser)
+                    .setTarget(position)
+                    .setEconomyActions(Settings.EconomyAction.BACK_COMMAND)
+                    .toTimedTeleport()
+                    .thenApply(TimedTeleport::execute),
+                () -> plugin.getLocales().getLocale("error_no_last_position").ifPresent(onlineUser::sendMessage)));
     }
 
 }

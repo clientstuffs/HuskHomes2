@@ -31,17 +31,6 @@ public class TeleportBuilder {
      */
     @NotNull
     private final OnlineUser executor;
-
-    /**
-     * The teleporter; the one who is being teleported, to be resolved before construction
-     */
-    private CompletableFuture<User> teleporter;
-
-    /**
-     * The target position for the teleporter, to be resolved before construction
-     */
-    private CompletableFuture<Position> target;
-
     /**
      * List of {@link Settings.EconomyAction}s to check against.
      * <p>
@@ -49,7 +38,14 @@ public class TeleportBuilder {
      * not necessarily the one doing the teleporting
      */
     private final Set<Settings.EconomyAction> economyActions = new HashSet<>();
-
+    /**
+     * The teleporter; the one who is being teleported, to be resolved before construction
+     */
+    private CompletableFuture<User> teleporter;
+    /**
+     * The target position for the teleporter, to be resolved before construction
+     */
+    private CompletableFuture<Position> target;
     /**
      * The type of teleport. Defaults to {@link TeleportType#TELEPORT}
      */
@@ -86,17 +82,17 @@ public class TeleportBuilder {
      */
     public TeleportBuilder setTeleporter(@NotNull String teleporterUsername) {
         this.teleporter = CompletableFuture.supplyAsync(() -> plugin
-                .findOnlinePlayer(teleporterUsername)
-                .map(onlineUser -> (User) onlineUser)
-                .or(() -> {
-                    if (plugin.getSettings().crossServer) {
-                        return plugin.getMessenger()
-                                .findPlayer(executor, teleporterUsername).join()
-                                .map(username -> new User(UUID.randomUUID(), username));
-                    }
-                    return Optional.empty();
-                })
-                .orElse(null));
+            .findOnlinePlayer(teleporterUsername)
+            .map(onlineUser -> (User) onlineUser)
+            .or(() -> {
+                if (plugin.getSettings().crossServer) {
+                    return plugin.getMessenger()
+                        .findPlayer(executor, teleporterUsername).join()
+                        .map(username -> new User(UUID.randomUUID(), username));
+                }
+                return Optional.empty();
+            })
+            .orElse(null));
         return this;
     }
 
@@ -210,9 +206,10 @@ public class TeleportBuilder {
             final Position target = this.target.join();
             final int warmupTime = plugin.getSettings().teleportWarmupTime;
 
-            if (!(teleporter instanceof OnlineUser onlineUser)) {
+            if (!(teleporter instanceof OnlineUser)) {
                 throw new IllegalStateException("Timed teleports can only be executed for local users");
             }
+            final var onlineUser = (OnlineUser) teleporter;
 
             return new TimedTeleport(onlineUser, executor, target, type, warmupTime, economyActions, updateLastPosition, plugin);
         }).exceptionally(e -> {
@@ -234,17 +231,17 @@ public class TeleportBuilder {
         }
         if (plugin.getSettings().crossServer) {
             return plugin.getMessenger()
-                    .findPlayer(executor, playerName)
-                    .thenApplyAsync(foundPlayer -> {
-                        if (foundPlayer.isEmpty()) {
-                            return Optional.empty();
-                        }
-                        return Request.builder()
-                                .withType(Request.MessageType.POSITION_REQUEST)
-                                .withTargetPlayer(playerName)
-                                .build().send(executor, plugin)
-                                .thenApply(reply -> reply.map(message -> message.getPayload().position)).join();
-                    });
+                .findPlayer(executor, playerName)
+                .thenApplyAsync(foundPlayer -> {
+                    if (foundPlayer.isEmpty()) {
+                        return Optional.empty();
+                    }
+                    return Request.builder()
+                        .withType(Request.MessageType.POSITION_REQUEST)
+                        .withTargetPlayer(playerName)
+                        .build().send(executor, plugin)
+                        .thenApply(reply -> reply.map(message -> message.getPayload().position)).join();
+                });
         }
         return CompletableFuture.supplyAsync(Optional::empty);
     }

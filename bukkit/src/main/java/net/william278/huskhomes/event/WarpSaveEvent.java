@@ -18,25 +18,25 @@ public class WarpSaveEvent extends Event implements IWarpSaveEvent, Cancellable 
         this.warp = warp;
     }
 
+    @SuppressWarnings("unused")
+    public static HandlerList getHandlerList() {
+        return HANDLER_LIST;
+    }
+
     @NotNull
     @Override
     public HandlerList getHandlers() {
         return HANDLER_LIST;
     }
 
-    @SuppressWarnings("unused")
-    public static HandlerList getHandlerList() {
-        return HANDLER_LIST;
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
     }
 
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
     }
 
     @Override

@@ -22,8 +22,8 @@ public class HomeListCommand extends CommandBase implements ConsoleExecutable {
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0 -> showHomeList(onlineUser, onlineUser.username, 1);
-            case 1 -> {
+            case 0: showHomeList(onlineUser, onlineUser.username, 1);
+            case 1: {
                 try {
                     int pageNumber = Integer.parseInt(args[0]);
                     showHomeList(onlineUser, onlineUser.username, pageNumber);
@@ -31,17 +31,17 @@ public class HomeListCommand extends CommandBase implements ConsoleExecutable {
                     showHomeList(onlineUser, args[0], 1);
                 }
             }
-            case 2 -> {
+            case 2: {
                 try {
                     int pageNumber = Integer.parseInt(args[1]);
                     showHomeList(onlineUser, args[0], pageNumber);
                 } catch (NumberFormatException e) {
                     plugin.getLocales().getLocale("error_invalid_syntax", "/homelist [player] [page]")
-                            .ifPresent(onlineUser::sendMessage);
+                        .ifPresent(onlineUser::sendMessage);
                 }
             }
-            default -> plugin.getLocales().getLocale("error_invalid_syntax", "/homelist [page]")
-                    .ifPresent(onlineUser::sendMessage);
+            default: plugin.getLocales().getLocale("error_invalid_syntax", "/homelist [page]")
+                .ifPresent(onlineUser::sendMessage);
         }
     }
 
@@ -68,16 +68,16 @@ public class HomeListCommand extends CommandBase implements ConsoleExecutable {
                 if (homes.isEmpty()) {
                     if (!onlineUser.equals(userData.user())) {
                         plugin.getLocales().getLocale("error_no_homes_set_other",
-                                userData.user().username).ifPresent(onlineUser::sendMessage);
+                            userData.user().username).ifPresent(onlineUser::sendMessage);
                     } else {
                         plugin.getLocales().getLocale("error_no_homes_set").ifPresent(onlineUser::sendMessage);
                     }
                     return;
                 }
                 plugin.getCache().getHomeList(onlineUser, userData.user(),
-                                plugin.getLocales(), homes,
-                                plugin.getSettings().listItemsPerPage, pageNumber)
-                        .ifPresent(onlineUser::sendMessage);
+                        plugin.getLocales(), homes,
+                        plugin.getSettings().listItemsPerPage, pageNumber)
+                    .ifPresent(onlineUser::sendMessage);
             });
         }, () -> plugin.getLocales().getLocale("error_player_not_found", homeOwner).ifPresent(onlineUser::sendMessage)));
 
@@ -99,7 +99,7 @@ public class HomeListCommand extends CommandBase implements ConsoleExecutable {
             StringJoiner rowJoiner = new StringJoiner("\t");
 
             plugin.getLoggingAdapter().log(Level.INFO, "List of " + userData.get().user().username + "'s "
-                    + homes.size() + " homes:");
+                                                       + homes.size() + " homes:");
             for (int i = 0; i < homes.size(); i++) {
                 final String home = homes.get(i).meta.name;
                 rowJoiner.add(home.length() < 16 ? home + " ".repeat(16 - home.length()) : home);

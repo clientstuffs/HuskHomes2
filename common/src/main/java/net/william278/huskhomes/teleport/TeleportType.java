@@ -25,7 +25,7 @@ public enum TeleportType {
      */
     public static Optional<TeleportType> getTeleportType(int typeId) {
         return Arrays.stream(values())
-                .filter(type -> type.typeId == typeId)
-                .findFirst();
+            .filter(type -> type.typeId == typeId)
+            .findFirst();
     }
 }

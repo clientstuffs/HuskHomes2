@@ -18,25 +18,25 @@ public class WarpDeleteEvent extends Event implements IWarpDeleteEvent, Cancella
         this.warp = warp;
     }
 
-    @Override
-    @NotNull
-    public HandlerList getHandlers() {
-        return HANDLER_LIST;
-    }
-
     @SuppressWarnings("unused")
     public static HandlerList getHandlerList() {
         return HANDLER_LIST;
     }
 
     @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
+    @NotNull
+    public HandlerList getHandlers() {
+        return HANDLER_LIST;
     }
 
     @Override
     public boolean isCancelled() {
         return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 
     @Override

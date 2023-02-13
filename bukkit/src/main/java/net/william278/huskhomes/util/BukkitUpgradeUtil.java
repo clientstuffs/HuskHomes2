@@ -33,12 +33,22 @@ public class BukkitUpgradeUtil {
         this.plugin = plugin;
     }
 
+    @Nullable
+    public static BukkitUpgradeUtil detect(@NotNull BukkitHuskHomes plugin) {
+        if (!plugin.getConfig().contains("config_file_version")) {
+            return null;
+        }
+        final BukkitUpgradeUtil upgrade = new BukkitUpgradeUtil(plugin);
+        upgrade.readOldSettings();
+        return upgrade;
+    }
+
     /**
      * Reads old settings from the config and writes them to the new config.
      */
     private void readOldSettings() {
         this.databaseType = Settings.DatabaseType.valueOf(plugin.getConfig()
-                .getString("data_storage_options.storage_type", "SQLITE").toUpperCase());
+            .getString("data_storage_options.storage_type", "SQLITE").toUpperCase());
 
         this.mySqlHost = plugin.getConfig().getString("data_storage_options.mysql_credentials.host", "localhost");
         this.mySqlPort = plugin.getConfig().getInt("data_storage_options.mysql_credentials.port", 3306);
@@ -72,16 +82,6 @@ public class BukkitUpgradeUtil {
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to upgrade HuskHomes settings from a legacy version", e);
         }
-    }
-
-    @Nullable
-    public static BukkitUpgradeUtil detect(@NotNull BukkitHuskHomes plugin) {
-        if (!plugin.getConfig().contains("config_file_version")) {
-            return null;
-        }
-        final BukkitUpgradeUtil upgrade = new BukkitUpgradeUtil(plugin);
-        upgrade.readOldSettings();
-        return upgrade;
     }
 
 }

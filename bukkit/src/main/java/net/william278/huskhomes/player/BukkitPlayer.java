@@ -73,15 +73,15 @@ public class BukkitPlayer extends OnlineUser {
     @Override
     public Position getPosition() {
         return new Position(BukkitAdapter.adaptLocation(player.getLocation())
-                .orElseThrow(() -> new HuskHomesException("Failed to get the position of a BukkitPlayer (null)")),
-                plugin.getServerName());
+            .orElseThrow(() -> new HuskHomesException("Failed to get the position of a BukkitPlayer (null)")),
+            plugin.getServerName());
 
     }
 
     @Override
     public Optional<Position> getBedSpawnPosition() {
         return Optional.ofNullable(player.getBedSpawnLocation()).flatMap(BukkitAdapter::adaptLocation)
-                .map(location -> new Position(location, plugin.getServerName()));
+            .map(location -> new Position(location, plugin.getServerName()));
     }
 
     @Override
@@ -98,8 +98,8 @@ public class BukkitPlayer extends OnlineUser {
     @Override
     public @NotNull Map<String, Boolean> getPermissions() {
         return player.getEffectivePermissions().stream().collect(
-                Collectors.toMap(PermissionAttachmentInfo::getPermission,
-                        PermissionAttachmentInfo::getValue, (a, b) -> b));
+            Collectors.toMap(PermissionAttachmentInfo::getPermission,
+                PermissionAttachmentInfo::getValue, (a, b) -> b));
     }
 
     @Override
@@ -121,8 +121,8 @@ public class BukkitPlayer extends OnlineUser {
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (asynchronous) {
                 PaperLib.teleportAsync(player, bukkitLocation.get(), PlayerTeleportEvent.TeleportCause.PLUGIN)
-                        .thenAccept(result -> resultCompletableFuture.complete(
-                                result ? TeleportResult.COMPLETED_LOCALLY : TeleportResult.FAILED_INVALID_WORLD));
+                    .thenAccept(result -> resultCompletableFuture.complete(
+                        result ? TeleportResult.COMPLETED_LOCALLY : TeleportResult.FAILED_INVALID_WORLD));
             } else {
                 player.teleport(bukkitLocation.get(), PlayerTeleportEvent.TeleportCause.PLUGIN);
                 resultCompletableFuture.complete(TeleportResult.COMPLETED_LOCALLY);
@@ -141,10 +141,10 @@ public class BukkitPlayer extends OnlineUser {
     public boolean isVanished() {
         // Return the value of the player's "vanished" metadata tag if they have it
         return player.getMetadata("vanished")
-                .stream()
-                .map(MetadataValue::asBoolean)
-                .findFirst()
-                .orElse(false);
+            .stream()
+            .map(MetadataValue::asBoolean)
+            .findFirst()
+            .orElse(false);
     }
 
     /**
@@ -155,7 +155,7 @@ public class BukkitPlayer extends OnlineUser {
      */
     public void sendPluginMessage(@NotNull String channel, final byte[] message) {
         Bukkit.getScheduler().runTaskLater(plugin,
-                () -> player.sendPluginMessage(plugin, channel, message), PLUGIN_MESSAGE_DISPATCH_DELAY);
+            () -> player.sendPluginMessage(plugin, channel, message), PLUGIN_MESSAGE_DISPATCH_DELAY);
     }
 
     /**

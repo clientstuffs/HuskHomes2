@@ -1,6 +1,7 @@
 package net.william278.huskhomes.util;
 
 import net.william278.huskhomes.position.Location;
+import net.william278.huskhomes.position.World;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,7 +28,7 @@ public final class BukkitAdapter {
             return Optional.empty();
         }
         return Optional.of(new org.bukkit.Location(world, location.x, location.y, location.z,
-                location.yaw, location.pitch));
+            location.yaw, location.pitch));
     }
 
     /**
@@ -39,22 +40,35 @@ public final class BukkitAdapter {
     public static Optional<Location> adaptLocation(@NotNull org.bukkit.Location location) {
         if (location.getWorld() == null) return Optional.empty();
         return Optional.of(new Location(location.getX(), location.getY(), location.getZ(),
-                location.getYaw(), location.getPitch(),
-                adaptWorld(location.getWorld()).orElse(new net.william278.huskhomes.position.World())));
+            location.getYaw(), location.getPitch(),
+            adaptWorld(location.getWorld()).orElse(new net.william278.huskhomes.position.World())));
     }
 
     public static Optional<net.william278.huskhomes.position.World> adaptWorld(@Nullable org.bukkit.World world) {
         if (world == null) {
             return Optional.empty();
         }
-        return Optional.of(new net.william278.huskhomes.position.World(world.getName(), world.getUID(),
-                switch (world.getEnvironment()) {
-                    case NORMAL -> net.william278.huskhomes.position.World.Environment.OVERWORLD;
-                    case NETHER -> net.william278.huskhomes.position.World.Environment.NETHER;
-                    case THE_END -> net.william278.huskhomes.position.World.Environment.THE_END;
-                    case CUSTOM -> net.william278.huskhomes.position.World.Environment.CUSTOM;
-                })
-        );
+        final World.Environment environment;
+        switch (world.getEnvironment()) {
+            case NORMAL: {
+                environment = net.william278.huskhomes.position.World.Environment.OVERWORLD;
+                break;
+            }
+            case NETHER: {
+                environment = net.william278.huskhomes.position.World.Environment.NETHER;
+                break;
+            }
+            case THE_END: {
+                environment = net.william278.huskhomes.position.World.Environment.THE_END;
+                break;
+            }
+            case CUSTOM: {
+                environment = net.william278.huskhomes.position.World.Environment.CUSTOM;
+                break;
+            }
+            default: throw new UnsupportedOperationException();
+        }
+        return Optional.of(new net.william278.huskhomes.position.World(world.getName(), world.getUID(), environment));
     }
 
 }

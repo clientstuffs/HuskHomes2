@@ -20,7 +20,7 @@ public class DelWarpCommand extends CommandBase implements TabCompletable {
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         if (args.length == 0) {
             plugin.getLocales().getLocale("error_invalid_syntax", "/delwarp <name>")
-                    .ifPresent(onlineUser::sendMessage);
+                .ifPresent(onlineUser::sendMessage);
             return;
         }
         if (args.length <= 2) {
@@ -29,7 +29,7 @@ public class DelWarpCommand extends CommandBase implements TabCompletable {
             plugin.getSavedPositionManager().deleteWarp(warpName).thenAccept(deleted -> {
                 if (deleted) {
                     plugin.getLocales().getLocale("warp_deleted", warpName)
-                            .ifPresent(onlineUser::sendMessage);
+                        .ifPresent(onlineUser::sendMessage);
                     return;
                 }
                 if (warpName.equalsIgnoreCase("all")) {
@@ -38,11 +38,11 @@ public class DelWarpCommand extends CommandBase implements TabCompletable {
                 }
 
                 plugin.getLocales().getLocale("error_warp_invalid", warpName)
-                        .ifPresent(onlineUser::sendMessage);
+                    .ifPresent(onlineUser::sendMessage);
             });
         } else {
             plugin.getLocales().getLocale("error_invalid_syntax", "/delwarp <name>")
-                    .ifPresent(onlineUser::sendMessage);
+                .ifPresent(onlineUser::sendMessage);
         }
     }
 
@@ -55,28 +55,28 @@ public class DelWarpCommand extends CommandBase implements TabCompletable {
     private void deleteAllWarps(@NotNull OnlineUser deleter, final boolean confirm) {
         if (!confirm) {
             plugin.getLocales().getLocale("delete_all_warps_confirm")
-                    .ifPresent(deleter::sendMessage);
+                .ifPresent(deleter::sendMessage);
             return;
         }
 
         plugin.getSavedPositionManager().deleteAllWarps().thenAccept(deleted -> {
             if (deleted == 0) {
                 plugin.getLocales().getLocale("error_no_warps_set")
-                        .ifPresent(deleter::sendMessage);
+                    .ifPresent(deleter::sendMessage);
                 return;
             }
 
             plugin.getLocales().getLocale("delete_all_warps_success", Integer.toString(deleted))
-                    .ifPresent(deleter::sendMessage);
+                .ifPresent(deleter::sendMessage);
         });
     }
 
     @Override
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         return args.length > 1 ? Collections.emptyList() : plugin.getCache().warps
-                .stream()
-                .filter(s -> s.startsWith(args.length == 1 ? args[0] : ""))
-                .sorted()
-                .collect(Collectors.toList());
+            .stream()
+            .filter(s -> s.startsWith(args.length == 1 ? args[0] : ""))
+            .sorted()
+            .collect(Collectors.toList());
     }
 }

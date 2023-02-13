@@ -14,11 +14,10 @@ import java.util.UUID;
 /**
  * Used to store the server spawn location
  */
-@YamlFile(header = """
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-        ┃ Server /spawn location cache ┃
-        ┃ Edit in-game using /setspawn ┃
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛""")
+@YamlFile(header = "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+                   "┃ Server /spawn location cache ┃\n" +
+                   "┃ Edit in-game using /setspawn ┃\n" +
+                   "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 public class CachedSpawn {
 
     public double x;
@@ -30,20 +29,6 @@ public class CachedSpawn {
     public String worldName;
     @YamlKey("world_uuid")
     public String worldUuid;
-
-    /**
-     * Returns the {@link Position} of the spawn
-     *
-     * @return The {@link Position} of the spawn
-     */
-    public Optional<Position> getPosition(@NotNull Server server) {
-        try {
-            return Optional.of(new Position(x, y, z, yaw, pitch,
-                    new World(worldName, UUID.fromString(worldUuid)), server));
-        } catch (IllegalArgumentException e) {
-            return Optional.empty();
-        }
-    }
 
     /**
      * Set the {@link Location} of the spawn
@@ -62,5 +47,19 @@ public class CachedSpawn {
 
     @SuppressWarnings("unused")
     public CachedSpawn() {
+    }
+
+    /**
+     * Returns the {@link Position} of the spawn
+     *
+     * @return The {@link Position} of the spawn
+     */
+    public Optional<Position> getPosition(@NotNull Server server) {
+        try {
+            return Optional.of(new Position(x, y, z, yaw, pitch,
+                new World(worldName, UUID.fromString(worldUuid)), server));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 }

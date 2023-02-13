@@ -1,6 +1,6 @@
 package net.william278.huskhomes.network;
 
-import com.google.gson.*;
+import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.william278.huskhomes.HuskHomes;
@@ -87,37 +87,13 @@ public class Request {
     }
 
     @NotNull
-    public String toJson() {
-        return new GsonBuilder().create().toJson(this);
-    }
-
-    @NotNull
     public static Request fromJson(@NotNull String json) {
         return new GsonBuilder().create().fromJson(json, Request.class);
     }
 
-    /**
-     * Identifies the type of message or reply
-     */
-    public enum MessageType {
-        TELEPORT_TO_POSITION_REQUEST,
-        POSITION_REQUEST,
-        TELEPORT_REQUEST,
-        TELEPORT_REQUEST_RESPONSE
-    }
-
-    /**
-     * Identifies the source of the message being relayed - a {@link RelayType#MESSAGE} or a {@link RelayType#REPLY} to a message.
-     */
-    public enum RelayType {
-        /**
-         * An outbound message to/from a server
-         */
-        MESSAGE,
-        /**
-         * A reply to an outbound message
-         */
-        REPLY
+    @NotNull
+    public String toJson() {
+        return new GsonBuilder().create().toJson(this);
     }
 
     @NotNull
@@ -176,10 +152,36 @@ public class Request {
 
     @Override
     public boolean equals(@NotNull Object other) {
-        if (other instanceof Request request) {
+        if (other instanceof Request) {
+            final var request = (Request) other;
+
             return request.uuid.equals(this.uuid);
         }
         return super.equals(other);
+    }
+
+    /**
+     * Identifies the type of message or reply
+     */
+    public enum MessageType {
+        TELEPORT_TO_POSITION_REQUEST,
+        POSITION_REQUEST,
+        TELEPORT_REQUEST,
+        TELEPORT_REQUEST_RESPONSE
+    }
+
+    /**
+     * Identifies the source of the message being relayed - a {@link RelayType#MESSAGE} or a {@link RelayType#REPLY} to a message.
+     */
+    public enum RelayType {
+        /**
+         * An outbound message to/from a server
+         */
+        MESSAGE,
+        /**
+         * A reply to an outbound message
+         */
+        REPLY
     }
 
 }

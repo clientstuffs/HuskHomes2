@@ -3,16 +3,16 @@ package net.william278.huskhomes;
 import net.william278.desertwell.UpdateChecker;
 import net.william278.desertwell.Version;
 import net.william278.huskhomes.command.CommandBase;
+import net.william278.huskhomes.config.CachedSpawn;
 import net.william278.huskhomes.config.Locales;
 import net.william278.huskhomes.config.Settings;
-import net.william278.huskhomes.config.CachedSpawn;
 import net.william278.huskhomes.database.Database;
 import net.william278.huskhomes.event.EventDispatcher;
 import net.william278.huskhomes.hook.EconomyHook;
 import net.william278.huskhomes.hook.MapHook;
 import net.william278.huskhomes.hook.PluginHook;
-import net.william278.huskhomes.network.Messenger;
 import net.william278.huskhomes.migrator.Migrator;
+import net.william278.huskhomes.network.Messenger;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.*;
 import net.william278.huskhomes.random.RandomTeleportEngine;
@@ -61,11 +61,11 @@ public interface HuskHomes {
     @NotNull
     default Optional<OnlineUser> findOnlinePlayer(@NotNull String playerName) {
         return getOnlinePlayers().stream()
-                .filter(user -> user.username.equalsIgnoreCase(playerName))
-                .findFirst()
-                .or(() -> getOnlinePlayers().stream()
-                        .filter(user -> user.username.toLowerCase().startsWith(playerName.toLowerCase()))
-                        .findFirst());
+            .filter(user -> user.username.equalsIgnoreCase(playerName))
+            .findFirst()
+            .or(() -> getOnlinePlayers().stream()
+                .filter(user -> user.username.toLowerCase().startsWith(playerName.toLowerCase()))
+                .findFirst());
     }
 
     /**
@@ -191,8 +191,8 @@ public interface HuskHomes {
      */
     default CompletableFuture<Optional<? extends Position>> getSpawn() {
         return CompletableFuture.supplyAsync(() -> getSettings().crossServer && getSettings().globalSpawn
-                ? getDatabase().getWarp(getSettings().globalSpawnName).join()
-                : getLocalCachedSpawn().flatMap(spawn -> spawn.getPosition(getServerName())));
+            ? getDatabase().getWarp(getSettings().globalSpawnName).join()
+            : getLocalCachedSpawn().flatMap(spawn -> spawn.getPosition(getServerName())));
     }
 
     /**
@@ -235,9 +235,9 @@ public interface HuskHomes {
      */
     default <H extends PluginHook> Optional<H> getHook(@NotNull Class<H> hookClass) {
         return getPluginHooks().stream()
-                .filter(hook -> hook.getClass().isInstance(hookClass))
-                .findFirst()
-                .map(hookClass::cast);
+            .filter(hook -> hook.getClass().isInstance(hookClass))
+            .findFirst()
+            .map(hookClass::cast);
     }
 
     /**
@@ -273,7 +273,7 @@ public interface HuskHomes {
             if (hook.isPresent()) {
                 if (cost.get() > hook.get().getPlayerBalance(player)) {
                     getLocales().getLocale("error_insufficient_funds", hook.get().formatCurrency(cost.get()))
-                            .ifPresent(player::sendMessage);
+                        .ifPresent(player::sendMessage);
                     return false;
                 }
             }
@@ -296,7 +296,7 @@ public interface HuskHomes {
             if (hook.isPresent()) {
                 hook.get().changePlayerBalance(player, -cost.get());
                 getLocales().getLocale(action.confirmationLocaleId, hook.get().formatCurrency(cost.get()))
-                        .ifPresent(player::sendMessage);
+                    .ifPresent(player::sendMessage);
             }
         }
     }

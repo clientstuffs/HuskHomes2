@@ -15,6 +15,11 @@ public class TeleportEvent extends Event implements ITeleportEvent {
         this.teleport = teleport;
     }
 
+    @SuppressWarnings("unused")
+    public static HandlerList getHandlerList() {
+        return HANDLER_LIST;
+    }
+
     @Override
     public @NotNull Teleport getTeleport() {
         return teleport;
@@ -23,11 +28,6 @@ public class TeleportEvent extends Event implements ITeleportEvent {
     @NotNull
     @Override
     public HandlerList getHandlers() {
-        return HANDLER_LIST;
-    }
-
-    @SuppressWarnings("unused")
-    public static HandlerList getHandlerList() {
         return HANDLER_LIST;
     }
 
