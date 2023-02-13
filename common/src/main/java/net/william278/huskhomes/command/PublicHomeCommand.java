@@ -29,17 +29,20 @@ public class PublicHomeCommand extends CommandBase implements TabCompletable, Co
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0: plugin.getDatabase().getPublicHomes().thenAcceptAsync(publicHomes -> {
-                // Display the public home list if there are any public home set
-                if (publicHomes.size() == 0) {
-                    plugin.getLocales().getLocale("error_no_public_homes_set").ifPresent(onlineUser::sendMessage);
-                    return;
-                }
+            case 0: {
+                plugin.getDatabase().getPublicHomes().thenAcceptAsync(publicHomes -> {
+                    // Display the public home list if there are any public home set
+                    if (publicHomes.size() == 0) {
+                        plugin.getLocales().getLocale("error_no_public_homes_set").ifPresent(onlineUser::sendMessage);
+                        return;
+                    }
 
-                plugin.getCache().getPublicHomeList(onlineUser, plugin.getLocales(),
-                        publicHomes, plugin.getSettings().listItemsPerPage, 1)
-                    .ifPresent(onlineUser::sendMessage);
-            });
+                    plugin.getCache().getPublicHomeList(onlineUser, plugin.getLocales(),
+                            publicHomes, plugin.getSettings().listItemsPerPage, 1)
+                        .ifPresent(onlineUser::sendMessage);
+                });
+                break;
+            }
             case 1: {
                 final String homeName = args[0];
                 // Match the input to a home identifier and teleport
@@ -62,9 +65,13 @@ public class PublicHomeCommand extends CommandBase implements TabCompletable, Co
                                 .ifPresent(onlineUser::sendMessage);
                         }
                     }));
+                break;
             }
-            default: plugin.getLocales().getLocale("error_invalid_syntax", "/publichome [<owner_name>.<home_name>]")
-                .ifPresent(onlineUser::sendMessage);
+            default: {
+                plugin.getLocales().getLocale("error_invalid_syntax", "/publichome [<owner_name>.<home_name>]")
+                    .ifPresent(onlineUser::sendMessage);
+                break;
+            }
         }
     }
 
