@@ -15,6 +15,7 @@ import net.william278.huskhomes.migrator.Migrator;
 import net.william278.huskhomes.network.Messenger;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.*;
+import net.william278.huskhomes.queue.TeleportQueue;
 import net.william278.huskhomes.random.RandomTeleportEngine;
 import net.william278.huskhomes.request.RequestManager;
 import net.william278.huskhomes.util.Logger;
@@ -145,6 +146,14 @@ public interface HuskHomes {
      */
     @NotNull
     Messenger getMessenger() throws HuskHomesException;
+
+    /**
+     * The {@link TeleportQueue} that manages queues
+     *
+     * @return the {@link TeleportQueue} implementation
+     */
+    @NotNull
+    TeleportQueue getTeleportQueue() throws HuskHomesException;
 
     /**
      * The {@link RandomTeleportEngine} that manages random teleports

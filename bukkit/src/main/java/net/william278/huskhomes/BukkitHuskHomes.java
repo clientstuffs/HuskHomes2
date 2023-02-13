@@ -417,6 +417,7 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
     }
 
     @NotNull
+    @Override
     public TeleportQueue getTeleportQueue() {
         if (teleportQueue == null) {
             throw new HuskHomesException("Attempted to access queue system when it was not initialized");

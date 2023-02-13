@@ -21,7 +21,8 @@ public class ServerCommand extends CommandBase implements TabCompletable {
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         if (args.length == 1) {
             final String serverName = args[0];
-            this.plugin.getMessenger().sendPlayer(onlineUser, new Server(serverName));
+            this.plugin.getTeleportQueue().joinFor(onlineUser, serverName)
+                .thenRun(() -> this.plugin.getMessenger().sendPlayer(onlineUser, new Server(serverName)));
         } else {
             this.plugin.getLocales().getLocale("error_invalid_syntax", "/home [name]")
                 .ifPresent(onlineUser::sendMessage);
