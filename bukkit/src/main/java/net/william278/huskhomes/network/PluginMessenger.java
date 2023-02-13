@@ -9,6 +9,7 @@ import net.william278.huskhomes.player.BukkitPlayer;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.Server;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
@@ -69,6 +70,15 @@ public class PluginMessenger extends Messenger implements PluginMessageListener 
         messageWriter.writeUTF("GetServers");
         dispatcher.sendPluginMessage(BUNGEE_PLUGIN_CHANNEL_NAME, messageWriter.toByteArray());
         return future;
+    }
+
+    @Override
+    public CompletableFuture<String[]> fetchOnlineServerList() {
+        final var firstPlayer = Bukkit.getOnlinePlayers().stream().findFirst();
+        if (firstPlayer.isEmpty()) {
+            return CompletableFuture.completedFuture(new String[0]);
+        }
+        return this.fetchOnlineServerList(BukkitPlayer.adapt(firstPlayer.get()));
     }
 
     @Override

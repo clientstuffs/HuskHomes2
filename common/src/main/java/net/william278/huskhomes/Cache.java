@@ -5,6 +5,7 @@ import net.william278.huskhomes.command.CommandBase;
 import net.william278.huskhomes.config.Locales;
 import net.william278.huskhomes.database.Database;
 import net.william278.huskhomes.event.EventDispatcher;
+import net.william278.huskhomes.network.Messenger;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
 import net.william278.huskhomes.position.Home;
@@ -13,9 +14,13 @@ import net.william278.huskhomes.teleport.TimedTeleport;
 import net.william278.paginedown.ListOptions;
 import net.william278.paginedown.PaginatedList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +32,11 @@ public class Cache {
      * Cached home names - maps a {@link UUID} to a list of their homes
      */
     public final HashMap<UUID, List<String>> homes;
+
+    /**
+     * Cached online server names
+     */
+    public final List<String> onlineServers;
 
     /**
      * Cached home names - maps a username to a list of their public homes
@@ -68,11 +78,15 @@ public class Cache {
      */
     private final EventDispatcher eventDispatcher;
 
+    @Nullable
+    private final Messenger messenger;
+
     /**
      * Create a new cache
      */
-    public Cache(@NotNull EventDispatcher eventDispatcher) {
+    public Cache(@NotNull EventDispatcher eventDispatcher, @Nullable final Messenger messenger) {
         this.homes = new HashMap<>();
+        this.onlineServers = new ArrayList<>();
         this.publicHomes = new HashMap<>();
         this.warps = new ArrayList<>();
         this.players = new HashSet<>();
@@ -81,6 +95,7 @@ public class Cache {
         this.warpLists = new HashMap<>();
         this.currentlyOnWarmup = new HashSet<>();
         this.eventDispatcher = eventDispatcher;
+        this.messenger = messenger;
     }
 
     /**
@@ -97,6 +112,18 @@ public class Cache {
             database.getWarps().thenAccept(warpsList -> warpsList.forEach(warp ->
                 this.warps.add(warp.meta.name)));
         });
+        if (messenger != null) {
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
+                () -> {
+                    this.onlineServers.clear();
+                    final var fetch = this.messenger.fetchOnlineServerList().join();
+                    Collections.addAll(this.onlineServers, fetch);
+                },
+                0L,
+                1L,
+                TimeUnit.SECONDS
+            );
+        }
     }
 
     /**

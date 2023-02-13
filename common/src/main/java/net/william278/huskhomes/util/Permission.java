@@ -4,6 +4,8 @@ import org.intellij.lang.annotations.Pattern;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.MessageFormat;
+
 /**
  * Static plugin permission nodes required to perform actions or execute commands
  */
@@ -174,7 +176,28 @@ public enum Permission {
     /**
      * Lets the user check for plugin updates
      */
-    COMMAND_HUSKHOMES_UPDATE("huskhomes.command.huskhomes.update", DefaultAccess.OPERATORS);
+    COMMAND_HUSKHOMES_UPDATE("huskhomes.command.huskhomes.update", DefaultAccess.OPERATORS),
+    /**
+     * Lets the user teleport to servers ({@code /server [server_name]})
+     */
+    COMMAND_SERVER("huskhomes.command.server", DefaultAccess.EVERYONE),
+    /**
+     * Lets the user bypass the queue system
+     */
+    QUEUE_BYPASS_ALL("huskhomes.queue.bypass.*", DefaultAccess.OPERATORS),
+    /**
+     * Lets the user bypass the queue system for the specified server
+     * <p>
+     * {0} is server
+     */
+    QUEUE_BYPASS("huskhomes.queue.bypass.{0}", DefaultAccess.OPERATORS),
+    /**
+     * Prioritized the queue system based on the server and also priority number
+     * <p>
+     * {0} is server
+     * {1} is priority number
+     */
+    QUEUE_PRIORITY("huskhomes.queue.priority.{0}.{1}", DefaultAccess.OPERATORS);
 
     public static final String PERMISSION_PATTERN = "(huskhomes\\.)?[a-z0-9_\\-*.]+";
 
@@ -187,6 +210,17 @@ public enum Permission {
     Permission(@Subst("huskhomes.*") @NotNull String node, @NotNull DefaultAccess defaultAccess) {
         this.node = node;
         this.defaultAccess = defaultAccess;
+    }
+
+    /**
+     * Formats {@link #node} using {@link MessageFormat}.
+     *
+     * @param args The arguments to format the node.
+     * @return Formatted permission.
+     */
+    @NotNull
+    public String formatted(@NotNull final Object... args) {
+        return MessageFormat.format(this.node, args);
     }
 
     /**

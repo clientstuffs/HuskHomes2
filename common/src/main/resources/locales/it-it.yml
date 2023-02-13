@@ -171,3 +171,13 @@ setspawn_command_description: 'Setta la posizione di spawn'
 tpaall_command_description: 'Richiedi a tutti i giocatori di teletrasportarsi da te'
 tpall_command_description: 'Teletrasporta tutti i giocatori alla tua posizione'
 huskhomes_command_description: 'Vedi le informazioni del plugin & ricarica la configurazione'
+
+queue_reminder:
+  - "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."
+  - "&f[&e!&f] type /leavequeue to leave the queue!"
+queue_reminder_action_bar: "you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."
+queue_canceled_overlapping_queue: "&f[&c!&f] an overlapping queue exists and the old queue has been deleted."
+queue_canceled_player_offline: "&f[&c!&f] the queue is stopped because the teleport target is offline."
+queue_finish_success: "&f[&c!&f] sending you to %server_name% now"
+queue_leave_success: "&f[&c!&f] you successfully exited the queue."
+queue_leave_fail_not_in_queue: "&f[&c!&f] not in queue."

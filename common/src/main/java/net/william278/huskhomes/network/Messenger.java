@@ -91,6 +91,13 @@ public abstract class Messenger implements AutoCloseable {
     public abstract CompletableFuture<String[]> fetchOnlineServerList(@NotNull OnlineUser requester);
 
     /**
+     * Fetch a list of online server names proxy
+     *
+     * @return Future returning a {@link List} of online servers connected to the proxy network
+     */
+    public abstract CompletableFuture<String[]> fetchOnlineServerList();
+
+    /**
      * Send a {@link OnlineUser} to a target {@link Server} on the proxy network
      *
      * @param server The {@link Server} to send the {@link OnlineUser} to

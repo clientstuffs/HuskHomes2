@@ -30,6 +30,8 @@ import net.william278.huskhomes.position.Location;
 import net.william278.huskhomes.position.SavedPositionManager;
 import net.william278.huskhomes.position.Server;
 import net.william278.huskhomes.position.World;
+import net.william278.huskhomes.queue.PrioritizedTeleportQueue;
+import net.william278.huskhomes.queue.TeleportQueue;
 import net.william278.huskhomes.random.NormalDistributionEngine;
 import net.william278.huskhomes.random.RandomTeleportEngine;
 import net.william278.huskhomes.request.RequestManager;
@@ -84,6 +86,8 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
     private Server server;
     @Nullable
     private Messenger messenger;
+    @Nullable
+    private TeleportQueue teleportQueue;
     // Adventure audience
     private BukkitAudiences audiences;
 
@@ -171,6 +175,18 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
                 }
                 messenger.initialize(this);
                 getLoggingAdapter().log(Level.INFO, "Successfully initialized the network messenger.");
+
+                if (this.settings.queue) {
+                    this.getLoggingAdapter().info("Initializing the queue system...");
+                    if (settings.messengerType != Settings.MessengerType.REDIS) {
+                        this.getLoggingAdapter().severe("Queue system cannot be initialized...");
+                        this.getLoggingAdapter().severe("You MUST enable redis messaging to able to use the queue system!");
+                        return;
+                    }
+                    this.teleportQueue = new PrioritizedTeleportQueue(this, this.messenger);
+                    this.teleportQueue.initialize();
+                    getLoggingAdapter().info("Successfully initialized the queue system.");
+                }
             }
 
             // Prepare the request manager
@@ -180,7 +196,7 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             this.eventDispatcher = new BukkitEventDispatcher(this);
 
             // Initialize the cache
-            cache = new Cache(eventDispatcher);
+            cache = new Cache(eventDispatcher, this.messenger);
             cache.initialize(database);
 
             // Prepare the home and warp position manager
@@ -398,6 +414,14 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             throw new HuskHomesException("Attempted to access network messenger when it was not initialized");
         }
         return messenger;
+    }
+
+    @NotNull
+    public TeleportQueue getTeleportQueue() {
+        if (teleportQueue == null) {
+            throw new HuskHomesException("Attempted to access queue system when it was not initialized");
+        }
+        return teleportQueue;
     }
 
     @NotNull
