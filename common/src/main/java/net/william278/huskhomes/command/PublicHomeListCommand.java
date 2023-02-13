@@ -20,7 +20,10 @@ public class PublicHomeListCommand extends CommandBase implements ConsoleExecuta
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0: showPublicHomeList(onlineUser, 1);
+            case 0: {
+                showPublicHomeList(onlineUser, 1);
+                break;
+            }
             case 1: {
                 try {
                     int pageNumber = Integer.parseInt(args[0]);
@@ -29,9 +32,13 @@ public class PublicHomeListCommand extends CommandBase implements ConsoleExecuta
                     plugin.getLocales().getLocale("error_invalid_syntax", "/publichomelist [page]")
                         .ifPresent(onlineUser::sendMessage);
                 }
+                break;
             }
-            default: plugin.getLocales().getLocale("error_invalid_syntax", "/publichomelist [page]")
-                .ifPresent(onlineUser::sendMessage);
+            default: {
+                plugin.getLocales().getLocale("error_invalid_syntax", "/publichomelist [page]")
+                    .ifPresent(onlineUser::sendMessage);
+                break;
+            }
         }
     }
 

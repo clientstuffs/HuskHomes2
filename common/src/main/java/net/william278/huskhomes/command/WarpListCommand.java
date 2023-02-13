@@ -18,8 +18,10 @@ public class WarpListCommand extends CommandBase implements ConsoleExecutable {
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0:
+            case 0: {
                 showWarpList(onlineUser, 1);
+                break;
+            }
             case 1: {
                 try {
                     int pageNumber = Integer.parseInt(args[0]);
@@ -28,10 +30,13 @@ public class WarpListCommand extends CommandBase implements ConsoleExecutable {
                     plugin.getLocales().getLocale("error_invalid_syntax", "/warplist [page]")
                         .ifPresent(onlineUser::sendMessage);
                 }
+                break;
             }
-            default:
+            default: {
                 plugin.getLocales().getLocale("error_invalid_syntax", "/warplist [page]")
                     .ifPresent(onlineUser::sendMessage);
+                break;
+            }
         }
     }
 

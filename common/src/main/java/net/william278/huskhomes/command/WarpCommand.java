@@ -22,7 +22,7 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
     @Override
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
-            case 0:
+            case 0: {
                 plugin.getDatabase().getWarps()
                     .thenApply(warps -> warps.stream()
                         .filter(warp -> warp.hasPermission(plugin.getSettings().permissionRestrictWarps, onlineUser))
@@ -37,6 +37,8 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
                                 plugin.getSettings().listItemsPerPage, 1)
                             .ifPresent(onlineUser::sendMessage);
                     });
+                break;
+            }
             case 1: {
                 final String warpName = args[0];
                 plugin.getDatabase()
@@ -56,10 +58,13 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
                         },
                         () -> plugin.getLocales().getLocale("error_warp_invalid", warpName)
                             .ifPresent(onlineUser::sendMessage)));
+                break;
             }
-            default:
+            default: {
                 plugin.getLocales().getLocale("error_invalid_syntax", "/warp [name]")
                     .ifPresent(onlineUser::sendMessage);
+                break;
+            }
         }
     }
 

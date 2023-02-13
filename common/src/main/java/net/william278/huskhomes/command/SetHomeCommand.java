@@ -32,10 +32,17 @@ public class SetHomeCommand extends CommandBase {
                         plugin.getLocales().getLocale("error_invalid_syntax", "/sethome <name>")
                             .ifPresent(onlineUser::sendMessage);
                     }
+                    break;
                 }
-                case 1: setHome(onlineUser, args[0], homes);
-                default: plugin.getLocales().getLocale("error_invalid_syntax", "/sethome <name>")
-                    .ifPresent(onlineUser::sendMessage);
+                case 1: {
+                    setHome(onlineUser, args[0], homes);
+                    break;
+                }
+                default: {
+                    plugin.getLocales().getLocale("error_invalid_syntax", "/sethome <name>")
+                        .ifPresent(onlineUser::sendMessage);
+                    break;
+                }
             }
         });
     }
