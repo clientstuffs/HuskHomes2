@@ -60,7 +60,10 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
             return;
         }
         switch (args[0].toLowerCase()) {
-            case "about": sendAboutMenu(onlineUser);
+            case "about": {
+                sendAboutMenu(onlineUser);
+                break;
+            }
             case "help": {
                 if (!onlineUser.hasPermission(Permission.COMMAND_HUSKHOMES_HELP.node)) {
                     plugin.getLocales().getLocale("error_no_permission")
@@ -79,6 +82,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                 }
                 onlineUser.sendMessage(plugin.getCache().getCommandList(onlineUser,
                     plugin.getLocales(), plugin.getCommands(), plugin.getSettings().listItemsPerPage, page));
+                break;
             }
             case "reload": {
                 if (!onlineUser.hasPermission(Permission.COMMAND_HUSKHOMES_RELOAD.node)) {
@@ -91,6 +95,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                     return;
                 }
                 onlineUser.sendMessage(new MineDown("[HuskHomes](#00fb9a bold) &#00fb9a&| Reloaded config & message files."));
+                break;
             }
             case "update": {
                 if (!onlineUser.hasPermission(Permission.COMMAND_HUSKHOMES_UPDATE.node)) {
@@ -106,11 +111,18 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                         () -> onlineUser.sendMessage(
                             new MineDown("[HuskHomes](#00fb9a bold) [| HuskHomes is up-to-date."
                                          + " (Running: v" + plugin.getPluginVersion() + ")](#00fb9a)"))));
+                break;
             }
-            case "migrate": plugin.getLocales().getLocale("error_console_command_only")
-                .ifPresent(onlineUser::sendMessage);
-            default: plugin.getLocales().getLocale("error_invalid_syntax", "/huskhomes [about|help|reload|update]")
-                .ifPresent(onlineUser::sendMessage);
+            case "migrate": {
+                plugin.getLocales().getLocale("error_console_command_only")
+                    .ifPresent(onlineUser::sendMessage);
+                break;
+            }
+            default: {
+                plugin.getLocales().getLocale("error_invalid_syntax", "/huskhomes [about|help|reload|update]")
+                    .ifPresent(onlineUser::sendMessage);
+                break;
+            }
         }
     }
 
@@ -122,8 +134,11 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
             return;
         }
         switch (args[0].toLowerCase()) {
-            case "about": Arrays.stream(aboutMenu.toString().split("\n")).forEach(message ->
-                plugin.getLoggingAdapter().log(Level.INFO, message));
+            case "about":{
+                Arrays.stream(aboutMenu.toString().split("\n")).forEach(message ->
+                    plugin.getLoggingAdapter().log(Level.INFO, message));
+                break;
+            }
             case "help": {
                 plugin.getLoggingAdapter().log(Level.INFO, "List of enabled console-executable commands:");
                 plugin.getCommands()
@@ -132,6 +147,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                         command.command +
                         (command.command.length() < 16 ? " ".repeat(16 - command.command.length()) : "")
                         + " - " + command.getDescription()));
+                break;
             }
             case "reload": {
                 if (!plugin.reload()) {
@@ -139,14 +155,18 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                     return;
                 }
                 plugin.getLoggingAdapter().log(Level.INFO, "Reloaded config & message files.");
+                break;
             }
-            case "update": plugin.getLatestVersionIfOutdated().thenAccept(newestVersion ->
-                newestVersion.ifPresentOrElse(newVersion -> plugin.getLoggingAdapter().log(Level.WARNING,
-                        "An update is available for HuskHomes, v" + newVersion
-                        + " (Running v" + plugin.getPluginVersion() + ")"),
-                    () -> plugin.getLoggingAdapter().log(Level.INFO,
-                        "HuskHomes is up to date" +
-                        " (Running v" + plugin.getPluginVersion() + ")")));
+            case "update": {
+                plugin.getLatestVersionIfOutdated().thenAccept(newestVersion ->
+                    newestVersion.ifPresentOrElse(newVersion -> plugin.getLoggingAdapter().log(Level.WARNING,
+                            "An update is available for HuskHomes, v" + newVersion
+                            + " (Running v" + plugin.getPluginVersion() + ")"),
+                        () -> plugin.getLoggingAdapter().log(Level.INFO,
+                            "HuskHomes is up to date" +
+                            " (Running v" + plugin.getPluginVersion() + ")")));
+                break;
+            }
             case "migrate": {
                 if (args.length < 2) {
                     plugin.getLoggingAdapter().log(Level.INFO,
@@ -179,6 +199,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                         "If a migrator is not available, please verify that you meet the prerequisites to use it.");
                     logMigratorsList();
                 });
+                break;
             }
         }
     }
