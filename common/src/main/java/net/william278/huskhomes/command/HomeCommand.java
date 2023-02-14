@@ -40,7 +40,8 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
                             Teleport.builder(plugin, onlineUser)
                                 .setTarget(homes.get(0))
                                 .waitForQueue(!onlineUser.hasPermission(Permission.QUEUE_BYPASS.node))
-                                .toTimedTeleport().thenAccept(TimedTeleport::execute);
+                                .toTimedTeleport()
+                                .thenAccept(TimedTeleport::execute);
                             break;
                         }
                         default: {
