@@ -7,6 +7,7 @@ import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.util.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -25,8 +26,8 @@ public class TimedTeleport extends Teleport {
 
     protected TimedTeleport(@NotNull OnlineUser teleporter, @NotNull OnlineUser executor, @NotNull Position target,
                             @NotNull TeleportType type, int warmupTime, @NotNull Set<Settings.EconomyAction> economyActions,
-                            final boolean updateLastPosition, @NotNull HuskHomes plugin) {
-        super(teleporter, executor, target, type, economyActions, updateLastPosition, plugin);
+                            final boolean updateLastPosition, @Nullable final String queueType, @NotNull HuskHomes plugin) {
+        super(teleporter, executor, target, type, economyActions, updateLastPosition, queueType, plugin);
         this.plugin = plugin;
         this.startLocation = teleporter.getPosition();
         this.startHealth = teleporter.getHealth();
@@ -44,6 +45,11 @@ public class TimedTeleport extends Teleport {
         // If the target has not been resolved, fail the teleport
         if (target == null) {
             return CompletableFuture.completedFuture(TeleportResult.FAILED_TARGET_NOT_RESOLVED)
+                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+        }
+
+        if (this.queue()) {
+            return CompletableFuture.completedFuture(TeleportResult.COMPLETED_CROSS_SERVER)
                 .thenApply(resultState -> CompletedTeleport.from(resultState, this));
         }
 

@@ -5,7 +5,6 @@ import net.william278.huskhomes.network.Payload;
 import net.william278.huskhomes.network.Request;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
-import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TimedTeleport;
 import net.william278.huskhomes.util.Permission;
@@ -318,39 +317,15 @@ public class RequestManager {
             if (plugin.getSettings().strictTpaHereRequests) {
                 Teleport.builder(plugin, recipient)
                     .setTarget(request.requesterPosition)
+                    .setQueueType("tpahere")
                     .toTimedTeleport()
-                    .thenAccept(teleport -> {
-                        final var target = teleport.target;
-                        if (target == null) {
-                            teleport.execute();
-                        } else {
-                            final var bypass = recipient.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
-                                               recipient.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
-                            if (!this.plugin.getSettings().queue || bypass) {
-                                teleport.execute();
-                            } else {
-                                this.plugin.getTeleportQueue().join(teleport, "tpahere");
-                            }
-                        }
-                    });
+                    .thenAccept(TimedTeleport::execute);
             } else {
                 Teleport.builder(plugin, recipient)
                     .setTarget(request.requesterName)
+                    .setQueueType("tpahere")
                     .toTimedTeleport()
-                    .thenAccept(teleport -> {
-                        final var target = teleport.target;
-                        if (target == null) {
-                            teleport.execute();
-                        } else {
-                            final var bypass = recipient.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
-                                               recipient.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
-                            if (!this.plugin.getSettings().queue || bypass) {
-                                teleport.execute();
-                            } else {
-                                this.plugin.getTeleportQueue().join(teleport, "tpahere");
-                            }
-                        }
-                    });
+                    .thenAccept(TimedTeleport::execute);
             }
         }
 
@@ -371,21 +346,9 @@ public class RequestManager {
         if (accepted && (request.type == TeleportRequest.RequestType.TPA)) {
             Teleport.builder(plugin, requester)
                 .setTarget(request.recipientName)
+                .setQueueType("tpa")
                 .toTimedTeleport()
-                .thenAccept(teleport -> {
-                    final var target = teleport.target;
-                    if (target == null) {
-                        teleport.execute();
-                    } else {
-                        final var bypass = requester.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
-                                           requester.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
-                        if (!this.plugin.getSettings().queue || bypass) {
-                            teleport.execute();
-                        } else {
-                            this.plugin.getTeleportQueue().join(teleport, "tpa");
-                        }
-                    }
-                });
+                .thenAccept(TimedTeleport::execute);
         }
     }
 

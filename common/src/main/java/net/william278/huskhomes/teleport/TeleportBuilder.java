@@ -8,6 +8,7 @@ import net.william278.huskhomes.player.User;
 import net.william278.huskhomes.position.Location;
 import net.william278.huskhomes.position.Position;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -55,6 +56,9 @@ public class TeleportBuilder {
      * Whether this teleport should update the user's last position (i.e. their {@code /back} position)
      */
     private boolean updateLastPosition = true;
+
+    @Nullable
+    private String queueType;
 
     protected TeleportBuilder(@NotNull HuskHomes plugin, @NotNull OnlineUser executor) {
         this.plugin = plugin;
@@ -178,6 +182,11 @@ public class TeleportBuilder {
         return this;
     }
 
+    public TeleportBuilder setQueueType(@NotNull final String queueType) {
+        this.queueType = queueType;
+        return this;
+    }
+
     /**
      * Resolve the teleporter and target, and construct as an instantly-completing {@link Teleport}
      *
@@ -188,7 +197,7 @@ public class TeleportBuilder {
             final User teleporter = this.teleporter.join();
             final Position target = this.target.join();
 
-            return new Teleport(teleporter, executor, target, type, economyActions, updateLastPosition, plugin);
+            return new Teleport(teleporter, executor, target, type, economyActions, updateLastPosition, queueType, plugin);
         }).exceptionally(e -> {
             plugin.getLoggingAdapter().log(Level.SEVERE, "Failed to create teleport", e);
             return null;
@@ -211,7 +220,7 @@ public class TeleportBuilder {
             }
             final var onlineUser = (OnlineUser) teleporter;
 
-            return new TimedTeleport(onlineUser, executor, target, type, warmupTime, economyActions, updateLastPosition, plugin);
+            return new TimedTeleport(onlineUser, executor, target, type, warmupTime, economyActions, updateLastPosition, queueType, plugin);
         }).exceptionally(e -> {
             plugin.getLoggingAdapter().log(Level.SEVERE, "Failed to create timed teleport", e);
             return null;

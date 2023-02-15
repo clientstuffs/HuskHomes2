@@ -7,6 +7,7 @@ import net.william278.huskhomes.position.Server;
 import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TeleportType;
+import net.william278.huskhomes.teleport.TimedTeleport;
 import net.william278.huskhomes.util.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,21 +35,9 @@ public class ServerCommand extends CommandBase implements TabCompletable {
             Teleport.builder(this.plugin, onlineUser)
                 .setTarget(new Position(0.0d, 0.0d, 0.0d, 0.0f, 0.0f, new World("", UUID.randomUUID()), server))
                 .setType(TeleportType.SERVER)
+                .setQueueType("server")
                 .toTimedTeleport()
-                .thenAccept(teleport -> {
-                    final var target = teleport.target;
-                    if (target == null) {
-                        teleport.execute();
-                    } else {
-                        final var bypass = onlineUser.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
-                                           onlineUser.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
-                        if (!this.plugin.getSettings().queue || bypass) {
-                            teleport.execute();
-                        } else {
-                            this.plugin.getTeleportQueue().join(teleport, "server");
-                        }
-                    }
-                });
+                .thenAccept(TimedTeleport::execute);
         } else {
             this.plugin.getLocales().getLocale("error_invalid_syntax", "/server [server_name]")
                 .ifPresent(onlineUser::sendMessage);

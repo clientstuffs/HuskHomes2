@@ -7,9 +7,11 @@ import net.william278.huskhomes.network.Request;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
 import net.william278.huskhomes.position.Position;
+import net.william278.huskhomes.util.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +57,10 @@ public class Teleport {
      * Whether to update the {@link #teleporter teleporter}'s last position (i.e. their {@code /back} position)
      */
     public final boolean updateLastPosition;
+
+    @Nullable
+    public final String queueType;
+
     /**
      * <b>Internal</b> - Instance of the implementing HuskHomes plugin
      */
@@ -66,7 +72,7 @@ public class Teleport {
      */
     protected Teleport(@Nullable User teleporter, @NotNull OnlineUser executor, @Nullable Position target,
                        @NotNull TeleportType type, @NotNull Set<Settings.EconomyAction> economyActions,
-                       final boolean updateLastPosition, @NotNull HuskHomes plugin) {
+                       final boolean updateLastPosition, @Nullable final String queueType, @NotNull HuskHomes plugin) {
         this.teleporter = teleporter;
         this.executor = executor;
         this.target = target;
@@ -74,6 +80,7 @@ public class Teleport {
         this.economyActions = economyActions;
         this.plugin = plugin;
         this.updateLastPosition = updateLastPosition;
+        this.queueType = queueType;
     }
 
     /**
@@ -119,6 +126,11 @@ public class Teleport {
             return CompletableFuture.completedFuture(CompletedTeleport.from(TeleportResult.CANCELLED, this));
         }
 
+        if (this.queue()) {
+            return CompletableFuture.completedFuture(TeleportResult.COMPLETED_CROSS_SERVER)
+                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+        }
+
         // Run the teleport and apply economy actions
         return run(teleporter)
             .thenApply(resultState -> CompletedTeleport.from(resultState, this))
@@ -130,6 +142,19 @@ public class Teleport {
                 }
                 return result;
             });
+    }
+
+    protected boolean queue() {
+        if (this.queueType == null || !(this.teleporter instanceof OnlineUser)) {
+            return false;
+        }
+        final var onlineUser = (OnlineUser) this.teleporter;
+        if (onlineUser.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+            onlineUser.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name))) {
+            return false;
+        }
+        this.plugin.getTeleportQueue().join(this, this.queueType);
+        return true;
     }
 
     /**
