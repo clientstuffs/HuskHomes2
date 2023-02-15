@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -148,8 +149,8 @@ public class PublicHomeCommand extends CommandBase implements TabCompletable, Co
             homeNames.forEach(homeName -> publicHomes.add(ownerName + "." + homeName)));
         return args.length > 1 ? Collections.emptyList() : publicHomes
             .stream()
-            .filter(publicHomeIdentifier -> publicHomeIdentifier.split(Pattern.quote("."))[1].toLowerCase()
-                .startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+            .filter(publicHomeIdentifier -> publicHomeIdentifier.split(Pattern.quote("."))[1].toLowerCase(Locale.ROOT)
+                .startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
             .sorted()
             .collect(Collectors.toList());
     }

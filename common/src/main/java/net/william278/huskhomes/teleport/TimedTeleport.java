@@ -169,6 +169,11 @@ public class TimedTeleport extends Teleport {
             return true;
         }
 
+        if (shouldCancel()) {
+            cancelled = true;
+            return true;
+        }
+
         // Decrement the countdown timer
         timeLeft--;
         return false;
@@ -221,5 +226,4 @@ public class TimedTeleport extends Teleport {
     private boolean hasTeleporterTakenDamage() {
         return teleporter.getHealth() < startHealth;
     }
-
 }

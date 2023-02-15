@@ -4,16 +4,17 @@ import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
 import net.william278.huskhomes.position.Home;
+import net.william278.huskhomes.position.Position;
+import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.teleport.Teleport;
+import net.william278.huskhomes.teleport.TeleportType;
 import net.william278.huskhomes.teleport.TimedTeleport;
 import net.william278.huskhomes.util.Permission;
 import net.william278.huskhomes.util.RegexUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
@@ -37,11 +38,19 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
                             break;
                         }
                         case 1: {
-                            Teleport.builder(plugin, onlineUser)
-                                .setTarget(homes.get(0))
-                                .waitForQueue(!onlineUser.hasPermission(Permission.QUEUE_BYPASS.node))
+                            final var target = homes.get(0);
+                            Teleport.builder(this.plugin, onlineUser)
+                                .setTarget(target)
                                 .toTimedTeleport()
-                                .thenAccept(TimedTeleport::execute);
+                                .thenAccept(teleport -> {
+                                    final var bypass = onlineUser.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+                                                       onlineUser.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
+                                    if (!this.plugin.getSettings().queue || bypass) {
+                                        teleport.execute();
+                                    } else {
+                                        this.plugin.getTeleportQueue().join(teleport, "home");
+                                    }
+                                });
                             break;
                         }
                         default: {
@@ -86,10 +95,23 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
                         return;
                     }
                 }
-                Teleport.builder(plugin, teleporter)
+                Teleport.builder(this.plugin, teleporter)
                     .setTarget(home)
                     .toTimedTeleport()
-                    .thenAccept(TimedTeleport::execute);
+                    .thenAccept(teleport -> {
+                        final var target = teleport.target;
+                        if (target == null) {
+                            teleport.execute();
+                        } else {
+                            final var bypass = teleporter.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+                                               teleporter.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
+                            if (!this.plugin.getSettings().queue || bypass) {
+                                teleport.execute();
+                            } else {
+                                this.plugin.getTeleportQueue().join(teleport, "home");
+                            }
+                        }
+                    });
             }, () -> {
                 if (otherHome) {
                     plugin.getLocales().getLocale("error_home_invalid_other", owner.username, homeName)
@@ -145,7 +167,7 @@ public class HomeCommand extends CommandBase implements TabCompletable, ConsoleE
         return args.length > 1 ? Collections.emptyList() : plugin.getCache().homes
             .getOrDefault(user.uuid, new ArrayList<>())
             .stream()
-            .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
             .sorted()
             .collect(Collectors.toList());
     }

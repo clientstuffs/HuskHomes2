@@ -105,7 +105,7 @@ public class EditHomeCommand extends CommandBase implements TabCompletable {
             }
         }
 
-        switch (editOperation.toLowerCase()) {
+        switch (editOperation.toLowerCase(Locale.ROOT)) {
             case "rename": {
                 if (editArgs == null || editArgs.contains(Pattern.quote(" "))) {
                     plugin.getLocales().getLocale("error_invalid_syntax",
@@ -390,12 +390,12 @@ public class EditHomeCommand extends CommandBase implements TabCompletable {
             case 1:
                 return plugin.getCache().homes.getOrDefault(user.uuid, new ArrayList<>())
                     .stream()
-                    .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+                    .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
                     .sorted()
                     .collect(Collectors.toList());
             case 2:
                 return Arrays.stream(EDIT_HOME_COMPLETIONS)
-                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT)))
                     .sorted()
                     .collect(Collectors.toList());
             default:

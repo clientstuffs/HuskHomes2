@@ -35,7 +35,8 @@ public enum BukkitCommandType {
     SET_SPAWN_COMMAND(new SetSpawnCommand(BukkitHuskHomes.getInstance())),
     BACK_COMMAND(new BackCommand(BukkitHuskHomes.getInstance())),
     HUSKHOMES_COMMAND(new HuskHomesCommand(BukkitHuskHomes.getInstance())),
-    SERVEr_COMMAND(new ServerCommand(BukkitHuskHomes.getInstance()));
+    SERVER_COMMAND(new ServerCommand(BukkitHuskHomes.getInstance())),
+    LEAVE_QUEUE_COMMAND(new LeaveQueueCommand(BukkitHuskHomes.getInstance()));
 
     public final CommandBase commandBase;
 

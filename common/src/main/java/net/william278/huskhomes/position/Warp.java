@@ -5,6 +5,7 @@ import net.william278.huskhomes.util.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -37,7 +38,7 @@ public class Warp extends SavedPosition {
     @NotNull
     @Subst("huskhomes.command.warp")
     public static String getPermissionNode(@NotNull String warp) {
-        return Permission.COMMAND_WARP.node + "." + warp.toLowerCase();
+        return Permission.COMMAND_WARP.node + "." + warp.toLowerCase(Locale.ROOT);
     }
 
     /**

@@ -16,6 +16,7 @@ import net.william278.huskhomes.database.MySqlDatabase;
 import net.william278.huskhomes.database.SqLiteDatabase;
 import net.william278.huskhomes.event.BukkitEventDispatcher;
 import net.william278.huskhomes.event.EventDispatcher;
+import net.william278.huskhomes.grpc.GrpcClient;
 import net.william278.huskhomes.hook.*;
 import net.william278.huskhomes.listener.BukkitEventListener;
 import net.william278.huskhomes.listener.EventListener;
@@ -30,7 +31,7 @@ import net.william278.huskhomes.position.Location;
 import net.william278.huskhomes.position.SavedPositionManager;
 import net.william278.huskhomes.position.Server;
 import net.william278.huskhomes.position.World;
-import net.william278.huskhomes.queue.PrioritizedTeleportQueue;
+import net.william278.huskhomes.proto.Queue;
 import net.william278.huskhomes.queue.TeleportQueue;
 import net.william278.huskhomes.random.NormalDistributionEngine;
 import net.william278.huskhomes.random.RandomTeleportEngine;
@@ -175,18 +176,6 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
                 }
                 messenger.initialize(this);
                 getLoggingAdapter().log(Level.INFO, "Successfully initialized the network messenger.");
-
-                if (this.settings.queue) {
-                    this.getLoggingAdapter().info("Initializing the queue system...");
-                    if (settings.messengerType != Settings.MessengerType.REDIS) {
-                        this.getLoggingAdapter().severe("Queue system cannot be initialized...");
-                        this.getLoggingAdapter().severe("You MUST enable redis messaging to able to use the queue system!");
-                        return;
-                    }
-                    this.teleportQueue = new PrioritizedTeleportQueue(this, this.messenger);
-                    this.teleportQueue.initialize();
-                    getLoggingAdapter().info("Successfully initialized the queue system.");
-                }
             }
 
             // Prepare the request manager
@@ -417,7 +406,6 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
     }
 
     @NotNull
-    @Override
     public TeleportQueue getTeleportQueue() {
         if (teleportQueue == null) {
             throw new HuskHomesException("Attempted to access queue system when it was not initialized");
@@ -558,6 +546,15 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             final InputStream blocksResource = getResource("safety/unsafe_blocks.yml");
             this.unsafeBlocks = Annotaml.create(new UnsafeBlocks(), Objects.requireNonNull(blocksResource)).get();
 
+            GrpcClient.initiate(settings.grpcHost);
+
+            if (this.settings.queue) {
+                this.getLoggingAdapter().info("Initializing the queue system...");
+                this.teleportQueue = new TeleportQueue(this);
+                this.teleportQueue.initialize();
+                this.getLoggingAdapter().info("Successfully initialized the queue system.");
+            }
+
             return true;
         } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             getLoggingAdapter().log(Level.SEVERE, "Failed to reload HuskHomes config or messages file", e);
@@ -578,7 +575,7 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
             if (getSettings().crossServer) {
                 metrics.addCustomChart(new SimplePie("messenger_type", () -> getSettings().messengerType.displayName));
             }
-            metrics.addCustomChart(new SimplePie("language", () -> getSettings().language.toLowerCase()));
+            metrics.addCustomChart(new SimplePie("language", () -> getSettings().language.toLowerCase(Locale.ROOT)));
             metrics.addCustomChart(new SimplePie("database_type", () -> getSettings().databaseType.displayName));
             metrics.addCustomChart(new SimplePie("using_economy", () -> Boolean.toString(getSettings().economy)));
             metrics.addCustomChart(new SimplePie("using_map", () -> Boolean.toString(getSettings().doMapHook)));

@@ -56,11 +56,6 @@ public class TeleportBuilder {
      */
     private boolean updateLastPosition = true;
 
-    /**
-     * Whether the player should wait for the queue or not.
-     */
-    private boolean waitForQueue = false;
-
     protected TeleportBuilder(@NotNull HuskHomes plugin, @NotNull OnlineUser executor) {
         this.plugin = plugin;
         this.executor = executor;
@@ -180,17 +175,6 @@ public class TeleportBuilder {
      */
     public TeleportBuilder doUpdateLastPosition(boolean updateLastPosition) {
         this.updateLastPosition = updateLastPosition;
-        return this;
-    }
-
-    /**
-     * Set whether player should wait for the queue or not.
-     *
-     * @param waitForQueue Whether player should wait for the queue or not
-     * @return The {@link TeleportBuilder} instance
-     */
-    public TeleportBuilder waitForQueue(boolean waitForQueue) {
-        this.waitForQueue = waitForQueue;
         return this;
     }
 

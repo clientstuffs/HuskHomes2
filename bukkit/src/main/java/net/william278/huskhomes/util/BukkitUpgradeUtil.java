@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.logging.Level;
 
 /**
@@ -48,7 +49,7 @@ public class BukkitUpgradeUtil {
      */
     private void readOldSettings() {
         this.databaseType = Settings.DatabaseType.valueOf(plugin.getConfig()
-            .getString("data_storage_options.storage_type", "SQLITE").toUpperCase());
+            .getString("data_storage_options.storage_type", "SQLITE").toUpperCase(Locale.ROOT));
 
         this.mySqlHost = plugin.getConfig().getString("data_storage_options.mysql_credentials.host", "localhost");
         this.mySqlPort = plugin.getConfig().getInt("data_storage_options.mysql_credentials.port", 3306);

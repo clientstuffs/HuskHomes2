@@ -5,6 +5,7 @@ import net.william278.huskhomes.config.Settings;
 import net.william278.huskhomes.util.BukkitUpgradeUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -120,7 +121,7 @@ public class LegacyMigrator extends Migrator {
     public void handleConfigurationCommand(@NotNull String[] args) {
         if (args.length == 2) {
             final boolean check;
-            switch (args[0].toLowerCase()) {
+            switch (args[0].toLowerCase(Locale.ROOT)) {
                 case "database": {
                     this.sourceMySqlDatabase = args[1];
                     check = true;

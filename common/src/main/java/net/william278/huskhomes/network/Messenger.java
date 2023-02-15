@@ -78,7 +78,7 @@ public abstract class Messenger implements AutoCloseable {
                 .filter(user -> user.equalsIgnoreCase(playerName))
                 .findFirst()
                 .or(() -> Arrays.stream(networkedPlayers)
-                    .filter(user -> user.toLowerCase().startsWith(playerName))
+                    .filter(user -> user.toLowerCase(Locale.ROOT).startsWith(playerName))
                     .findFirst()));
     }
 

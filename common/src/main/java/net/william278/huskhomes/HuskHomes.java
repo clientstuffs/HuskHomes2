@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -65,7 +66,7 @@ public interface HuskHomes {
             .filter(user -> user.username.equalsIgnoreCase(playerName))
             .findFirst()
             .or(() -> getOnlinePlayers().stream()
-                .filter(user -> user.username.toLowerCase().startsWith(playerName.toLowerCase()))
+                .filter(user -> user.username.toLowerCase(Locale.ROOT).startsWith(playerName.toLowerCase(Locale.ROOT)))
                 .findFirst());
     }
 

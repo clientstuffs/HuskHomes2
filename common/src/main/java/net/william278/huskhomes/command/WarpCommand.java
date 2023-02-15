@@ -2,6 +2,7 @@ package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.player.OnlineUser;
+import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.Warp;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TimedTeleport;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -51,10 +53,23 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
                                 return;
                             }
 
-                            Teleport.builder(plugin, onlineUser)
+                            Teleport.builder(this.plugin, onlineUser)
                                 .setTarget(warp)
                                 .toTimedTeleport()
-                                .thenAccept(TimedTeleport::execute);
+                                .thenAccept(teleport -> {
+                                    final var target = teleport.target;
+                                    if (target == null) {
+                                        teleport.execute();
+                                    } else {
+                                        final var bypass = onlineUser.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+                                                           onlineUser.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
+                                        if (!this.plugin.getSettings().queue || bypass) {
+                                            teleport.execute();
+                                        } else {
+                                            this.plugin.getTeleportQueue().join(teleport, "home");
+                                        }
+                                    }
+                                });
                         },
                         () -> plugin.getLocales().getLocale("error_warp_invalid", warpName)
                             .ifPresent(onlineUser::sendMessage)));
@@ -72,7 +87,7 @@ public class WarpCommand extends CommandBase implements TabCompletable, ConsoleE
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         return plugin.getCache().warps.stream()
             .filter(s -> user == null || Warp.hasPermission(plugin.getSettings().permissionRestrictWarps, user, s))
-            .filter(s -> s.toLowerCase().startsWith(args.length >= 1 ? args[0].toLowerCase() : ""))
+            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length >= 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
             .sorted()
             .collect(Collectors.toList());
     }

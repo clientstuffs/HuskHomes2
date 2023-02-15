@@ -22,6 +22,8 @@ import java.util.logging.Level;
  */
 public class Teleport {
 
+    public static final String CANCEL_METADATA_KEY = "TeleportCancel";
+
     /**
      * The {@link User} who is doing the teleporting
      */
@@ -111,6 +113,10 @@ public class Teleport {
                 return CompletableFuture.completedFuture(TeleportResult.CANCELLED_ECONOMY)
                     .thenApply(resultState -> CompletedTeleport.from(resultState, this));
             }
+        }
+
+        if (shouldCancel()) {
+            return CompletableFuture.completedFuture(CompletedTeleport.from(TeleportResult.CANCELLED, this));
         }
 
         // Run the teleport and apply economy actions
@@ -227,4 +233,14 @@ public class Teleport {
             });
     }
 
+    protected boolean shouldCancel() {
+        if (teleporter == null) {
+            return false;
+        }
+        if (!(teleporter instanceof OnlineUser)) {
+            return false;
+        }
+        final var user = (OnlineUser) teleporter;
+        return user.getMetadata(CANCEL_METADATA_KEY).filter(Boolean.class::isInstance).map(Boolean.class::cast).orElse(false);
+    }
 }

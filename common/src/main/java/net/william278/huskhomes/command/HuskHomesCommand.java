@@ -9,10 +9,7 @@ import net.william278.huskhomes.util.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -59,7 +56,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                 .ifPresent(onlineUser::sendMessage);
             return;
         }
-        switch (args[0].toLowerCase()) {
+        switch (args[0].toLowerCase(Locale.ROOT)) {
             case "about": {
                 sendAboutMenu(onlineUser);
                 break;
@@ -133,7 +130,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
                 plugin.getLoggingAdapter().log(Level.INFO, message));
             return;
         }
-        switch (args[0].toLowerCase()) {
+        switch (args[0].toLowerCase(Locale.ROOT)) {
             case "about": {
                 Arrays.stream(aboutMenu.toString().split("\n")).forEach(message ->
                     plugin.getLoggingAdapter().log(Level.INFO, message));
@@ -228,7 +225,7 @@ public class HuskHomesCommand extends CommandBase implements ConsoleExecutable, 
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         if (args.length == 0 || args.length == 1) {
             return Arrays.stream(SUB_COMMANDS)
-                .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+                .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
                 .sorted().collect(Collectors.toList());
         }
         return Collections.emptyList();

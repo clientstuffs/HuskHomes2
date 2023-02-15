@@ -5,8 +5,10 @@ import net.william278.huskhomes.network.Payload;
 import net.william278.huskhomes.network.Request;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
+import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TimedTeleport;
+import net.william278.huskhomes.util.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -317,12 +319,38 @@ public class RequestManager {
                 Teleport.builder(plugin, recipient)
                     .setTarget(request.requesterPosition)
                     .toTimedTeleport()
-                    .thenAccept(TimedTeleport::execute);
+                    .thenAccept(teleport -> {
+                        final var target = teleport.target;
+                        if (target == null) {
+                            teleport.execute();
+                        } else {
+                            final var bypass = recipient.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+                                               recipient.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
+                            if (!this.plugin.getSettings().queue || bypass) {
+                                teleport.execute();
+                            } else {
+                                this.plugin.getTeleportQueue().join(teleport, "tpahere");
+                            }
+                        }
+                    });
             } else {
                 Teleport.builder(plugin, recipient)
                     .setTarget(request.requesterName)
                     .toTimedTeleport()
-                    .thenAccept(TimedTeleport::execute);
+                    .thenAccept(teleport -> {
+                        final var target = teleport.target;
+                        if (target == null) {
+                            teleport.execute();
+                        } else {
+                            final var bypass = recipient.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+                                               recipient.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
+                            if (!this.plugin.getSettings().queue || bypass) {
+                                teleport.execute();
+                            } else {
+                                this.plugin.getTeleportQueue().join(teleport, "tpahere");
+                            }
+                        }
+                    });
             }
         }
 
@@ -344,7 +372,20 @@ public class RequestManager {
             Teleport.builder(plugin, requester)
                 .setTarget(request.recipientName)
                 .toTimedTeleport()
-                .thenAccept(TimedTeleport::execute);
+                .thenAccept(teleport -> {
+                    final var target = teleport.target;
+                    if (target == null) {
+                        teleport.execute();
+                    } else {
+                        final var bypass = requester.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
+                                           requester.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name));
+                        if (!this.plugin.getSettings().queue || bypass) {
+                            teleport.execute();
+                        } else {
+                            this.plugin.getTeleportQueue().join(teleport, "tpa");
+                        }
+                    }
+                });
         }
     }
 

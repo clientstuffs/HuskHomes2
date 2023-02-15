@@ -49,7 +49,7 @@ public class TpCommand extends CommandBase implements TabCompletable, ConsoleExe
             final String playerToTeleport = players.stream()
                 .filter(user -> user.equalsIgnoreCase(targetPlayerToTeleport)).findFirst()
                 .or(() -> Optional.ofNullable(targetPlayerToTeleport.equals("@s") ? onlineUser.username : null))
-                .or(() -> plugin.getCache().players.stream().filter(user -> user.toLowerCase().startsWith(targetPlayerToTeleport)).findFirst())
+                .or(() -> plugin.getCache().players.stream().filter(user -> user.toLowerCase(Locale.ROOT).startsWith(targetPlayerToTeleport)).findFirst())
                 .orElse(null);
 
             // Ensure the player to teleport exists
@@ -226,7 +226,7 @@ public class TpCommand extends CommandBase implements TabCompletable, ConsoleExe
                     : Collections.emptyList());
                 completions.addAll(plugin.getCache().players);
                 return completions.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+                    .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
                     .sorted().collect(Collectors.toList());
             }
             case 2: {
@@ -247,7 +247,7 @@ public class TpCommand extends CommandBase implements TabCompletable, ConsoleExe
                     completions.addAll(plugin.getCache().players);
                 }
                 return completions.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args[1].toLowerCase(Locale.ROOT)))
                     .sorted().collect(Collectors.toList());
             }
             case 3: {
@@ -265,7 +265,7 @@ public class TpCommand extends CommandBase implements TabCompletable, ConsoleExe
                     completions.addAll(List.of("~ ~", (int) user.getPosition().y + " " + (int) user.getPosition().z));
                 }
                 return completions.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args[2].toLowerCase()))
+                    .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args[2].toLowerCase(Locale.ROOT)))
                     .sorted().collect(Collectors.toList());
             }
             case 4: {
@@ -277,7 +277,7 @@ public class TpCommand extends CommandBase implements TabCompletable, ConsoleExe
                     completions.addAll(List.of("~", Integer.toString((int) user.getPosition().z)));
                 }
                 return completions.stream()
-                    .filter(s -> s.toLowerCase().startsWith(args[3].toLowerCase()))
+                    .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args[3].toLowerCase(Locale.ROOT)))
                     .sorted().collect(Collectors.toList());
             }
             default:

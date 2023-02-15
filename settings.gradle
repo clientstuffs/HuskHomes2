@@ -6,6 +6,7 @@ pluginManagement {
 
 rootProject.name = 'HuskHomes'
 
+include 'proto'
 include 'common'
 include 'bukkit'
-include 'plugin'
+include 'velocity'

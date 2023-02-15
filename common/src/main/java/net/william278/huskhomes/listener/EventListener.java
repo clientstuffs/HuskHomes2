@@ -92,6 +92,11 @@ public class EventListener {
                     return;
                 }
 
+                if (teleport.get().type == TeleportType.SERVER) {
+                    this.plugin.getDatabase().setCurrentTeleport(onlineUser, null);
+                    return;
+                }
+
                 // Teleport the player locally
                 teleport.get().execute()
                     .thenRun(() -> plugin.getDatabase().setCurrentTeleport(onlineUser, null))

@@ -5,10 +5,7 @@ import net.william278.annotaml.YamlFile;
 import net.william278.annotaml.YamlKey;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Plugin settings, read from config.yml
@@ -20,7 +17,7 @@ import java.util.Optional;
                    "┣╸ Information: https://william278.net/project/huskhomes\n" +
                    "┗╸ Documentation: https://william278.net/docs/huskhomes",
 
-    versionField = "config_version", versionNumber = 11)
+    versionField = "config_version", versionNumber = 12)
 public class Settings {
 
     // Top-level settings
@@ -74,12 +71,12 @@ public class Settings {
 
     @YamlKey("database.table_names")
     public Map<String, String> tableNames = Map.of(
-        TableName.PLAYER_DATA.name().toLowerCase(), TableName.PLAYER_DATA.defaultName,
-        TableName.POSITION_DATA.name().toLowerCase(), TableName.POSITION_DATA.defaultName,
-        TableName.SAVED_POSITION_DATA.name().toLowerCase(), TableName.SAVED_POSITION_DATA.defaultName,
-        TableName.HOME_DATA.name().toLowerCase(), TableName.HOME_DATA.defaultName,
-        TableName.WARP_DATA.name().toLowerCase(), TableName.WARP_DATA.defaultName,
-        TableName.TELEPORT_DATA.name().toLowerCase(), TableName.TELEPORT_DATA.defaultName
+        TableName.PLAYER_DATA.name().toLowerCase(Locale.ROOT), TableName.PLAYER_DATA.defaultName,
+        TableName.POSITION_DATA.name().toLowerCase(Locale.ROOT), TableName.POSITION_DATA.defaultName,
+        TableName.SAVED_POSITION_DATA.name().toLowerCase(Locale.ROOT), TableName.SAVED_POSITION_DATA.defaultName,
+        TableName.HOME_DATA.name().toLowerCase(Locale.ROOT), TableName.HOME_DATA.defaultName,
+        TableName.WARP_DATA.name().toLowerCase(Locale.ROOT), TableName.WARP_DATA.defaultName,
+        TableName.TELEPORT_DATA.name().toLowerCase(Locale.ROOT), TableName.TELEPORT_DATA.defaultName
     );
     // General settings
     @YamlComment("General plugin settings")
@@ -117,9 +114,9 @@ public class Settings {
     public boolean playSoundEffects = true;
     @YamlKey("general.sound_effects")
     public Map<String, String> soundEffects = Map.of(
-        SoundEffectAction.TELEPORTATION_COMPLETE.name().toLowerCase(), SoundEffectAction.TELEPORTATION_COMPLETE.defaultSoundEffect,
-        SoundEffectAction.TELEPORTATION_WARMUP.name().toLowerCase(), SoundEffectAction.TELEPORTATION_WARMUP.defaultSoundEffect,
-        SoundEffectAction.TELEPORTATION_CANCELLED.name().toLowerCase(), SoundEffectAction.TELEPORTATION_CANCELLED.defaultSoundEffect
+        SoundEffectAction.TELEPORTATION_COMPLETE.name().toLowerCase(Locale.ROOT), SoundEffectAction.TELEPORTATION_COMPLETE.defaultSoundEffect,
+        SoundEffectAction.TELEPORTATION_WARMUP.name().toLowerCase(Locale.ROOT), SoundEffectAction.TELEPORTATION_WARMUP.defaultSoundEffect,
+        SoundEffectAction.TELEPORTATION_CANCELLED.name().toLowerCase(Locale.ROOT), SoundEffectAction.TELEPORTATION_CANCELLED.defaultSoundEffect
     );
     // Cross-server settings
     @YamlComment("Enable teleporting across proxied servers. Requires MySQL")
@@ -135,8 +132,20 @@ public class Settings {
     public String globalSpawnName = "Spawn";
     @YamlKey("cross_server.global_respawning")
     public boolean globalRespawning = false;
-    @YamlKey("cross_server.queue")
-    public boolean queue = false;
+    @YamlKey("cross_server.queue.enabled")
+    public boolean queue = true;
+    @YamlKey("cross_server.queue.starts")
+    public int queueStarts = 100;
+    @YamlKey("cross_server.queue.reminder.message")
+    public boolean queueReminderMessage = true;
+    @YamlKey("cross_server.queue.reminder.actionbar")
+    public boolean queueReminderActionbar = true;
+    @YamlKey("cross_server.queue.reminder.old-queue")
+    public boolean queueReminderOldQueue = true;
+    @YamlKey("cross_server.queue.reminder.finish-queue")
+    public boolean queueReminderFinishQueue = true;
+    @YamlKey("cross_server.grpc")
+    public String grpcHost = "localhost";
     @YamlKey("cross_server.redis_credentials.host")
     public String redisHost = "localhost";
     @YamlKey("cross_server.redis_credentials.port")
@@ -170,10 +179,10 @@ public class Settings {
     public int freeHomeSlots = 5;
     @YamlKey("economy.costs")
     public Map<String, Double> economyCosts = Map.of(
-        EconomyAction.ADDITIONAL_HOME_SLOT.name().toLowerCase(), EconomyAction.ADDITIONAL_HOME_SLOT.defaultCost,
-        EconomyAction.MAKE_HOME_PUBLIC.name().toLowerCase(), EconomyAction.MAKE_HOME_PUBLIC.defaultCost,
-        EconomyAction.RANDOM_TELEPORT.name().toLowerCase(), EconomyAction.RANDOM_TELEPORT.defaultCost,
-        EconomyAction.BACK_COMMAND.name().toLowerCase(), EconomyAction.BACK_COMMAND.defaultCost
+        EconomyAction.ADDITIONAL_HOME_SLOT.name().toLowerCase(Locale.ROOT), EconomyAction.ADDITIONAL_HOME_SLOT.defaultCost,
+        EconomyAction.MAKE_HOME_PUBLIC.name().toLowerCase(Locale.ROOT), EconomyAction.MAKE_HOME_PUBLIC.defaultCost,
+        EconomyAction.RANDOM_TELEPORT.name().toLowerCase(Locale.ROOT), EconomyAction.RANDOM_TELEPORT.defaultCost,
+        EconomyAction.BACK_COMMAND.name().toLowerCase(Locale.ROOT), EconomyAction.BACK_COMMAND.defaultCost
     );
     // Mapping plugins
     @YamlComment("Display public homes/warps on web maps (DYNMAP, BLUEMAP)")
@@ -196,21 +205,21 @@ public class Settings {
 
     @NotNull
     public String getTableName(@NotNull TableName tableName) {
-        return Optional.ofNullable(tableNames.get(tableName.name().toLowerCase())).orElse(tableName.defaultName);
+        return Optional.ofNullable(tableNames.get(tableName.name().toLowerCase(Locale.ROOT))).orElse(tableName.defaultName);
     }
 
     public Optional<String> getSoundEffect(@NotNull SoundEffectAction action) {
         if (!playSoundEffects) {
             return Optional.empty();
         }
-        return Optional.ofNullable(soundEffects.get(action.name().toLowerCase()));
+        return Optional.ofNullable(soundEffects.get(action.name().toLowerCase(Locale.ROOT)));
     }
 
     public Optional<Double> getEconomyCost(@NotNull EconomyAction action) {
         if (!economy) {
             return Optional.empty();
         }
-        final Double cost = economyCosts.get(action.name().toLowerCase());
+        final Double cost = economyCosts.get(action.name().toLowerCase(Locale.ROOT));
         if (cost != null && cost > 0d) {
             return Optional.of(cost);
         }

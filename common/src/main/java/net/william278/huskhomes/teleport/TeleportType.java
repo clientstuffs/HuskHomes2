@@ -9,7 +9,8 @@ import java.util.Optional;
 public enum TeleportType {
 
     TELEPORT(0),
-    RESPAWN(1);
+    RESPAWN(1),
+    SERVER(2);
 
     public final int typeId;
 

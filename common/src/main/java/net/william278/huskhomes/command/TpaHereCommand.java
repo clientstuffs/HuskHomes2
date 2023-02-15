@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class TpaHereCommand extends CommandBase implements TabCompletable {
@@ -53,7 +54,7 @@ public class TpaHereCommand extends CommandBase implements TabCompletable {
     @Override
     public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
         return args.length <= 1 ? plugin.getCache().players.stream()
-            .filter(s -> s.toLowerCase().startsWith(args.length == 1 ? args[0].toLowerCase() : ""))
+            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
             .sorted().collect(Collectors.toList()) : Collections.emptyList();
     }
 }

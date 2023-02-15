@@ -182,6 +182,10 @@ public enum Permission {
      */
     COMMAND_SERVER("huskhomes.command.server", DefaultAccess.EVERYONE),
     /**
+     * Lets the user leave from the queue ({@code /leavequeue})
+     */
+    COMMAND_LEAVE_QUEUE("huskhomes.command.leave-queue", DefaultAccess.EVERYONE),
+    /**
      * Lets the user bypass the queue system
      */
     QUEUE_BYPASS_ALL("huskhomes.queue.bypass.*", DefaultAccess.OPERATORS),

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "net.william278.huskhomes.proto";
+option java_outer_classname = "Services";
+option java_multiple_files = true;
+
+package net.william278.huskhomes.proto;
+
+import "queue.proto";
+import "google/protobuf/empty.proto";
+
+service QueueService {
+
+  rpc join(Join.Request) returns(Join.Response);
+  rpc leave(Leave.Request) returns(Leave.Response);
+  rpc updateSettings(UpdateSettings.Request) returns(google.protobuf.Empty);
+}

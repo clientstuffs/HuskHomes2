@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_package = "net.william278.huskhomes.proto";
+option java_outer_classname = "Definition";
+
+package net.william278.huskhomes.proto;
+
+message User {
+  string name = 1;
+  string uuid = 2;
+}
+
+message NetworkPosition {
+  string server = 1;
+  optional string world = 2;
+  optional double x = 3;
+  optional double y = 4;
+  optional double z = 5;
+  optional float yaw = 6;
+  optional float pitch = 7;
+}

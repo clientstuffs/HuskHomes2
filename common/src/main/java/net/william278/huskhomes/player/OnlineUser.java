@@ -68,6 +68,9 @@ public abstract class OnlineUser extends User {
     @NotNull
     public abstract Map<String, Boolean> getPermissions();
 
+    @NotNull
+    public abstract OptionalInt getEffectivePermissionCount(@NotNull String permissionFormat);
+
     /**
      * Dispatch a MineDown-formatted title or subtitle to the player
      *
@@ -160,6 +163,9 @@ public abstract class OnlineUser extends User {
      * @return {@code true} if the player is tagged as being "vanished" by a /vanish plugin; {@code false} otherwise
      */
     public abstract boolean isVanished();
+
+    public abstract Optional<Object> getMetadata(@NotNull final String metadata);
+    public abstract void putMetadata(@NotNull final String metadata, @NotNull final Object value);
 
     /**
      * Get the maximum number of homes this user may set
