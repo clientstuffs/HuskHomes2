@@ -3,6 +3,7 @@ package net.william278.huskhomes.grpc;
 import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import net.william278.huskhomes.grpc.client.QueueClient;
 import net.william278.huskhomes.proto.QueueServiceGrpc;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ public final class GrpcClient {
     private static final AtomicReference<QueueClient> QUEUE_CLIENT = new AtomicReference<>();
 
     public static void initiate(@NotNull final String host) {
-        GrpcClient.CHANNEL.set(Grpc.newChannelBuilderForAddress(host, 443, InsecureChannelCredentials.create()).build());
+        GrpcClient.CHANNEL.set(ManagedChannelBuilder.forAddress(host, 443).usePlaintext().build());
     }
 
     public static void initiateQueue() {

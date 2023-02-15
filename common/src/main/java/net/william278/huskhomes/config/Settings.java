@@ -145,7 +145,7 @@ public class Settings {
     @YamlKey("cross_server.queue.reminder.finish-queue")
     public boolean queueReminderFinishQueue = true;
     @YamlKey("cross_server.grpc")
-    public String grpcHost = "http://localhost";
+    public String grpcHost = "localhost";
     @YamlKey("cross_server.redis_credentials.host")
     public String redisHost = "localhost";
     @YamlKey("cross_server.redis_credentials.port")
