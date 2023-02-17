@@ -28,7 +28,7 @@ public final class VelocityHuskHomes {
         }
         this.proxy.getScheduler().buildTask(this, GrpcServer::onUpdate)
             .delay(Duration.ofSeconds(1L))
-            .repeat(Duration.ofSeconds(1L))
+            .repeat(Duration.ofSeconds(2L))
             .schedule();
     }
 

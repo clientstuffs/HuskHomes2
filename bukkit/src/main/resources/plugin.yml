@@ -80,3 +80,7 @@ commands:
     usage: /back
   huskhomes:
     usage: /huskhomes [about|help|reload|update|migrate]
+  server:
+    usage: /server <server_name>
+  leavequeue:
+    usage: /leavequeue

@@ -171,6 +171,8 @@ setspawn_command_description: 'Поставете спаун позицията'
 tpaall_command_description: 'Заявете всеки да се телепортира до Вас'
 tpall_command_description: 'Телепортирайте всички до Вашата позиция'
 huskhomes_command_description: 'Вижте информацията за плъгина и/или презаредете конфигурациите'
+server_command_description: 'Teleport to the sever'
+leavequeue_command_description: 'Leave from the teleport queue'
 
 queue_reminder:
   - "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."

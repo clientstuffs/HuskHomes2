@@ -70,11 +70,11 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
 
     @Override
     public void leave(Queue.Leave.Request request, StreamObserver<Queue.Leave.Response> responseObserver) {
+        this.onLeave(request.getUser());
         if (this.users.containsKey(request.getUser())) {
-            responseObserver.onNext(Queue.Leave.Response.newBuilder().setResult(Queue.Leave.Result.USER_NOT_FOUND).build());
-        } else {
-            this.onLeave(request.getUser());
             responseObserver.onNext(Queue.Leave.Response.newBuilder().setResult(Queue.Leave.Result.SUCCEED).build());
+        } else {
+            responseObserver.onNext(Queue.Leave.Response.newBuilder().setResult(Queue.Leave.Result.USER_NOT_FOUND).build());
         }
         responseObserver.onCompleted();
     }
@@ -126,6 +126,7 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
             if (user == null) {
                 continue;
             }
+            this.onLeave(user.user);
             final var playerOptional = this.proxy.getPlayer(UUID.fromString(user.user.getUuid()));
             if (playerOptional.isEmpty()) {
                 continue;
@@ -135,7 +136,7 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
                 player.sendMessage(QueueService.FINISH_QUEUE_MESSAGE.get()
                     .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(server)));
             }
-            player.createConnectionRequest(registeredServer).fireAndForget();
+            player.createConnectionRequest(registeredServer).connect().join();
             break;
         }
         if (QueueService.ACTIONBAR.get() != null) {

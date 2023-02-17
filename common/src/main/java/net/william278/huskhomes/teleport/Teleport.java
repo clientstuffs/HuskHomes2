@@ -145,10 +145,16 @@ public class Teleport {
     }
 
     protected boolean queue() {
+        if (this.target == null) {
+            return false;
+        }
         if (this.queueType == null || !(this.teleporter instanceof OnlineUser)) {
             return false;
         }
         final var onlineUser = (OnlineUser) this.teleporter;
+        if (onlineUser.getPosition().server.equals(target.server)) {
+            return false;
+        }
         if (onlineUser.hasPermission(Permission.QUEUE_BYPASS_ALL.node) ||
             onlineUser.hasPermission(Permission.QUEUE_BYPASS.formatted(target.server.name))) {
             return false;

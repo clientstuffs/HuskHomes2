@@ -171,6 +171,8 @@ setspawn_command_description: 'Işınlanma komudunu ayarlar'
 tpaall_command_description: 'Herkesin size ışınlanmasını ister'
 tpall_command_description: 'Herkesi konumunuza ışınlar'
 huskhomes_command_description: 'Eklenti bilgilerini görüntüleyin ve yapılandırmaları yeniden yükler'
+server_command_description: 'Teleport to the sever'
+leavequeue_command_description: 'Leave from the teleport queue'
 
 queue_reminder:
   - "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."

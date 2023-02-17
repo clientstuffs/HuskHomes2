@@ -171,6 +171,8 @@ setspawn_command_description: '设置重生点位置'
 tpaall_command_description: '请求所有人都传送过来'
 tpall_command_description: '将所有人传送过来'
 huskhomes_command_description: '查看插件信息 & 重载配置'
+server_command_description: 'Teleport to the sever'
+leavequeue_command_description: 'Leave from the teleport queue'
 
 queue_reminder:
   - "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."
