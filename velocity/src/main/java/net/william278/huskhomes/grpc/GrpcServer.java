@@ -23,7 +23,7 @@ public final class GrpcServer {
     ) throws IOException {
         final var queueService = new QueueService(proxy);
         GrpcServer.LISTENABLE_SERVICES.add(queueService);
-        ServerBuilder.forPort(443)
+        ServerBuilder.forPort(548)
             .addService(queueService)
             .build()
             .start();

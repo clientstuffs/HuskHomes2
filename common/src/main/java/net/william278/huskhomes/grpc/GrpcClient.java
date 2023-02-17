@@ -16,7 +16,7 @@ public final class GrpcClient {
     private static final AtomicReference<QueueClient> QUEUE_CLIENT = new AtomicReference<>();
 
     public static void initiate(@NotNull final String host) {
-        GrpcClient.CHANNEL.set(ManagedChannelBuilder.forAddress(host, 443).usePlaintext().build());
+        GrpcClient.CHANNEL.set(ManagedChannelBuilder.forAddress(host, 548).usePlaintext().build());
     }
 
     public static void initiateQueue() {

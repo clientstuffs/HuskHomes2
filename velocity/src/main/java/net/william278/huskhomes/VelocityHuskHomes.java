@@ -20,6 +20,7 @@ public final class VelocityHuskHomes {
 
     @Subscribe
     public void onProxyInitialization(final ProxyInitializeEvent event) {
+        this.proxy.getCommandManager().unregister("server");
         try {
             GrpcServer.initiate(this.proxy);
         } catch (final Exception e) {
