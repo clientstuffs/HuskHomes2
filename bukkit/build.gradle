@@ -32,6 +32,9 @@ shadowJar {
         exclude(dependency('com.mojang:brigadier'))
     }
 
+    relocate 'io.grpc', 'net.william278.huskhomes.libraries.io.grpc'
+    relocate 'com.google.protobuf', 'net.william278.huskhomes.libraries.com.google.protobuf'
+
     relocate 'org.apache.commons.io', 'net.william278.huskhomes.libraries.commons.io'
     relocate 'de.themoep', 'net.william278.huskhomes.libraries'
     relocate 'org.jetbrains', 'net.william278.huskhomes.libraries'

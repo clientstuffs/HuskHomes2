@@ -10,6 +10,7 @@ import net.william278.huskhomes.grpc.service.ServiceListener;
 import net.william278.huskhomes.proto.Definition;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,12 +20,13 @@ public final class GrpcServer {
 
     public static void initiate(
         @NotNull final ProxyServer proxy
-    ) {
+    ) throws IOException {
         final var queueService = new QueueService(proxy);
         GrpcServer.LISTENABLE_SERVICES.add(queueService);
         ServerBuilder.forPort(443)
             .addService(queueService)
-            .build();
+            .build()
+            .start();
     }
 
     public static void onUpdate() {

@@ -5,8 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public final class NoopObserver<T> implements StreamObserver<T> {
 
-    private NoopObserver() {
-    }
+    private NoopObserver() {}
 
     @NotNull
     public static <T> NoopObserver<T> create() {
@@ -14,17 +13,13 @@ public final class NoopObserver<T> implements StreamObserver<T> {
     }
 
     @Override
-    public void onNext(T value) {
-
-    }
+    public void onNext(T value) {}
 
     @Override
     public void onError(Throwable t) {
-
+        throw new RuntimeException(t);
     }
 
     @Override
-    public void onCompleted() {
-
-    }
+    public void onCompleted() {}
 }

@@ -29,7 +29,6 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
 
     private final Map<Definition.User, QueuedUser> users = new ConcurrentHashMap<>();
 
-
     @NotNull
     private final ProxyServer proxy;
 
@@ -58,14 +57,13 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
         this.users.put(user, newUser);
         if (QueueService.MESSAGE.get() != null) {
             playerOptional.ifPresent(player ->
-                player.sendMessage(QueueService.MESSAGE.get().replaceText(builder -> {
-                    builder
-                        .match("%server_name%").replacement(position.getServer())
-                        .match("%queue_type%").replacement(type)
-                        .match("%queue_order%").replacement(String.valueOf(queue.size()))
-                        .match("%queue_total%").replacement(String.valueOf(queue.size()));
-                })));
+                player.sendMessage(QueueService.MESSAGE.get()
+                    .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(position.getServer()))
+                    .replaceText(builder -> builder.matchLiteral("%queue_type%").replacement(type))
+                    .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(queue.size())))
+                    .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size())))));
         }
+
         responseObserver.onNext(Queue.Join.Response.newBuilder().setResult(result).build());
         responseObserver.onCompleted();
     }
@@ -134,9 +132,8 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
             }
             final var player = playerOptional.get();
             if (QueueService.FINISH_QUEUE_MESSAGE.get() != null) {
-                player.sendMessage(QueueService.FINISH_QUEUE_MESSAGE.get().replaceText(builder -> {
-                    builder.match("%server_name%").replacement(server);
-                }));
+                player.sendMessage(QueueService.FINISH_QUEUE_MESSAGE.get()
+                    .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(server)));
             }
             player.createConnectionRequest(registeredServer).fireAndForget();
             break;
@@ -149,13 +146,11 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
                 for (final var user : queue) {
                     order.getAndIncrement();
                     this.proxy.getPlayer(UUID.fromString(user.user.getUuid())).ifPresent(player -> {
-                        player.sendActionBar(QueueService.ACTIONBAR.get().replaceText(builder -> {
-                            builder
-                                .match("%server_name%").replacement(server)
-                                .match("%queue_type%").replacement(user.type)
-                                .match("%queue_order%").replacement(String.valueOf(order.get()))
-                                .match("%queue_total%").replacement(String.valueOf(queue.size()));
-                        }));
+                        player.sendActionBar(QueueService.ACTIONBAR.get()
+                            .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(server))
+                            .replaceText(builder -> builder.matchLiteral("%queue_type%").replacement(user.type))
+                            .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(order.get())))
+                            .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size()))));
                     });
                 }
             }

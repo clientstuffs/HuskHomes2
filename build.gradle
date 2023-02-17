@@ -65,6 +65,8 @@ subprojects {
 
     if (['bukkit', 'velocity'].contains(project.name)) {
         shadowJar {
+            mergeServiceFiles()
+
             destinationDirectory.set(file("$rootDir/target"))
             archiveClassifier.set('')
         }

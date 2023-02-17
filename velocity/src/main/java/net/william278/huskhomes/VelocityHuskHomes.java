@@ -20,7 +20,11 @@ public final class VelocityHuskHomes {
 
     @Subscribe
     public void onProxyInitialization(final ProxyInitializeEvent event) {
-        GrpcServer.initiate(this.proxy);
+        try {
+            GrpcServer.initiate(this.proxy);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
         this.proxy.getScheduler().buildTask(this, GrpcServer::onUpdate)
             .delay(Duration.ofSeconds(1L))
             .repeat(Duration.ofSeconds(1L))
