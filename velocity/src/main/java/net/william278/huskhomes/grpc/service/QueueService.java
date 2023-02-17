@@ -1,6 +1,7 @@
 package net.william278.huskhomes.grpc.service;
 
 import com.google.protobuf.Empty;
+import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.grpc.stub.StreamObserver;
 import net.kyori.adventure.text.Component;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +30,8 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
     private final Map<String, PriorityQueue<QueuedUser>> queue = new ConcurrentHashMap<>();
 
     private final Map<Definition.User, QueuedUser> users = new ConcurrentHashMap<>();
+
+    private final Set<String> moving = ConcurrentHashMap.newKeySet();
 
     @NotNull
     private final ProxyServer proxy;
@@ -118,7 +122,7 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
             final var registeredServer = serverOptional.get();
             final var ping = registeredServer.ping().join();
             final var players = ping.getPlayers().orElseThrow();
-            final var online = players.getOnline();
+            final var online = players.getOnline() + this.moving.size();
             if (online >= QueueService.QUEUE_STARTS.get()) {
                 continue;
             }
@@ -136,7 +140,12 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
                 player.sendMessage(QueueService.FINISH_QUEUE_MESSAGE.get()
                     .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(server)));
             }
-            player.createConnectionRequest(registeredServer).connect().join();
+            final var uniqueId = player.getUniqueId();
+            this.moving.add(uniqueId.toString());
+            final var result = player.createConnectionRequest(registeredServer).connect().join();
+            if (!result.isSuccessful()) {
+                this.moving.remove(uniqueId.toString());
+            }
             break;
         }
         if (QueueService.ACTIONBAR.get() != null) {
@@ -156,6 +165,11 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
                 }
             }
         }
+    }
+
+    @Override
+    public void onJoin(@NotNull final Definition.User user) {
+        this.moving.remove(user.getUuid());
     }
 
     @Override

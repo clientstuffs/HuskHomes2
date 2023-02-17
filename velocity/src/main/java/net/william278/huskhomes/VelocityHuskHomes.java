@@ -28,7 +28,7 @@ public final class VelocityHuskHomes {
         }
         this.proxy.getScheduler().buildTask(this, GrpcServer::onUpdate)
             .delay(Duration.ofSeconds(1L))
-            .repeat(Duration.ofSeconds(2L))
+            .repeat(Duration.ofSeconds(1L))
             .schedule();
     }
 
@@ -42,9 +42,6 @@ public final class VelocityHuskHomes {
 
     @Subscribe
     public void onJoin(final ServerConnectedEvent event) {
-        if (event.getPreviousServer().isEmpty()) {
-            return;
-        }
         final var player = event.getPlayer();
         final var name = player.getUsername();
         final var uuid = player.getUniqueId().toString();

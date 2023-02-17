@@ -5,17 +5,9 @@ import org.jetbrains.annotations.NotNull;
 
 public interface ServiceListener {
 
-    /**
-     * Runs every seconds.
-     */
-    default void onUpdate() {
-    }
+    default void onUpdate() {}
 
-    /**
-     * Runs whenever the user leaves from the server(proxy).
-     *
-     * @param user The user to run.
-     */
-    default void onLeave(@NotNull final Definition.User user) {
-    }
+    default void onLeave(@NotNull final Definition.User user) {}
+
+    default void onJoin(@NotNull final Definition.User user) {}
 }
