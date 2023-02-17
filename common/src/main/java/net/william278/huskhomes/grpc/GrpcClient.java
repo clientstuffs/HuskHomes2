@@ -1,7 +1,5 @@
 package net.william278.huskhomes.grpc;
 
-import io.grpc.Grpc;
-import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import net.william278.huskhomes.grpc.client.QueueClient;

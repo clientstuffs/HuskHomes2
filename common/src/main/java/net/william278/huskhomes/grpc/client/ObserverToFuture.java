@@ -13,7 +13,11 @@ final class ObserverToFuture {
     static <T> CompletableFuture<T> future(@NotNull final Consumer<StreamObserver<T>> consumer) {
         final var observer = new Observer<T>();
         consumer.accept(observer);
-        return observer.future;
+        return observer.future.whenComplete((__, t) -> {
+            if (t != null) {
+                t.printStackTrace();
+            }
+        });
     }
 
     private static final class Observer<T> implements StreamObserver<T> {
