@@ -120,9 +120,8 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
                 continue;
             }
             final var registeredServer = serverOptional.get();
-            final var ping = registeredServer.ping().join();
-            final var players = ping.getPlayers().orElseThrow();
-            final var online = players.getOnline() + this.moving.size();
+            final var players = registeredServer.getPlayersConnected();
+            final var online = players.size() + this.moving.size();
             if (online >= QueueService.QUEUE_STARTS.get()) {
                 continue;
             }
