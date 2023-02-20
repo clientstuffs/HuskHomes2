@@ -74,12 +74,12 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
 
     @Override
     public void leave(Queue.Leave.Request request, StreamObserver<Queue.Leave.Response> responseObserver) {
-        this.onLeave(request.getUser());
         if (this.users.containsKey(request.getUser())) {
             responseObserver.onNext(Queue.Leave.Response.newBuilder().setResult(Queue.Leave.Result.SUCCEED).build());
         } else {
             responseObserver.onNext(Queue.Leave.Response.newBuilder().setResult(Queue.Leave.Result.USER_NOT_FOUND).build());
         }
+        this.onLeave(request.getUser());
         responseObserver.onCompleted();
     }
 
