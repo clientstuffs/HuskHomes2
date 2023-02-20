@@ -11,6 +11,9 @@ import net.william278.huskhomes.proto.Queue;
 import net.william278.huskhomes.proto.QueueServiceGrpc;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -36,8 +39,12 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
     @NotNull
     private final ProxyServer proxy;
 
-    public QueueService(@NotNull final ProxyServer proxy) {
+    @NotNull
+    private final MethodHandle indexOf;
+
+    public QueueService(@NotNull final ProxyServer proxy) throws NoSuchMethodException, IllegalAccessException {
         this.proxy = proxy;
+        this.indexOf = MethodHandles.lookup().findVirtual(PriorityQueue.class, "indexOf", MethodType.methodType(int.class, Object.class));
     }
 
     @Override
@@ -60,12 +67,17 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
         queue.add(newUser);
         this.users.put(user, newUser);
         if (QueueService.MESSAGE.get() != null) {
-            playerOptional.ifPresent(player ->
-                player.sendMessage(QueueService.MESSAGE.get()
-                    .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(position.getServer()))
-                    .replaceText(builder -> builder.matchLiteral("%queue_type%").replacement(type))
-                    .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(queue.size())))
-                    .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size())))));
+            try {
+                final var order = this.indexOf.invoke(queue, newUser);
+                playerOptional.ifPresent(player ->
+                    player.sendMessage(QueueService.MESSAGE.get()
+                        .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(position.getServer()))
+                        .replaceText(builder -> builder.matchLiteral("%queue_type%").replacement(type))
+                        .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(order)))
+                        .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size())))));
+            } catch (final Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
         responseObserver.onNext(Queue.Join.Response.newBuilder().setResult(result).build());
         responseObserver.onCompleted();
