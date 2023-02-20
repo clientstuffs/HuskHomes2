@@ -174,6 +174,7 @@ huskhomes_command_description: 'View plugin information & reload configs'
 server_command_description: 'Teleport to the sever'
 leavequeue_command_description: 'Leave from the teleport queue'
 
+already_in_same_server: "&cYou are already in the same server!"
 queue_reminder: "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%.\n&f[&e!&f] type /leavequeue to leave the queue!"
 queue_reminder_action_bar: "you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."
 queue_canceled_overlapping_queue: "&f[&c!&f] an overlapping queue exists and the old queue has been deleted."

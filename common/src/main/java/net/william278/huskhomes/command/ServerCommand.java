@@ -31,6 +31,10 @@ public class ServerCommand extends CommandBase implements TabCompletable {
         }
         if (args.length == 1) {
             final String serverName = args[0];
+            if (onlineUser.getPosition().server.name.equalsIgnoreCase(serverName)) {
+                this.plugin.getLocales().getLocale("already_in_same_server").ifPresent(onlineUser::sendMessage);
+                return;
+            }
             final var server = new Server(serverName);
             Teleport.builder(this.plugin, onlineUser)
                 .setTarget(new Position(0.0d, 0.0d, 0.0d, 0.0f, 0.0f, new World("", UUID.randomUUID()), server))

@@ -145,6 +145,9 @@ public class Teleport {
     }
 
     protected boolean queue() {
+        if (!this.plugin.getSettings().queue) {
+            return false;
+        }
         if (this.target == null) {
             return false;
         }
