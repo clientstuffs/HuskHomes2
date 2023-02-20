@@ -67,7 +67,6 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
                     .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(queue.size())))
                     .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size())))));
         }
-
         responseObserver.onNext(Queue.Join.Response.newBuilder().setResult(result).build());
         responseObserver.onCompleted();
     }
