@@ -169,13 +169,21 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
     @Override
     public void onJoin(@NotNull final Definition.User user) {
         this.moving.remove(user.getUuid());
+        this.onLeave(user);
     }
 
     @Override
     public void onLeave(@NotNull final Definition.User user) {
         final var existingUser = this.users.remove(user);
         if (existingUser != null) {
-            this.queue.computeIfAbsent(existingUser.position.getServer(), __ -> new PriorityQueue<>()).remove(existingUser);
+            final var queuedUsers = this.queue.get(existingUser.position.getServer());
+            if (queuedUsers == null) {
+                return;
+            }
+            queuedUsers.remove(existingUser);
+            if (queuedUsers.isEmpty()) {
+                this.queue.remove(existingUser.position.getServer());
+            }
         }
     }
 
