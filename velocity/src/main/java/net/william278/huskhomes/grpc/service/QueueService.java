@@ -1,7 +1,6 @@
 package net.william278.huskhomes.grpc.service;
 
 import com.google.protobuf.Empty;
-import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.ProxyServer;
 import io.grpc.stub.StreamObserver;
 import net.kyori.adventure.text.Component;
@@ -9,13 +8,10 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.william278.huskhomes.proto.Definition;
 import net.william278.huskhomes.proto.Queue;
 import net.william278.huskhomes.proto.QueueServiceGrpc;
+import net.william278.huskhomes.util.PriorityQueue;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,12 +35,8 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
     @NotNull
     private final ProxyServer proxy;
 
-    @NotNull
-    private final MethodHandle indexOf;
-
-    public QueueService(@NotNull final ProxyServer proxy) throws NoSuchMethodException, IllegalAccessException {
+    public QueueService(@NotNull final ProxyServer proxy) {
         this.proxy = proxy;
-        this.indexOf = MethodHandles.lookup().findVirtual(PriorityQueue.class, "indexOf", MethodType.methodType(int.class, Object.class));
     }
 
     @Override
@@ -67,17 +59,12 @@ public final class QueueService extends QueueServiceGrpc.QueueServiceImplBase im
         queue.add(newUser);
         this.users.put(user, newUser);
         if (QueueService.MESSAGE.get() != null) {
-            try {
-                final var order = this.indexOf.invoke(queue, newUser);
-                playerOptional.ifPresent(player ->
-                    player.sendMessage(QueueService.MESSAGE.get()
-                        .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(position.getServer()))
-                        .replaceText(builder -> builder.matchLiteral("%queue_type%").replacement(type))
-                        .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(order)))
-                        .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size())))));
-            } catch (final Throwable e) {
-                throw new RuntimeException(e);
-            }
+            playerOptional.ifPresent(player ->
+                player.sendMessage(QueueService.MESSAGE.get()
+                    .replaceText(builder -> builder.matchLiteral("%server_name%").replacement(position.getServer()))
+                    .replaceText(builder -> builder.matchLiteral("%queue_type%").replacement(type))
+                    .replaceText(builder -> builder.matchLiteral("%queue_order%").replacement(String.valueOf(queue.indexOf(newUser) + 1)))
+                    .replaceText(builder -> builder.matchLiteral("%queue_total%").replacement(String.valueOf(queue.size())))));
         }
         responseObserver.onNext(Queue.Join.Response.newBuilder().setResult(result).build());
         responseObserver.onCompleted();

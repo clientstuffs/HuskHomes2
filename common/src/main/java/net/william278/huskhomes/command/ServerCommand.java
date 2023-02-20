@@ -31,6 +31,9 @@ public class ServerCommand extends CommandBase implements TabCompletable {
         }
         if (args.length == 1) {
             final String serverName = args[0];
+            if (!this.plugin.getCache().onlineServers.contains(serverName)) {
+                return;
+            }
             if (onlineUser.getPosition().server.name.equalsIgnoreCase(serverName)) {
                 this.plugin.getLocales().getLocale("already_in_same_server").ifPresent(onlineUser::sendMessage);
                 return;

@@ -20,7 +20,7 @@ public final class GrpcServer {
 
     public static void initiate(
         @NotNull final ProxyServer proxy
-    ) throws IOException, NoSuchMethodException, IllegalAccessException {
+    ) throws IOException {
         final var queueService = new QueueService(proxy);
         GrpcServer.LISTENABLE_SERVICES.add(queueService);
         ServerBuilder.forPort(548)
