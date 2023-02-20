@@ -36,4 +36,8 @@ public final class GrpcServer {
     public static void onLeave(@NotNull final Definition.User user) {
         GrpcServer.LISTENABLE_SERVICES.forEach(s -> s.onLeave(user));
     }
+
+    public static void onJoin(@NotNull final Definition.User user) {
+        GrpcServer.LISTENABLE_SERVICES.forEach(s -> s.onJoin(user));
+    }
 }

@@ -45,6 +45,6 @@ public final class VelocityHuskHomes {
         final var player = event.getPlayer();
         final var name = player.getUsername();
         final var uuid = player.getUniqueId().toString();
-        GrpcServer.onLeave(Definition.User.newBuilder().setName(name).setUuid(uuid).build());
+        GrpcServer.onJoin(Definition.User.newBuilder().setName(name).setUuid(uuid).build());
     }
 }
