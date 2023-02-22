@@ -1,5 +1,6 @@
 package net.william278.huskhomes.database;
 
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.player.OnlineUser;
@@ -69,23 +70,26 @@ public class MySqlDatabase extends Database {
         try {
             // Create jdbc driver connection url
             final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + database + connectionParameters;
-            dataSource = new HikariDataSource();
-            dataSource.setJdbcUrl(jdbcUrl);
+            final var config = new HikariConfig();
+
+            config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+
+            config.setJdbcUrl(jdbcUrl);
 
             // Authenticate
-            dataSource.setUsername(username);
-            dataSource.setPassword(password);
+            config.setUsername(username);
+            config.setPassword(password);
 
             // Set connection pool options
-            dataSource.setMaximumPoolSize(connectionPoolSize);
-            dataSource.setMinimumIdle(connectionPoolIdle);
-            dataSource.setMaxLifetime(connectionPoolLifetime);
-            dataSource.setKeepaliveTime(connectionPoolKeepAlive);
-            dataSource.setConnectionTimeout(connectionPoolTimeout);
-            dataSource.setPoolName(DATA_POOL_NAME);
+            config.setMaximumPoolSize(connectionPoolSize);
+            config.setMinimumIdle(connectionPoolIdle);
+            config.setMaxLifetime(connectionPoolLifetime);
+            config.setKeepaliveTime(connectionPoolKeepAlive);
+            config.setConnectionTimeout(connectionPoolTimeout);
+            config.setPoolName(DATA_POOL_NAME);
 
             // Set additional connection pool properties
-            dataSource.setDataSourceProperties(new Properties() {{
+            config.setDataSourceProperties(new Properties() {{
                 put("cachePrepStmts", "true");
                 put("prepStmtCacheSize", "250");
                 put("prepStmtCacheSqlLimit", "2048");
@@ -98,6 +102,8 @@ public class MySqlDatabase extends Database {
                 put("elideSetAutoCommits", "true");
                 put("maintainTimeStats", "false");
             }});
+
+            dataSource = new HikariDataSource(config);
 
             // Prepare database schema; make tables if they don't exist
             try (Connection connection = dataSource.getConnection()) {
