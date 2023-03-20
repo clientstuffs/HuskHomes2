@@ -4,6 +4,8 @@ import net.william278.annotaml.YamlFile;
 import net.william278.annotaml.YamlKey;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
+
 /**
  * Represents a server on a proxied network
  */
@@ -16,13 +18,20 @@ public class Server {
     /**
      * Default (unknown) server identifier
      */
-    public static final Server DEFAULT = new Server();
+    public static String getDefaultServerName() {
+        try {
+            final Path serverDirectory = Path.of(System.getProperty("user.dir"));
+            return serverDirectory.getFileName().toString().trim();
+        } catch (Exception e) {
+            return "server";
+        }
+    }
 
     /**
      * Proxy-defined name of this server
      */
     @YamlKey("server_name")
-    public String name = "server";
+    public String name = getDefaultServerName();
 
     public Server(@NotNull String name) {
         this.name = name;

@@ -516,14 +516,17 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
     @Override
     @NotNull
     public List<World> getWorlds() {
-        return getServer().getWorlds().stream().filter(world -> BukkitAdapter.adaptWorld(world).isPresent()).map(world -> BukkitAdapter.adaptWorld(world).orElse(null)).collect(Collectors.toList());
+        return getServer().getWorlds().stream()
+                .filter(world -> BukkitAdapter.adaptWorld(world).isPresent())
+                .map(world -> BukkitAdapter.adaptWorld(world).orElse(null))
+                .toList();
     }
 
     @Override
     public boolean reload() {
         try {
             // Load settings
-            this.settings = Annotaml.create(new File(getDataFolder(), "config.yml"), new Settings()).get();
+            this.settings = Annotaml.create(new File(getDataFolder(), "config.yml"), Settings.class).get();
 
             // Load locales from language preset default
             final Locales languagePresets = Annotaml.create(Locales.class, Objects.requireNonNull(getResource("locales/" + settings.language + ".yml"))).get();
@@ -531,9 +534,9 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes {
 
             // Load server from file
             if (settings.crossServer) {
-                this.server = Annotaml.create(new File(getDataFolder(), "server.yml"), Server.DEFAULT).get();
+                this.server = Annotaml.create(new File(getDataFolder(), "server.yml"), Server.class).get();
             } else {
-                this.server = Server.DEFAULT;
+                this.server = new Server(Server.getDefaultServerName());
             }
 
             // Load spawn location from file
