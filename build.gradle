@@ -57,12 +57,6 @@ allprojects {
         useJUnitPlatform()
     }
 
-    license {
-        header = rootProject.file('HEADER')
-        include '**/*.java'
-        newLine = true
-    }
-
     processResources {
         filesMatching(['**/*.json', '**/*.yml']) {
             filter ReplaceTokens as Class, beginToken: '${', endToken: '}',
