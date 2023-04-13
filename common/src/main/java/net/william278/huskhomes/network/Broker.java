@@ -54,46 +54,61 @@ public abstract class Broker {
             return;
         }
         switch (message.getType()) {
-            case TELEPORT_TO_POSITION -> message.getPayload()
+            case TELEPORT_TO_POSITION:
+                message.getPayload()
                     .getPosition().ifPresent(position -> {
                         try {
                             Teleport.builder(plugin)
-                                    .teleporter(receiver)
-                                    .target(position)
-                                    .toTeleport()
-                                    .execute();
+                                .teleporter(receiver)
+                                .target(position)
+                                .toTeleport()
+                                .execute();
                         } catch (TeleportationException e) {
                             e.displayMessage(plugin.getConsole(), plugin, new String[]{});
                         }
                     });
-            case TELEPORT_TO_NETWORKED_POSITION -> Message.builder()
+                break;
+            case TELEPORT_TO_NETWORKED_POSITION:
+                Message.builder()
                     .type(Message.Type.TELEPORT_TO_POSITION)
                     .target(message.getSender())
                     .payload(Payload.withPosition(receiver.getPosition()))
                     .build().send(this, receiver);
-            case TELEPORT_TO_NETWORKED_USER -> message.getPayload()
+                break;
+            case TELEPORT_TO_NETWORKED_USER:
+                message.getPayload()
                     .getString().ifPresent(target -> Message.builder()
-                            .type(Message.Type.TELEPORT_TO_NETWORKED_POSITION)
-                            .target(target)
-                            .build().send(this, receiver));
-            case TELEPORT_REQUEST -> message.getPayload()
+                        .type(Message.Type.TELEPORT_TO_NETWORKED_POSITION)
+                        .target(target)
+                        .build().send(this, receiver));
+                break;
+            case TELEPORT_REQUEST:
+                message.getPayload()
                     .getTeleportRequest()
                     .ifPresent(teleportRequest -> plugin.getManager().requests()
-                            .sendLocalTeleportRequest(teleportRequest, receiver));
-            case TELEPORT_REQUEST_RESPONSE -> message.getPayload()
+                        .sendLocalTeleportRequest(teleportRequest, receiver));
+                break;
+            case TELEPORT_REQUEST_RESPONSE:
+                message.getPayload()
                     .getTeleportRequest()
                     .ifPresent(teleportRequest -> plugin.getManager().requests()
-                            .handleLocalRequestResponse(receiver, teleportRequest));
-            case REQUEST_PLAYER_LIST -> Message.builder()
+                        .handleLocalRequestResponse(receiver, teleportRequest));
+                break;
+            case REQUEST_PLAYER_LIST:
+                Message.builder()
                     .type(Message.Type.PLAYER_LIST)
                     .scope(Message.Scope.SERVER)
                     .target(message.getSourceServer())
                     .payload(Payload.withStringList(plugin.getLocalPlayerList()))
                     .build().send(this, receiver);
-            case PLAYER_LIST -> message.getPayload()
+                break;
+            case PLAYER_LIST:
+                message.getPayload()
                     .getStringList()
                     .ifPresent(players -> plugin.setPlayerList(message.getSourceServer(), players));
-            case UPDATE_HOME -> message.getPayload().getString()
+                break;
+            case UPDATE_HOME:
+                message.getPayload().getString()
                     .map(UUID::fromString)
                     .ifPresent(homeId -> {
                         final Optional<Home> optionalHome = plugin.getDatabase().getHome(homeId);
@@ -103,7 +118,9 @@ public abstract class Broker {
                             plugin.getManager().homes().unCacheHome(homeId, false);
                         }
                     });
-            case UPDATE_WARP -> message.getPayload().getString()
+                break;
+            case UPDATE_WARP:
+                message.getPayload().getString()
                     .map(UUID::fromString)
                     .ifPresent(warpId -> {
                         final Optional<Warp> optionalWarp = plugin.getDatabase().getWarp(warpId);
@@ -113,10 +130,11 @@ public abstract class Broker {
                             plugin.getManager().warps().unCacheWarp(warpId, false);
                         }
                     });
-            case UPDATE_CACHES -> {
+                break;
+            case UPDATE_CACHES:
                 plugin.getManager().homes().updatePublicHomeCache();
                 plugin.getManager().warps().updateWarpCache();
-            }
+                break;
         }
     }
 

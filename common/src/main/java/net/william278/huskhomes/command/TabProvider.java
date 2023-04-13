@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public interface TabProvider {
 
@@ -44,7 +45,7 @@ public interface TabProvider {
         return suggestions.stream()
                 .filter(suggestion -> args.length == 0 || suggestion.toLowerCase()
                         .startsWith(args[args.length - 1].toLowerCase().trim()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
 }

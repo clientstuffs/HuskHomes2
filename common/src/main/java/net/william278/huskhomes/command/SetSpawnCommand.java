@@ -21,13 +21,6 @@ package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Position;
-<<<<<<< HEAD
-import net.william278.huskhomes.position.PositionMeta;
-import net.william278.huskhomes.util.Permission;
-import org.jetbrains.annotations.NotNull;
-
-public class SetSpawnCommand extends CommandBase {
-=======
 import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.util.ValidationException;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class SetSpawnCommand extends InGameCommand {
->>>>>>> master
 
     protected SetSpawnCommand(@NotNull HuskHomes plugin) {
         super("setspawn", List.of(), "", plugin);
@@ -43,36 +35,6 @@ public class SetSpawnCommand extends InGameCommand {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (args.length > 0) {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/setspawn")
-                .ifPresent(onlineUser::sendMessage);
-            return;
-        }
-
-        final Position position = onlineUser.getPosition();
-        if (plugin.getSettings().crossServer && plugin.getSettings().globalSpawn) {
-            plugin.getDatabase().getWarp(plugin.getSettings().globalSpawnName).thenApply(warp -> {
-                if (warp.isPresent()) {
-                    return plugin.getSavedPositionManager().updateWarpPosition(warp.get(), position);
-                } else {
-                    return plugin.getSavedPositionManager().setWarp(new PositionMeta(plugin.getSettings().globalSpawnName,
-                            plugin.getLocales().getRawLocale("spawn_warp_default_description").orElse("")), position)
-                        .thenApply(result -> result.resultType().successful);
-                }
-            }).thenAccept(result -> result.thenAccept(successful -> {
-                if (successful) {
-                    plugin.getLocales().getLocale("set_spawn_success")
-                        .ifPresent(onlineUser::sendMessage);
-                }
-            }));
-        } else {
-            plugin.setServerSpawn(position);
-            plugin.getLocales().getLocale("set_spawn_success")
-                .ifPresent(onlineUser::sendMessage);
-        }
-=======
     public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
         final Position position = executor.getPosition();
         try {
@@ -91,7 +53,6 @@ public class SetSpawnCommand extends InGameCommand {
 
         plugin.getLocales().getLocale("set_spawn_success")
                 .ifPresent(executor::sendMessage);
->>>>>>> master
     }
 
 }

@@ -26,13 +26,7 @@ import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-<<<<<<< HEAD
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-=======
 import java.util.Optional;
->>>>>>> master
 
 public class TpHereCommand extends InGameCommand implements UserListTabProvider {
 
@@ -42,36 +36,6 @@ public class TpHereCommand extends InGameCommand implements UserListTabProvider 
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        CompletableFuture.runAsync(() -> {
-            if (args.length != 1) {
-                plugin.getLocales().getLocale("error_invalid_syntax", "/tphere <player>")
-                    .ifPresent(onlineUser::sendMessage);
-                return;
-            }
-            final String targetPlayerName = args[0];
-            plugin.findPlayer(onlineUser, targetPlayerName).thenAccept(teleporterName -> {
-                if (teleporterName.isEmpty()) {
-                    plugin.getLocales().getLocale("error_player_not_found", targetPlayerName)
-                        .ifPresent(onlineUser::sendMessage);
-                    return;
-                }
-
-                Teleport.builder(plugin, onlineUser)
-                    .setTeleporter(teleporterName.get())
-                    .setTarget(onlineUser.getPosition())
-                    .toTeleport()
-                    .thenAccept(teleport -> teleport.execute().thenAccept(result -> {
-                        if (result.successful()) {
-                            result.getTeleporter()
-                                .flatMap(teleporter -> plugin.getLocales().getLocale("teleporting_other_complete",
-                                    teleporter.username, onlineUser.username))
-                                .ifPresent(onlineUser::sendMessage);
-                        }
-                    }));
-            });
-=======
     public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
         final Optional<String> optionalTarget = parseStringArg(args, 0);
         if (optionalTarget.isEmpty()) {
@@ -86,7 +50,6 @@ public class TpHereCommand extends InGameCommand implements UserListTabProvider 
                     .teleporter(optionalTarget.get())
                     .target(executor.getPosition())
                     .toTeleport().execute();
->>>>>>> master
 
             plugin.getLocales().getLocale("teleporting_other_complete",
                     optionalTarget.get(), executor.getUsername());
@@ -95,13 +58,4 @@ public class TpHereCommand extends InGameCommand implements UserListTabProvider 
         }
     }
 
-<<<<<<< HEAD
-    @Override
-    public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
-        return args.length <= 1 ? plugin.getCache().players.stream()
-            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
-            .sorted().collect(Collectors.toList()) : Collections.emptyList();
-    }
-=======
->>>>>>> master
 }

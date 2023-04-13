@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 public class HomesManager {
 
@@ -58,7 +59,7 @@ public class HomesManager {
     @NotNull
     public Map<String, List<String>> getUserHomes() {
         return userHomes.entrySet().stream()
-                .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().stream().map(Home::getName).toList()),
+                .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().stream().map(Home::getName).collect(Collectors.toList())),
                         HashMap::putAll);
     }
 
@@ -67,7 +68,7 @@ public class HomesManager {
         return userHomes.entrySet().stream()
                 .flatMap(e -> e.getValue().stream()
                         .map(home -> home.getOwner().getUsername() + "." + home.getName()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     /**
@@ -84,7 +85,7 @@ public class HomesManager {
     public List<String> getPublicHomeNames() {
         return publicHomes.stream()
                 .map(home -> home.getOwner().getUsername() + "." + home.getName())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public void cacheUserHomes(@NotNull User user) {
@@ -173,9 +174,10 @@ public class HomesManager {
         final SavedUser savedOwner = plugin.getSavedUser(owner)
                 .orElseThrow(() -> new IllegalStateException("User data not found for " + owner.getUuid()));
         if (plugin.getSettings().doEconomy() && homeCount >= getFreeHomes(owner) && homeCount >= savedOwner.getHomeSlots()) {
-            if (!buyAdditionalSlots || plugin.getEconomyHook().isEmpty() || !(owner instanceof OnlineUser online)) {
+            if (!buyAdditionalSlots || plugin.getEconomyHook().isEmpty() || !(owner instanceof OnlineUser)) {
                 throw new ValidationException(ValidationException.Type.NOT_ENOUGH_HOME_SLOTS);
             }
+            OnlineUser online = (OnlineUser) owner;
 
             if (!plugin.validateEconomyCheck(online, EconomyHook.Action.ADDITIONAL_HOME_SLOT)) {
                 throw new ValidationException(ValidationException.Type.NOT_ENOUGH_MONEY);
@@ -289,9 +291,7 @@ public class HomesManager {
 
     public void setHomePrivacy(@NotNull Home home, boolean isPublic) {
         if (isPublic) {
-            final int publicHomes = plugin.getDatabase().getHomes(home.getOwner()).stream()
-                    .filter(Home::isPublic)
-                    .toList().size();
+            final int publicHomes = (int) plugin.getDatabase().getHomes(home.getOwner()).stream().filter(Home::isPublic).count();
             if (publicHomes >= getMaxPublicHomes(home.getOwner())) {
                 throw new ValidationException(ValidationException.Type.REACHED_MAX_PUBLIC_HOMES);
             }
@@ -318,21 +318,21 @@ public class HomesManager {
     }
 
     public int getMaxHomes(@Nullable User user) {
-        return user instanceof OnlineUser online ? online.getMaxHomes(
+        return user instanceof OnlineUser ? ((OnlineUser) user).getMaxHomes(
                 plugin.getSettings().getMaxHomes(),
                 plugin.getSettings().doStackPermissionLimits()
         ) : plugin.getSettings().getMaxHomes();
     }
 
     public int getMaxPublicHomes(@Nullable User user) {
-        return user instanceof OnlineUser online ? online.getMaxPublicHomes(
+        return user instanceof OnlineUser ? ((OnlineUser) user).getMaxPublicHomes(
                 plugin.getSettings().getMaxPublicHomes(),
                 plugin.getSettings().doStackPermissionLimits()
         ) : plugin.getSettings().getMaxPublicHomes();
     }
 
     public int getFreeHomes(@Nullable User user) {
-        return user instanceof OnlineUser online ? online.getFreeHomes(
+        return user instanceof OnlineUser ? ((OnlineUser) user).getFreeHomes(
                 plugin.getSettings().getFreeHomeSlots(),
                 plugin.getSettings().doStackPermissionLimits()
         ) : plugin.getSettings().getFreeHomeSlots();

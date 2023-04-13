@@ -53,13 +53,6 @@ public class TeleportEvent extends Event implements ITeleportEvent, Cancellable 
         return HANDLER_LIST;
     }
 
-<<<<<<< HEAD
-=======
-    @SuppressWarnings("unused")
-    public static HandlerList getHandlerList() {
-        return HANDLER_LIST;
-    }
-
     @Override
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
@@ -69,5 +62,4 @@ public class TeleportEvent extends Event implements ITeleportEvent, Cancellable 
     public boolean isCancelled() {
         return cancelled;
     }
->>>>>>> master
 }

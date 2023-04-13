@@ -36,11 +36,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-<<<<<<< HEAD:common/src/main/java/net/william278/huskhomes/player/OnlineUser.java
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-=======
->>>>>>> master:common/src/main/java/net/william278/huskhomes/user/OnlineUser.java
 
 /**
  * A cross-platform representation of a logged-in {@link User}

@@ -39,22 +39,6 @@ public class TpAllCommand extends InGameCommand {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (args.length != 0) {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/tpaall")
-                .ifPresent(onlineUser::sendMessage);
-            return;
-        }
-
-        // Determine players to teleport and teleport them
-        plugin.getCache().updatePlayerListCache(plugin, onlineUser).thenAccept(fetchedPlayers -> {
-            final List<String> players = fetchedPlayers.stream()
-                .filter(userName -> !userName.equalsIgnoreCase(onlineUser.username)).collect(Collectors.toList());
-            if (players.isEmpty()) {
-                plugin.getLocales().getLocale("error_no_players_online").ifPresent(onlineUser::sendMessage);
-                return;
-=======
     public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
         if (plugin.getGlobalPlayerList().size() <= 1) {
             plugin.getLocales().getLocale("error_no_players_online")
@@ -69,27 +53,12 @@ public class TpAllCommand extends InGameCommand {
                         .teleporter(user)
                         .target(targetPosition)
                         .toTeleport().execute();
->>>>>>> master
             }
         } catch (TeleportationException e) {
             e.displayMessage(executor, plugin, args);
             return;
         }
 
-<<<<<<< HEAD
-            // Send a message
-            plugin.getLocales().getLocale("teleporting_all_players", Integer.toString(players.size()))
-                .ifPresent(onlineUser::sendMessage);
-
-            // Teleport every player
-            final Position targetPosition = onlineUser.getPosition();
-            players.forEach(playerName -> Teleport.builder(plugin, onlineUser)
-                .setTeleporter(playerName)
-                .setTarget(targetPosition)
-                .toTeleport()
-                .thenAccept(Teleport::execute));
-        });
-=======
         if (plugin.getSettings().doCrossServer()) {
             Message.builder()
                     .target(Message.TARGET_ALL)
@@ -97,7 +66,6 @@ public class TpAllCommand extends InGameCommand {
                     .payload(Payload.withPosition(targetPosition))
                     .build().send(plugin.getMessenger(), executor);
         }
->>>>>>> master
 
         plugin.getLocales().getLocale("teleporting_all_players")
                 .ifPresent(executor::sendMessage);

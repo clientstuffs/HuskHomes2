@@ -171,11 +171,10 @@ spawn_command_description: 'Teleport to spawn'
 setspawn_command_description: 'Set the spawn position'
 tpaall_command_description: 'Request that everyone teleports to you'
 tpall_command_description: 'Teleport everyone to your position'
-<<<<<<< HEAD
 huskhomes_command_description: 'View plugin information & reload configs'
+
 server_command_description: 'Teleport to the sever'
 leavequeue_command_description: 'Leave from the teleport queue'
-
 already_in_same_server: "&cYou are already in the same server!"
 queue_reminder: "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%.\n&f[&e!&f] type /leavequeue to leave the queue!"
 queue_reminder_action_bar: "you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."
@@ -183,6 +182,3 @@ queue_canceled_overlapping_queue: "&f[&c!&f] an overlapping queue exists and the
 queue_finish_success: "&f[&c!&f] sending you to %server_name% now"
 queue_leave_success: "&f[&c!&f] you successfully exited the queue."
 queue_leave_fail_not_in_queue: "&f[&c!&f] not in queue."
-=======
-huskhomes_command_description: 'View plugin information & reload configs'
->>>>>>> master

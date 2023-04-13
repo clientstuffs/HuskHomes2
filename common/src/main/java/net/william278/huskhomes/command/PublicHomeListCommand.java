@@ -39,64 +39,27 @@ public class PublicHomeListCommand extends ListCommand {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        switch (args.length) {
-            case 0: {
-                showPublicHomeList(onlineUser, 1);
-                break;
-            }
-            case 1: {
-                try {
-                    int pageNumber = Integer.parseInt(args[0]);
-                    showPublicHomeList(onlineUser, pageNumber);
-                } catch (NumberFormatException e) {
-                    plugin.getLocales().getLocale("error_invalid_syntax", "/publichomelist [page]")
-                        .ifPresent(onlineUser::sendMessage);
-                }
-                break;
-            }
-            default: {
-                plugin.getLocales().getLocale("error_invalid_syntax", "/publichomelist [page]")
-                    .ifPresent(onlineUser::sendMessage);
-                break;
-            }
-        }
-=======
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
         final int pageNumber = parseIntArg(args, 0).orElse(1);
         this.showPublicHomeList(executor, pageNumber);
->>>>>>> master
     }
 
     protected void showPublicHomeList(@NotNull CommandUser executor, int pageNumber) {
-        if (executor instanceof OnlineUser user && cachedLists.containsKey(user.getUuid())) {
+        if (executor instanceof OnlineUser && cachedLists.containsKey(((OnlineUser) executor).getUuid())) {
+            OnlineUser user = (OnlineUser) executor;
             executor.sendMessage(cachedLists.get(user.getUuid()).getNearestValidPage(pageNumber));
             return;
         }
 
-<<<<<<< HEAD
-        plugin.getDatabase().getPublicHomes().thenAcceptAsync(publicHomes -> {
-            if (publicHomes.isEmpty()) {
-                plugin.getLocales().getLocale("error_no_public_homes_set").ifPresent(onlineUser::sendMessage);
-                return;
-            }
-            plugin.getCache().getPublicHomeList(onlineUser,
-                    plugin.getLocales(), publicHomes,
-                    plugin.getSettings().listItemsPerPage, pageNumber)
-                .ifPresent(onlineUser::sendMessage);
-        });
-
-=======
         final List<Home> homes = plugin.getDatabase().getPublicHomes();
         plugin.fireEvent(plugin.getViewHomeListEvent(homes, executor, true),
                 (event) -> this.generateList(executor, event.getHomes()).ifPresent(homeList -> {
-                    if (executor instanceof OnlineUser onlineUser) {
+                    if (executor instanceof OnlineUser) {
+                        OnlineUser onlineUser = (OnlineUser) executor;
                         cachedLists.put(onlineUser.getUuid(), homeList);
                     }
                     executor.sendMessage(homeList.getNearestValidPage(pageNumber));
                 }));
->>>>>>> master
     }
 
     private Optional<PaginatedList> generateList(@NotNull CommandUser executor, @NotNull List<Home> publicHomes) {

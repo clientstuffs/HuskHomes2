@@ -172,9 +172,9 @@ setspawn_command_description: 'Встановити точку спавну'
 tpaall_command_description: 'Надіслати усім запит на телепортацію до мене'
 tpall_command_description: 'Телепортувати всіх до мене'
 huskhomes_command_description: 'Переглянути інформацію про плагін та перезавантажити конфігурації'
+
 server_command_description: 'Teleport to the sever'
 leavequeue_command_description: 'Leave from the teleport queue'
-
 already_in_same_server: "&cYou are already in the same server!"
 queue_reminder: "&f[&e!&f] you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%.\n&f[&e!&f] type /leavequeue to leave the queue!"
 queue_reminder_action_bar: "you are now %queue_type% queued for %server_name%! you are in position %queue_order% of %queue_total%."

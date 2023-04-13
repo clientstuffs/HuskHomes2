@@ -91,8 +91,6 @@ public class Payload {
         return payload;
     }
 
-<<<<<<< HEAD
-=======
     /**
      * A string field
      */
@@ -111,9 +109,6 @@ public class Payload {
         final Payload payload = new Payload();
         payload.stringList = target;
         return payload;
-    }
-
-    private Payload() {
     }
 
     /**
@@ -145,5 +140,4 @@ public class Payload {
         return Optional.ofNullable(stringList);
     }
 
->>>>>>> master
 }

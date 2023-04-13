@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 public class WarpsManager {
     private final HuskHomes plugin;
@@ -98,7 +99,7 @@ public class WarpsManager {
      */
     @NotNull
     public List<String> getWarps() {
-        return warps.stream().map(Warp::getName).toList();
+        return warps.stream().map(Warp::getName).collect(Collectors.toList());
     }
 
     @NotNull
@@ -109,7 +110,7 @@ public class WarpsManager {
         return warps.stream()
                 .filter(warp -> user.hasPermission(warp.getPermission()))
                 .map(Warp::getName)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public void createWarp(@NotNull String name, @NotNull Position position, boolean overwrite) throws ValidationException {

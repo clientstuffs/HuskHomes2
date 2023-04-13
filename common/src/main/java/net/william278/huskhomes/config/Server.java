@@ -28,14 +28,13 @@ import java.nio.file.Path;
 /**
  * Represents a server on a proxied network
  */
-@YamlFile(header = """
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-        ┃  HuskHomes Server ID config  ┃
-        ┃    Developed by William278   ┃
-        ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-        ┣╸ This file should contain the ID of this server as defined in your proxy config.
-        ┣╸ If you join it using /server alpha, then set it to 'alpha' (case-sensitive)
-        ┗╸ You only need to touch this if you're using cross-server mode.""")
+@YamlFile(header = "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+                   "┃  HuskHomes Server ID config  ┃\n" +
+                   "┃    Developed by William278   ┃\n" +
+                   "┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n" +
+                   "┣╸ This file should contain the ID of this server as defined in your proxy config.\n" +
+                   "┣╸ If you join it using /server alpha, then set it to 'alpha' (case-sensitive)\n" +
+                   "┗╸ You only need to touch this if you're using cross-server mode.")
 public class Server {
 
     /**
@@ -65,7 +64,8 @@ public class Server {
     @Override
     public boolean equals(@NotNull Object other) {
         // If the name of this server matches another, the servers are the same.
-        if (other instanceof Server server) {
+        if (other instanceof Server) {
+            Server server = (Server) other;
             return server.getName().equalsIgnoreCase(this.getName());
         }
         return super.equals(other);

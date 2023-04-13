@@ -25,7 +25,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public record Username(@NotNull String name) implements Teleportable, Target {
+public final class Username implements Teleportable, Target {
+
+    @NotNull
+    private final String name;
+
+    public Username(@NotNull String name) {
+        this.name = name;
+    }
+
+    @NotNull
+    public String name() {
+        return name;
+    }
 
     @NotNull
     public Optional<OnlineUser> findLocally(@NotNull HuskHomes plugin) throws TeleportationException {

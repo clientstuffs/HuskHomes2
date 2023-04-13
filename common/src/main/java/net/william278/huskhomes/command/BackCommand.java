@@ -39,16 +39,6 @@ public class BackCommand extends InGameCommand {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        plugin.getDatabase().getLastPosition(onlineUser).thenAccept(lastPosition ->
-            lastPosition.ifPresentOrElse(position -> Teleport.builder(plugin, onlineUser)
-                    .setTarget(position)
-                    .setEconomyActions(Settings.EconomyAction.BACK_COMMAND)
-                    .toTimedTeleport()
-                    .thenApply(TimedTeleport::execute),
-                () -> plugin.getLocales().getLocale("error_no_last_position").ifPresent(onlineUser::sendMessage)));
-=======
     public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
         final Optional<Position> lastPosition = plugin.getDatabase().getLastPosition(executor);
         if (lastPosition.isEmpty()) {
@@ -68,7 +58,6 @@ public class BackCommand extends InGameCommand {
         } catch (TeleportationException e) {
             e.displayMessage(executor, plugin, args);
         }
->>>>>>> master
     }
 
 }

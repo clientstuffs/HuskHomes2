@@ -34,28 +34,8 @@ public abstract class MapHook extends Hook {
     protected static final String WARP_MARKER_IMAGE_NAME = "warp";
     protected static final String PUBLIC_HOME_MARKER_IMAGE_NAME = "public-home";
 
-<<<<<<< HEAD
-    protected MapHook(@NotNull HuskHomes implementor, @NotNull String hookName) {
-        super(implementor, hookName);
-    }
-
-    @Override
-    public final boolean initialize() {
-        initializeMap().thenRun(() -> {
-            if (plugin.getSettings().publicHomesOnMap) {
-                plugin.getDatabase().getLocalPublicHomes(plugin)
-                    .thenAcceptAsync(homes -> homes.forEach(this::updateHome));
-            }
-            if (plugin.getSettings().warpsOnMap) {
-                plugin.getDatabase().getLocalWarps(plugin)
-                    .thenAcceptAsync(warps -> warps.forEach(this::updateWarp));
-            }
-        });
-        return true;
-=======
     protected MapHook(@NotNull HuskHomes plugin, @NotNull String name) {
         super(plugin, name);
->>>>>>> master
     }
 
     /**
@@ -122,20 +102,8 @@ public abstract class MapHook extends Hook {
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     protected final boolean isValidPosition(@NotNull SavedPosition position) {
-<<<<<<< HEAD
-        if (position instanceof Warp && !plugin.getSettings().warpsOnMap) return false;
-        if (position instanceof Home && !plugin.getSettings().publicHomesOnMap) return false;
-
-        try {
-            return position.server.equals(plugin.getServerName());
-        } catch (HuskHomesException e) {
-            return plugin.getWorlds().stream()
-                .map(world -> world.uuid)
-                .anyMatch(uuid -> uuid.equals(position.world.uuid));
-=======
         if (position instanceof Warp && !plugin.getSettings().doWarpsOnMap()) {
             return false;
->>>>>>> master
         }
         if (position instanceof Home && !plugin.getSettings().doPublicHomesOnMap()) {
             return false;

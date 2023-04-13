@@ -22,16 +22,6 @@ package net.william278.huskhomes.api;
 import de.themoep.minedown.adventure.MineDown;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.config.Locales;
-<<<<<<< HEAD
-import net.william278.huskhomes.player.OnlineUser;
-import net.william278.huskhomes.player.User;
-import net.william278.huskhomes.player.UserData;
-import net.william278.huskhomes.position.*;
-import net.william278.huskhomes.random.RandomTeleportEngine;
-import net.william278.huskhomes.teleport.Teleport;
-import net.william278.huskhomes.teleport.TeleportBuilder;
-import net.william278.huskhomes.teleport.TeleportResult;
-=======
 import net.william278.huskhomes.position.Home;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.Warp;
@@ -42,7 +32,6 @@ import net.william278.huskhomes.teleport.TeleportationException;
 import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.user.SavedUser;
 import net.william278.huskhomes.user.User;
->>>>>>> master
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -207,15 +196,9 @@ public abstract class BaseHuskHomesAPI {
      * @since 3.0
      */
     public final CompletableFuture<List<Home>> getUserPublicHomes(@NotNull User user) {
-<<<<<<< HEAD
-        return getUserHomes(user).thenApply(homes -> homes.stream()
-            .filter(home -> home.isPublic)
-            .collect(Collectors.toList()));
-=======
         return plugin.supplyAsync(() -> plugin.getDatabase().getHomes(user).stream()
                 .filter(Home::isPublic)
                 .collect(Collectors.toList()));
->>>>>>> master
     }
 
     /**
@@ -659,20 +642,9 @@ public abstract class BaseHuskHomesAPI {
      * @return A {@link TeleportBuilder} to construct and execute a (timed) teleport
      * @since 4.0
      */
-<<<<<<< HEAD
-    @Deprecated(since = "3.1")
-    public final CompletableFuture<TeleportResult> teleportPlayer(@NotNull OnlineUser user,
-                                                                  @NotNull Position position,
-                                                                  final boolean timedTeleport) {
-        final TeleportBuilder builder = teleportBuilder(user).setTarget(position);
-        return timedTeleport
-            ? builder.toTimedTeleport().thenApplyAsync(teleport -> teleport.execute().join().getState())
-            : builder.toTeleport().thenApplyAsync(teleport -> teleport.execute().join().getState());
-=======
     @NotNull
     public final TeleportBuilder teleportBuilder() {
         return Teleport.builder(plugin);
->>>>>>> master
     }
 
 
@@ -686,27 +658,6 @@ public abstract class BaseHuskHomesAPI {
      * @param rtpArgs       Arguments that will be passed to the implementing {@link RandomTeleportEngine}
      * @since 3.0
      */
-<<<<<<< HEAD
-    public final CompletableFuture<TeleportResult> randomlyTeleportPlayer(@NotNull OnlineUser user,
-                                                                          final boolean timedTeleport,
-                                                                          @NotNull String... rtpArgs) {
-        return CompletableFuture.supplyAsync(() -> plugin.getRandomTeleportEngine()
-            .getRandomPosition(user.getPosition().world, rtpArgs)
-            .thenApply(position -> {
-                if (position.isPresent()) {
-                    final TeleportBuilder builder = Teleport.builder(plugin, user)
-                        .setTarget(position.get());
-
-                    return timedTeleport
-                        ? builder.toTimedTeleport()
-                        .thenApplyAsync(teleport -> teleport.execute().join().getState()).join()
-                        : builder.toTeleport()
-                        .thenApplyAsync(teleport -> teleport.execute().join().getState()).join();
-                } else {
-                    return TeleportResult.CANCELLED;
-                }
-            }).join());
-=======
     public final void randomlyTeleportPlayer(@NotNull OnlineUser user, boolean timedTeleport, @NotNull String... rtpArgs) {
         plugin.getRandomTeleportEngine()
                 .getRandomPosition(user.getPosition().getWorld(), rtpArgs)
@@ -730,7 +681,6 @@ public abstract class BaseHuskHomesAPI {
                 }).exceptionally(e -> {
                     throw new IllegalStateException("Random teleport engine threw an exception", e);
                 });
->>>>>>> master
     }
 
     /**

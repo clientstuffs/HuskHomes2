@@ -26,10 +26,7 @@ import net.william278.desertwell.Version;
 import net.william278.huskhomes.command.BukkitCommand;
 import net.william278.huskhomes.command.Command;
 import net.william278.huskhomes.command.DisabledCommand;
-import net.william278.huskhomes.config.Locales;
-import net.william278.huskhomes.config.Server;
-import net.william278.huskhomes.config.Settings;
-import net.william278.huskhomes.config.Spawn;
+import net.william278.huskhomes.config.*;
 import net.william278.huskhomes.database.Database;
 import net.william278.huskhomes.database.MySqlDatabase;
 import net.william278.huskhomes.database.SqLiteDatabase;
@@ -76,6 +73,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -152,9 +150,13 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
 
         // Initialize the database
         initialize(getSettings().getDatabaseType().getDisplayName() + " database connection", (plugin) -> {
-            this.database = switch (getSettings().getDatabaseType()) {
-                case MYSQL -> new MySqlDatabase(this);
-                case SQLITE -> new SqLiteDatabase(this);
+            switch (getSettings().getDatabaseType()) {
+                case MYSQL:
+                    database = new MySqlDatabase(this);
+                    break;
+                case SQLITE:
+                    database = new SqLiteDatabase(this);
+                    break;
             };
 
             database.initialize();
@@ -166,9 +168,13 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         // Initialize the network messenger if proxy mode is enabled
         if (getSettings().doCrossServer()) {
             initialize(settings.getBrokerType().getDisplayName() + " message broker", (plugin) -> {
-                broker = switch (settings.getBrokerType()) {
-                    case PLUGIN_MESSAGE -> new PluginMessageBroker(this);
-                    case REDIS -> new RedisBroker(this);
+                switch (settings.getBrokerType()) {
+                    case PLUGIN_MESSAGE:
+                        broker = new PluginMessageBroker(this);
+                        break;
+                    case REDIS:
+                        broker = new RedisBroker(this);
+                        break;
                 };
                 broker.initialize();
             });
@@ -338,6 +344,11 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         return Objects.requireNonNull(teleportQueue, "Attempted to access queue system when it was not initialized");
     }
 
+    @Override
+    public void setTeleportQueue(@NotNull TeleportQueue teleportQueue) {
+        this.teleportQueue = teleportQueue;
+    }
+
     @NotNull
     @Override
     public RandomTeleportEngine getRandomTeleportEngine() {
@@ -465,56 +476,10 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         return getServer().getWorlds().stream()
                 .filter(world -> BukkitAdapter.adaptWorld(world).isPresent())
                 .map(world -> BukkitAdapter.adaptWorld(world).orElse(null))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
-<<<<<<< HEAD
-    public boolean reload() {
-        try {
-            // Load settings
-            this.settings = Annotaml.create(new File(getDataFolder(), "config.yml"), Settings.class).get();
-
-            // Load locales from language preset default
-            final Locales languagePresets = Annotaml.create(Locales.class, Objects.requireNonNull(getResource("locales/" + settings.language + ".yml"))).get();
-            this.locales = Annotaml.create(new File(getDataFolder(), "messages_" + settings.language + ".yml"), languagePresets).get();
-
-            // Load server from file
-            if (settings.crossServer) {
-                this.server = Annotaml.create(new File(getDataFolder(), "server.yml"), Server.class).get();
-            } else {
-                this.server = new Server(Server.getDefaultServerName());
-            }
-
-            // Load spawn location from file
-            final File spawnFile = new File(getDataFolder(), "spawn.yml");
-            if (spawnFile.exists()) {
-                this.serverSpawn = Annotaml.create(spawnFile, CachedSpawn.class).get();
-            }
-
-            // Load unsafe blocks from resources
-            final InputStream blocksResource = getResource("safety/unsafe_blocks.yml");
-            this.unsafeBlocks = Annotaml.create(new UnsafeBlocks(), Objects.requireNonNull(blocksResource)).get();
-
-            GrpcClient.initiate(settings.grpcHost);
-
-            if (this.settings.queue) {
-                this.getLoggingAdapter().info("Initializing the queue system...");
-                this.teleportQueue = new TeleportQueue(this);
-                this.teleportQueue.initialize();
-                this.getLoggingAdapter().info("Successfully initialized the queue system.");
-            }
-
-            return true;
-        } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            getLoggingAdapter().log(Level.SEVERE, "Failed to reload HuskHomes config or messages file", e);
-        }
-        return false;
-    }
-
-    @Override
-=======
->>>>>>> master
     public boolean isBlockUnsafe(@NotNull String blockId) {
         return unsafeBlocks.isUnsafe(blockId);
     }
@@ -523,22 +488,9 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
     public void registerMetrics(int metricsId) {
         try {
             final Metrics metrics = new Metrics(this, metricsId);
-<<<<<<< HEAD
-            metrics.addCustomChart(new SimplePie("bungee_mode", () -> Boolean.toString(getSettings().crossServer)));
-            if (getSettings().crossServer) {
-                metrics.addCustomChart(new SimplePie("messenger_type", () -> getSettings().messengerType.displayName));
-            }
-            metrics.addCustomChart(new SimplePie("language", () -> getSettings().language.toLowerCase(Locale.ROOT)));
-            metrics.addCustomChart(new SimplePie("database_type", () -> getSettings().databaseType.displayName));
-            metrics.addCustomChart(new SimplePie("using_economy", () -> Boolean.toString(getSettings().economy)));
-            metrics.addCustomChart(new SimplePie("using_map", () -> Boolean.toString(getSettings().doMapHook)));
-            if (getSettings().doMapHook) {
-                metrics.addCustomChart(new SimplePie("map_type", () -> getSettings().mappingPlugin.displayName));
-=======
             metrics.addCustomChart(new SimplePie("bungee_mode", () -> Boolean.toString(getSettings().doCrossServer())));
             if (getSettings().doCrossServer()) {
                 metrics.addCustomChart(new SimplePie("messenger_type", () -> getSettings().getBrokerType().getDisplayName()));
->>>>>>> master
             }
             metrics.addCustomChart(new SimplePie("language", () -> getSettings().getLanguage().toLowerCase()));
             metrics.addCustomChart(new SimplePie("database_type", () -> getSettings().getDatabaseType().getDisplayName()));
@@ -550,8 +502,6 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         }
     }
 
-<<<<<<< HEAD
-=======
     @Override
     public void initializePluginChannels() {
         Bukkit.getMessenger().registerIncomingPluginChannel(this, PluginMessageBroker.BUNGEE_CHANNEL_ID, this);
@@ -569,9 +519,9 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
 
     @Override
     public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, byte[] message) {
-        if (broker != null && broker instanceof PluginMessageBroker pluginMessenger
+        if (broker != null && broker instanceof PluginMessageBroker
                 && getSettings().getBrokerType() == Broker.Type.PLUGIN_MESSAGE) {
-            pluginMessenger.onReceive(channel, BukkitUser.adapt(player), message);
+            ((PluginMessageBroker) broker).onReceive(channel, BukkitUser.adapt(player), message);
         }
     }
 
@@ -580,6 +530,4 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
     public HuskHomes getPlugin() {
         return this;
     }
-
->>>>>>> master
 }

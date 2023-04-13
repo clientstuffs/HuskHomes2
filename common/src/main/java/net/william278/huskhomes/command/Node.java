@@ -152,7 +152,7 @@ public abstract class Node implements Executable {
     }
 
     protected Position getBasePosition(@NotNull CommandUser executor) {
-        return executor instanceof OnlineUser user ? user.getPosition() : plugin.getSpawn()
+        return executor instanceof OnlineUser ? ((OnlineUser) executor).getPosition() : plugin.getSpawn()
                 .orElse(Position.at(0, 0, 0, 0, 0, plugin.getWorlds().get(0), plugin.getServerName()));
     }
 

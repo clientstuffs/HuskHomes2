@@ -24,12 +24,7 @@ import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-<<<<<<< HEAD
-import java.util.Locale;
-import java.util.stream.Collectors;
-=======
 import java.util.Optional;
->>>>>>> master
 
 /**
  * A command used for responding to tp requests - can either be a /tpaccept or /tpdecline command, controlled by the
@@ -45,29 +40,13 @@ public class TpRespondCommand extends InGameCommand implements UserListTabProvid
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (args.length > 1) {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/" + command + " [player]")
-                .ifPresent(onlineUser::sendMessage);
-=======
     public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
         final Optional<String> requesterName = parseStringArg(args, 0);
         if (requesterName.isPresent()) {
             plugin.getManager().requests().respondToTeleportRequestBySenderName(executor, requesterName.get(), accept);
->>>>>>> master
             return;
         }
         plugin.getManager().requests().respondToTeleportRequest(executor, accept);
     }
 
-<<<<<<< HEAD
-    @Override
-    public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
-        return args.length <= 1 ? plugin.getCache().players.stream()
-            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
-            .sorted().collect(Collectors.toList()) : Collections.emptyList();
-    }
-=======
->>>>>>> master
 }

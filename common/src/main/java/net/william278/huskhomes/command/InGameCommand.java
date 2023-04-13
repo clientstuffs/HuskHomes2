@@ -35,12 +35,12 @@ public abstract class InGameCommand extends Command {
 
     @Override
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
-        if (!(executor instanceof OnlineUser user)) {
+        if (!(executor instanceof OnlineUser)) {
             plugin.getLocales().getLocale("error_in_game_only")
                     .ifPresent(executor::sendMessage);
             return;
         }
-        this.execute(user, args);
+        this.execute(((OnlineUser) executor), args);
     }
 
     public abstract void execute(@NotNull OnlineUser executor, @NotNull String[] args);

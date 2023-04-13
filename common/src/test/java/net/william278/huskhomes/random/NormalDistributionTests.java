@@ -36,32 +36,6 @@ import java.util.UUID;
 @DisplayName("Normal Distribution Tests")
 public class NormalDistributionTests {
 
-<<<<<<< HEAD
-    // Plots location distribution
-    public static void generateRtpLocationDistributionImage() {
-        final List<Location> locations = generateLocations(2000);
-        final double[] xValues = new double[locations.size()];
-        final double[] zValues = new double[locations.size()];
-        for (int i = 0; i < locations.size(); i++) {
-            xValues[i] = locations.get(i).x;
-            zValues[i] = locations.get(i).z;
-        }
-        final Plot plot = Plot.plot(Plot.plotOpts()
-                .title("RTP Normal Distribution demo")
-                .legend(Plot.LegendFormat.BOTTOM))
-            .xAxis("x", Plot.axisOpts().range(-3250, 3250))
-            .yAxis("z", Plot.axisOpts().range(-3250, 3250))
-            .series("Data", Plot.data()
-                    .xy(xValues, zValues),
-                Plot.seriesOpts()
-                    .marker(Plot.Marker.CIRCLE)
-                    .markerColor(new Color(0, 60, 255, 180))
-                    .color(new Color(0, 0, 0, 0)));
-        try {
-            plot.save("images/rtp-location-distribution", "png");
-        } catch (IOException e) {
-            e.printStackTrace();
-=======
     private final static float MEAN = 0.75f;
     private final static float STANDARD_DEVIATION = 2f;
     private final static float SPAWN_RADIUS = 500f;
@@ -123,7 +97,6 @@ public class NormalDistributionTests {
             } catch (IOException e) {
                 e.printStackTrace();
             }
->>>>>>> master
         }
 
     }
@@ -132,13 +105,8 @@ public class NormalDistributionTests {
         final List<Location> locations = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             locations.add(NormalDistributionEngine.generateLocation(
-<<<<<<< HEAD
-                new Location(0, 0, 0, 0, 0, new World("TestWorld", UUID.randomUUID())),
-                0.75f, 2f, 500f, 3000f));
-=======
                     Location.at(0, 0, 0, 0, 0, World.from("TestWorld", UUID.randomUUID())),
                     MEAN, STANDARD_DEVIATION, SPAWN_RADIUS, MAX_RADIUS));
->>>>>>> master
         }
         return locations;
     }

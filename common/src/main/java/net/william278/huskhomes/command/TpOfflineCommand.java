@@ -28,13 +28,11 @@ import net.william278.huskhomes.user.SavedUser;
 import net.william278.huskhomes.user.User;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
-<<<<<<< HEAD
 import java.util.Locale;
-import java.util.stream.Collectors;
-=======
 import java.util.Optional;
->>>>>>> master
+import java.util.stream.Collectors;
 
 public class TpOfflineCommand extends InGameCommand implements UserListTabProvider {
 
@@ -44,47 +42,6 @@ public class TpOfflineCommand extends InGameCommand implements UserListTabProvid
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (args.length != 1) {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/tpoffline <player>")
-                .ifPresent(onlineUser::sendMessage);
-            return;
-        }
-        final String targetUser = args[0];
-        plugin.getDatabase().getUserDataByName(targetUser).thenAccept(userData -> {
-            if (userData.isEmpty()) {
-                plugin.getLocales().getLocale("error_player_not_found", targetUser)
-                    .ifPresent(onlineUser::sendMessage);
-                return;
-            }
-            plugin.getDatabase().getOfflinePosition(userData.get().user()).thenAccept(offlinePosition -> {
-                if (offlinePosition.isEmpty()) {
-                    plugin.getLocales().getLocale("error_no_offline_position", targetUser)
-                        .ifPresent(onlineUser::sendMessage);
-                    return;
-                }
-                plugin.getLocales().getLocale("teleporting_offline_player", targetUser)
-                    .ifPresent(onlineUser::sendMessage);
-                Teleport.builder(plugin, onlineUser)
-                    .setTarget(offlinePosition.get())
-                    .toTeleport()
-                    .thenAccept(teleport -> teleport.execute().thenAccept(result -> {
-                        if (result.successful()) {
-                            plugin.getLocales().getLocale("teleporting_offline_complete", targetUser)
-                                .ifPresent(onlineUser::sendMessage);
-                        }
-                    }));
-            });
-        });
-    }
-
-    @Override
-    public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
-        return args.length <= 1 ? plugin.getCache().players.stream()
-            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
-            .sorted().collect(Collectors.toList()) : Collections.emptyList();
-=======
     public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
         final Optional<String> optionalUser = parseStringArg(args, 0);
         if (optionalUser.isEmpty()) {
@@ -123,7 +80,6 @@ public class TpOfflineCommand extends InGameCommand implements UserListTabProvid
         } catch (TeleportationException e) {
             e.displayMessage(user, plugin, args);
         }
->>>>>>> master
     }
 
 }

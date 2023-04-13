@@ -39,7 +39,7 @@ public interface BukkitEventDispatcher extends EventDispatcher {
     @Override
     default <T extends Event> boolean fireIsCancelled(@NotNull T event) {
         Bukkit.getPluginManager().callEvent((org.bukkit.event.Event) event);
-        return event instanceof Cancellable cancellable && cancellable.isCancelled();
+        return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
     @Override

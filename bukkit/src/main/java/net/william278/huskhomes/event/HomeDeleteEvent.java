@@ -56,17 +56,13 @@ public class HomeDeleteEvent extends Event implements IHomeDeleteEvent, Cancella
     }
 
     @Override
-<<<<<<< HEAD
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 
-    @Override
-    public @NotNull Home getHome() {
-=======
     @NotNull
+    @Override
     public Home getHome() {
->>>>>>> master
         return home;
     }
 

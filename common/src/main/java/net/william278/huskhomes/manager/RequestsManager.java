@@ -298,7 +298,8 @@ public class RequestsManager {
             // If the request is a tpa here request, teleport the recipient to the sender
             if (accepted && request.getType() == TeleportRequest.Type.TPA_HERE) {
                 final TeleportBuilder builder = Teleport.builder(plugin)
-                        .teleporter(recipient);
+                        .teleporter(recipient)
+                        .setQueueType("tpa-here");
 
                 // Strict /tpahere requests will teleport to where the sender was when typing the command
                 if (plugin.getSettings().doStrictTpaHereRequests()) {
@@ -333,6 +334,7 @@ public class RequestsManager {
                 Teleport.builder(plugin)
                         .teleporter(requester)
                         .target(request.getRecipientName())
+                        .setQueueType("tpa")
                         .toTimedTeleport()
                         .execute();
             } catch (TeleportationException e) {

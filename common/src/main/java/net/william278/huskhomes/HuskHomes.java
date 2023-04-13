@@ -25,25 +25,17 @@ import net.kyori.adventure.key.Key;
 import net.william278.annotaml.Annotaml;
 import net.william278.desertwell.UpdateChecker;
 import net.william278.desertwell.Version;
-import net.william278.huskhomes.command.CommandBase;
-import net.william278.huskhomes.config.CachedSpawn;
 import net.william278.huskhomes.command.Command;
 import net.william278.huskhomes.config.Locales;
 import net.william278.huskhomes.config.Server;
 import net.william278.huskhomes.config.Settings;
 import net.william278.huskhomes.database.Database;
 import net.william278.huskhomes.event.EventDispatcher;
+import net.william278.huskhomes.grpc.GrpcClient;
 import net.william278.huskhomes.hook.EconomyHook;
 import net.william278.huskhomes.hook.MapHook;
-import net.william278.huskhomes.hook.PluginHook;
-import net.william278.huskhomes.migrator.Migrator;
-import net.william278.huskhomes.network.Messenger;
-import net.william278.huskhomes.player.OnlineUser;
-import net.william278.huskhomes.position.*;
 import net.william278.huskhomes.queue.TeleportQueue;
 import net.william278.huskhomes.config.Spawn;
-import net.william278.huskhomes.database.Database;
-import net.william278.huskhomes.event.EventDispatcher;
 import net.william278.huskhomes.hook.*;
 import net.william278.huskhomes.manager.Manager;
 import net.william278.huskhomes.network.Broker;
@@ -67,7 +59,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.lang.reflect.InvocationTargetException;
@@ -75,6 +66,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -206,7 +198,7 @@ public interface HuskHomes extends TaskRunner, EventDispatcher {
     Database getDatabase();
 
     /**
-     * The {@link Validator} for validating thome names and descriptions
+     * The {@link Validator} for validating home names and descriptions
      *
      * @return the {@link Validator} instance
      */
@@ -229,13 +221,10 @@ public interface HuskHomes extends TaskRunner, EventDispatcher {
     @NotNull
     Broker getMessenger();
 
-    /**
-     * The {@link TeleportQueue} that manages queues
-     *
-     * @return the {@link TeleportQueue} implementation
-     */
     @NotNull
     TeleportQueue getTeleportQueue();
+
+    void setTeleportQueue(@NotNull TeleportQueue teleportQueue);
 
     /**
      * The {@link RandomTeleportEngine} that manages random teleports
@@ -413,7 +402,7 @@ public interface HuskHomes extends TaskRunner, EventDispatcher {
         return Stream.concat(
                 getGlobalPlayerList().values().stream().flatMap(Collection::stream),
                 getLocalPlayerList().stream()
-        ).distinct().sorted().toList();
+        ).distinct().sorted().collect(Collectors.toList());
     }
 
     default void setPlayerList(@NotNull String server, @NotNull List<String> players) {
@@ -428,7 +417,7 @@ public interface HuskHomes extends TaskRunner, EventDispatcher {
     default List<String> getLocalPlayerList() {
         return getOnlineUsers().stream()
                 .map(OnlineUser::getUsername)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @NotNull
@@ -475,6 +464,16 @@ public interface HuskHomes extends TaskRunner, EventDispatcher {
             // Load unsafe blocks from resources
             final InputStream blocksResource = getResource("safety/unsafe_blocks.yml");
             setUnsafeBlocks(Annotaml.create(new UnsafeBlocks(), Objects.requireNonNull(blocksResource)).get());
+
+            GrpcClient.initiate(this.getSettings().grpcHost);
+
+            if (this.getSettings().queue) {
+                this.log(Level.INFO, "Initializing the queue system...");
+                final var teleportQueue = new TeleportQueue(this);
+                this.setTeleportQueue(teleportQueue);
+                teleportQueue.initialize();
+                this.log(Level.INFO, "Successfully initialized the queue system.");
+            }
 
             return true;
         } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {

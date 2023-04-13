@@ -1,27 +1,43 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.player.OnlineUser;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-public class LeaveQueueCommand extends CommandBase {
+public class LeaveQueueCommand extends InGameCommand {
 
-    protected LeaveQueueCommand(@NotNull HuskHomes implementor) {
-        super("leavequeue", Permission.COMMAND_LEAVE_QUEUE, implementor);
+    protected LeaveQueueCommand(@NotNull HuskHomes plugin) {
+        super("leavequeue", List.of(), "", plugin);
+        addAdditionalPermissions(Map.of("leave-queue", false));
     }
 
     @Override
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (!this.plugin.getSettings().crossServer || !this.plugin.getSettings().queue) {
+    public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
+        if (!this.plugin.getSettings().doCrossServer() || !this.plugin.getSettings().queue) {
             return;
         }
-        this.plugin.getTeleportQueue().leave(onlineUser);
+        this.plugin.getTeleportQueue().leave(executor);
     }
 }

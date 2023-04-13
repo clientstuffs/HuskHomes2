@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * A handler for when events take place
@@ -55,37 +56,6 @@ public class EventListener {
      * @param onlineUser the joining {@link OnlineUser}
      */
     protected final void handlePlayerJoin(@NotNull OnlineUser onlineUser) {
-<<<<<<< HEAD
-        // Handle the first player joining the server
-        plugin.getDatabase().ensureUser(onlineUser)
-            // Handle cross-server checks
-            .thenRun(() -> handleInboundTeleport(onlineUser).thenRun(() -> {
-                // Update the cached player list
-                plugin.getCache().updatePlayerListCache(plugin, onlineUser);
-            }).thenRun(() -> {
-                // Get this user's tp-ignore state and set locally
-                plugin.getDatabase().getUserData(onlineUser.uuid).thenAccept(userData -> {
-                    if (userData.isPresent()) {
-                        final boolean ignoringRequests = userData.get().ignoringTeleports();
-                        plugin.getRequestManager().setIgnoringRequests(onlineUser, ignoringRequests);
-
-                        // Send a reminder message if they are still ignoring requests
-                        if (ignoringRequests) {
-                            plugin.getLocales().getRawLocale("tpignore_on_notification",
-                                    plugin.getLocales().getRawLocale("tpignore_toggle_button").orElse(""))
-                                .ifPresent(locale -> onlineUser.sendMessage(new MineDown(locale)));
-                        }
-                    }
-                }).thenRun(() -> {
-                    // Cache this user's homes
-                    plugin.getDatabase()
-                        .getHomes(onlineUser)
-                        .thenAccept(homes -> plugin.getCache().homes.put(onlineUser.uuid, homes.stream()
-                            .map(home -> home.meta.name)
-                            .collect(Collectors.toList())));
-                });
-            }));
-=======
         plugin.runAsync(() -> {
             // Ensure the user is in the database
             plugin.getDatabase().ensureUser(onlineUser);
@@ -119,7 +89,6 @@ public class EventListener {
                 }
             });
         });
->>>>>>> master
     }
 
     /**
@@ -134,36 +103,11 @@ public class EventListener {
                 return;
             }
 
-<<<<<<< HEAD
-                // Handle cross-server respawn
-                if (teleport.get().type == TeleportType.RESPAWN) {
-                    final Optional<Position> bedPosition = onlineUser.getBedSpawnPosition();
-                    if (bedPosition.isEmpty()) {
-                        plugin.getLocalCachedSpawn().flatMap(spawn -> spawn.getPosition(plugin.getServerName()))
-                            .ifPresent(position -> onlineUser.teleportLocally(position, plugin.getSettings().asynchronousTeleports));
-                        onlineUser.sendTranslatableMessage("block.minecraft.spawn.not_valid");
-                    } else {
-                        onlineUser.teleportLocally(bedPosition.get(), plugin.getSettings().asynchronousTeleports);
-                    }
-                    plugin.getDatabase().setCurrentTeleport(onlineUser, null).thenRunAsync(() ->
-                        plugin.getDatabase().setRespawnPosition(onlineUser, bedPosition.orElse(null)));
-                    return;
-                }
+            if (teleport.getType() == Teleport.Type.SERVER) {
+                this.plugin.getDatabase().setCurrentTeleport(teleporter, null);
+                return;
+            }
 
-                if (teleport.get().type == TeleportType.SERVER) {
-                    this.plugin.getDatabase().setCurrentTeleport(onlineUser, null);
-                    return;
-                }
-
-                // Teleport the player locally
-                teleport.get().execute()
-                    .thenRun(() -> plugin.getDatabase().setCurrentTeleport(onlineUser, null))
-                    .exceptionally(throwable -> {
-                        plugin.getLoggingAdapter().log(Level.SEVERE,
-                            "An error occurred while teleporting an inbound player", throwable);
-                        return null;
-                    });
-=======
             try {
                 teleporter.teleportLocally((Position) teleport.getTarget(), plugin.getSettings().doAsynchronousTeleports());
             } catch (TeleportationException e) {
@@ -203,7 +147,6 @@ public class EventListener {
                     }
                 }
                 teleporter.sendTranslatableMessage("block.minecraft.spawn.not_valid");
->>>>>>> master
             });
         } else {
             try {
@@ -222,20 +165,6 @@ public class EventListener {
      * @param onlineUser the leaving {@link OnlineUser}
      */
     protected final void handlePlayerLeave(@NotNull OnlineUser onlineUser) {
-<<<<<<< HEAD
-        // Remove this user's home cache
-        plugin.getCache().homes.remove(onlineUser.uuid);
-
-        // Update the cached player list using another online player if possible
-        plugin.getOnlinePlayers()
-            .stream()
-            .filter(onlinePlayer -> !onlinePlayer.equals(onlineUser))
-            .findAny()
-            .ifPresent(updater -> plugin.getCache().updatePlayerListCache(plugin, updater));
-
-
-=======
->>>>>>> master
         // Set offline position
         plugin.getDatabase().setOfflinePosition(onlineUser, onlineUser.getPosition());
 
@@ -246,7 +175,7 @@ public class EventListener {
         if (plugin.getSettings().doCrossServer()) {
             final List<String> localPlayerList = plugin.getLocalPlayerList().stream()
                     .filter(player -> !player.equals(onlineUser.getUsername()))
-                    .toList();
+                    .collect(Collectors.toList());
 
             if (plugin.getSettings().getBrokerType() == Broker.Type.REDIS) {
                 this.synchronizeGlobalPlayerList(onlineUser, localPlayerList);
@@ -299,28 +228,6 @@ public class EventListener {
      * @param onlineUser the respawning {@link OnlineUser}
      */
     protected final void handlePlayerRespawn(@NotNull OnlineUser onlineUser) {
-<<<<<<< HEAD
-        // Display the return by death via /back notification
-        if (plugin.getSettings().backCommandReturnByDeath
-            && onlineUser.hasPermission(Permission.COMMAND_BACK.node)
-            && onlineUser.hasPermission(Permission.COMMAND_BACK_RETURN_BY_DEATH.node)) {
-            plugin.getLocales().getLocale("return_by_death_notification")
-                .ifPresent(onlineUser::sendMessage);
-        }
-
-        // Respawn the player cross-server if needed
-        if (plugin.getSettings().crossServer && plugin.getSettings().globalRespawning) {
-            plugin.getDatabase().getRespawnPosition(onlineUser).thenAccept(position -> position.ifPresent(respawnPosition -> {
-                if (!respawnPosition.server.equals(plugin.getServerName())) {
-                    Teleport.builder(plugin, onlineUser)
-                        .setType(TeleportType.RESPAWN)
-                        .setTarget(respawnPosition)
-                        .toTeleport()
-                        .thenAccept(Teleport::execute);
-                }
-            }));
-        }
-=======
         plugin.runAsync(() -> {
             // Display the return by death via /back notification
             final boolean canReturnByDeath = plugin.getCommand(BackCommand.class)
@@ -360,7 +267,6 @@ public class EventListener {
                         e.displayMessage(onlineUser, plugin, new String[0]);
                     }
                 });
->>>>>>> master
     }
 
     /**
@@ -374,14 +280,8 @@ public class EventListener {
             return;
         }
 
-<<<<<<< HEAD
-        plugin.getDatabase().getUserData(onlineUser.uuid)
-            .thenAccept(userData -> userData.ifPresent(data -> plugin.getDatabase()
-                .setLastPosition(data.user(), sourcePosition)));
-=======
         plugin.runAsync(() -> plugin.getDatabase().getUserData(onlineUser.getUuid())
                 .ifPresent(data -> plugin.getDatabase().setLastPosition(data.getUser(), sourcePosition)));
->>>>>>> master
     }
 
     /**

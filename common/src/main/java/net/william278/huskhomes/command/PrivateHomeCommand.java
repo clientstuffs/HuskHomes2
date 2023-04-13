@@ -36,11 +36,12 @@ public class PrivateHomeCommand extends HomeCommand {
     @Override
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
         if (args.length == 0) {
-            if (!(executor instanceof OnlineUser user)) {
+            if (!(executor instanceof OnlineUser)) {
                 plugin.getLocales().getLocale("error_invalid_syntax", getUsage())
                         .ifPresent(executor::sendMessage);
                 return;
             }
+            OnlineUser user = (OnlineUser) executor;
 
             // If the user has a home, teleport them there, otherwise show them their home list
             final List<Home> homes = plugin.getDatabase().getHomes(user);

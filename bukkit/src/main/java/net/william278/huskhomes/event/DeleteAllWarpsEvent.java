@@ -53,15 +53,12 @@ public class DeleteAllWarpsEvent extends Event implements IDeleteAllWarpsEvent, 
     }
 
     @Override
-<<<<<<< HEAD
     public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 
-=======
     @NotNull
     public CommandUser getDeleter() {
         return deleter;
     }
->>>>>>> master
 }

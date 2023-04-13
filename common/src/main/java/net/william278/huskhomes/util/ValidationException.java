@@ -35,43 +35,64 @@ public class ValidationException extends IllegalArgumentException {
 
     public void dispatchHomeError(@NotNull CommandUser viewer, boolean other, @NotNull HuskHomes plugin, @NotNull String... args) {
         switch (error) {
-            case NOT_FOUND -> plugin.getLocales()
+            case NOT_FOUND:
+                plugin.getLocales()
                     .getLocale(other ? "error_home_invalid_other" : "error_home_invalid", args)
                     .ifPresent(viewer::sendMessage);
-            case NAME_TAKEN -> plugin.getLocales()
+                break;
+            case NAME_TAKEN:
+                plugin.getLocales()
                     .getLocale("error_home_name_taken")
                     .ifPresent(viewer::sendMessage);
-            case NAME_INVALID -> plugin.getLocales()
+                break;
+            case NAME_INVALID:
+                plugin.getLocales()
                     .getLocale("error_home_name_characters", args)
                     .ifPresent(viewer::sendMessage);
-            case NOT_ENOUGH_HOME_SLOTS, REACHED_MAX_HOMES -> plugin.getLocales()
+                break;
+            case NOT_ENOUGH_HOME_SLOTS:
+            case REACHED_MAX_HOMES:
+                plugin.getLocales()
                     .getLocale("error_set_home_maximum_homes", Integer.toString(plugin.getManager().homes()
-                            .getMaxHomes(viewer instanceof OnlineUser user ? user : null)))
+                        .getMaxHomes(viewer instanceof OnlineUser ? (OnlineUser) viewer : null)))
                     .ifPresent(viewer::sendMessage);
-            case REACHED_MAX_PUBLIC_HOMES -> plugin.getLocales()
+                break;
+            case REACHED_MAX_PUBLIC_HOMES:
+                plugin.getLocales()
                     .getLocale("error_edit_home_maximum_public_homes", Integer.toString(plugin.getManager().homes()
-                            .getMaxPublicHomes(viewer instanceof OnlineUser user ? user : null)))
+                        .getMaxPublicHomes(viewer instanceof OnlineUser ? (OnlineUser) viewer : null)))
                     .ifPresent(viewer::sendMessage);
-            case DESCRIPTION_INVALID -> plugin.getLocales()
+                break;
+            case DESCRIPTION_INVALID:
+                plugin.getLocales()
                     .getLocale("error_home_description_characters", args)
                     .ifPresent(viewer::sendMessage);
+                break;
         }
     }
 
     public void dispatchWarpError(@NotNull CommandUser viewer, @NotNull HuskHomes plugin, @NotNull String... args) {
         switch (error) {
-            case NOT_FOUND -> plugin.getLocales()
+            case NOT_FOUND:
+                plugin.getLocales()
                     .getLocale("error_warp_invalid", args)
                     .ifPresent(viewer::sendMessage);
-            case NAME_TAKEN -> plugin.getLocales()
+                break;
+            case NAME_TAKEN:
+                plugin.getLocales()
                     .getLocale("error_warp_name_taken", args)
                     .ifPresent(viewer::sendMessage);
-            case NAME_INVALID -> plugin.getLocales()
+                break;
+            case NAME_INVALID:
+                plugin.getLocales()
                     .getLocale("error_warp_name_characters", args)
                     .ifPresent(viewer::sendMessage);
-            case DESCRIPTION_INVALID -> plugin.getLocales()
+                break;
+            case DESCRIPTION_INVALID:
+                plugin.getLocales()
                     .getLocale("error_warp_description_characters", args)
                     .ifPresent(viewer::sendMessage);
+                break;
         }
     }
 

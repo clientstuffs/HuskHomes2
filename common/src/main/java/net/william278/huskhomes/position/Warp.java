@@ -19,6 +19,9 @@
 
 package net.william278.huskhomes.position;
 
+import net.william278.huskhomes.user.OnlineUser;
+import net.william278.huskhomes.util.Permission;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -56,11 +59,6 @@ public class Warp extends SavedPosition {
     }
 
     @NotNull
-<<<<<<< HEAD
-    @Subst("huskhomes.command.warp")
-    public static String getPermissionNode(@NotNull String warp) {
-        return Permission.COMMAND_WARP.node + "." + warp.toLowerCase(Locale.ROOT);
-=======
     public static String getPermission(@NotNull String warpName) {
         return PERMISSION_PREFIX + warpName.toLowerCase();
     }
@@ -68,23 +66,10 @@ public class Warp extends SavedPosition {
     @NotNull
     public String getPermission() {
         return getPermission(getName());
->>>>>>> master
     }
 
     @NotNull
     public static String getWildcardPermission() {
         return PERMISSION_PREFIX + "*";
     }
-
-    /**
-     * Check if a {@link OnlineUser} has permission to teleport to this warp
-     *
-     * @param restrictWarps Whether to restrict warps to permission nodes
-     * @param user          The {@link OnlineUser} to check
-     * @return true if the user has permission to teleport to this warp
-     */
-    public boolean hasPermission(boolean restrictWarps, @NotNull OnlineUser user) {
-        return hasPermission(restrictWarps, user, meta.name);
-    }
-
 }

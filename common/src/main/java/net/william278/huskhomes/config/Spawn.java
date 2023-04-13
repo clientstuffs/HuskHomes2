@@ -31,11 +31,10 @@ import java.util.UUID;
 /**
  * Used to store the server spawn location
  */
-@YamlFile(header = """
-        ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-        ┃    Server /spawn location    ┃
-        ┃ Edit in-game using /setspawn ┃
-        ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛""")
+@YamlFile(header = "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n" +
+                   "┃    Server /spawn location    ┃\n" +
+                   "┃ Edit in-game using /setspawn ┃\n" +
+                   "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 public class Spawn {
 
     public double x;

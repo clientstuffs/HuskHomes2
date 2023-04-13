@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TimedTeleport extends Teleport {
@@ -39,18 +40,10 @@ public class TimedTeleport extends Teleport {
     private final double startHealth;
     private int timeLeft;
 
-<<<<<<< HEAD
-    protected TimedTeleport(@NotNull OnlineUser teleporter, @NotNull OnlineUser executor, @NotNull Position target,
-                            @NotNull TeleportType type, int warmupTime, @NotNull Set<Settings.EconomyAction> economyActions,
-                            final boolean updateLastPosition, @Nullable final String queueType, @NotNull HuskHomes plugin) {
-        super(teleporter, executor, target, type, economyActions, updateLastPosition, queueType, plugin);
-        this.plugin = plugin;
-=======
     protected TimedTeleport(@NotNull OnlineUser executor, @NotNull OnlineUser teleporter, @NotNull Target target,
                             @NotNull Type type, int warmupTime, boolean updateLastPosition,
-                            @NotNull List<EconomyHook.Action> actions, @NotNull HuskHomes plugin) {
-        super(teleporter, executor, target, type, updateLastPosition, actions, plugin);
->>>>>>> master
+                            @NotNull List<EconomyHook.Action> actions, @Nullable final String queueType, @NotNull HuskHomes plugin) {
+        super(teleporter, executor, target, type, updateLastPosition, actions, queueType, plugin);
         this.startLocation = teleporter.getPosition();
         this.startHealth = teleporter.getHealth();
         this.timeLeft = Math.max(warmupTime, 0);
@@ -58,48 +51,16 @@ public class TimedTeleport extends Teleport {
     }
 
     @Override
-<<<<<<< HEAD
-    public CompletableFuture<CompletedTeleport> execute() {
-        // If the target has not been resolved, fail the teleport
-        if (target == null) {
-            return CompletableFuture.completedFuture(TeleportResult.FAILED_TARGET_NOT_RESOLVED)
-                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
-        }
-
-        if (this.queue()) {
-            return CompletableFuture.completedFuture(TeleportResult.COMPLETED_CROSS_SERVER)
-                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
-        }
-
-=======
     public void execute() throws TeleportationException {
->>>>>>> master
+        if (this.queue()) {return;}
+
         // Check if the teleporter can bypass warmup
         if (timeLeft == 0 || teleporter.hasPermission(BYPASS_PERMISSION)) {
             super.execute();
             return;
         }
 
-        // Check if the teleporter is already warming up to teleport
-<<<<<<< HEAD
-        if (plugin.getCache().currentlyOnWarmup.contains(teleporter.uuid)) {
-            return CompletableFuture.completedFuture(TeleportResult.FAILED_ALREADY_TELEPORTING)
-                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
-        }
 
-        // Check economy actions
-        for (Settings.EconomyAction economyAction : economyActions) {
-            if (!plugin.validateEconomyCheck(executor, economyAction)) {
-                return CompletableFuture.completedFuture(TeleportResult.CANCELLED_ECONOMY)
-                    .thenApply(resultState -> CompletedTeleport.from(resultState, this));
-            }
-        }
-
-        // Check if they are moving at the start of the teleport
-        if (teleporter.isMoving()) {
-            return CompletableFuture.completedFuture(TeleportResult.FAILED_MOVING)
-                .thenApply(resultState -> CompletedTeleport.from(resultState, this));
-=======
         if (plugin.isWarmingUp(teleporter.getUuid())) {
             throw new TeleportationException(TeleportationException.Type.ALREADY_WARMING_UP);
         }
@@ -110,7 +71,6 @@ public class TimedTeleport extends Teleport {
         // Check if they are moving at the start of the teleport
         if (teleporter.isMoving()) {
             throw new TeleportationException(TeleportationException.Type.WARMUP_ALREADY_MOVING);
->>>>>>> master
         }
 
         // Process the warmup and execute the teleport
@@ -135,12 +95,8 @@ public class TimedTeleport extends Teleport {
                         .ifPresent(this::sendStatusMessage);
                 } else {
                     plugin.getLocales().getLocale("teleporting_action_bar_processing")
-<<<<<<< HEAD
-                        .ifPresent(this::sendStatusMessage);
-=======
                             .ifPresent(this::sendStatusMessage);
                     super.execute();
->>>>>>> master
                 }
 
                 // Tick (decrement) the timed teleport timer and end it if done
@@ -178,12 +134,7 @@ public class TimedTeleport extends Teleport {
             plugin.getLocales().getLocale("teleporting_action_bar_cancelled")
                 .ifPresent(this::sendStatusMessage);
             plugin.getSettings().getSoundEffect(Settings.SoundEffectAction.TELEPORTATION_CANCELLED)
-<<<<<<< HEAD
-                .ifPresent(teleporter::playSound);
-            cancelled = true;
-=======
                     .ifPresent(teleporter::playSound);
->>>>>>> master
             return true;
         }
 
@@ -194,17 +145,7 @@ public class TimedTeleport extends Teleport {
             plugin.getLocales().getLocale("teleporting_action_bar_cancelled")
                 .ifPresent(this::sendStatusMessage);
             plugin.getSettings().getSoundEffect(Settings.SoundEffectAction.TELEPORTATION_CANCELLED)
-<<<<<<< HEAD
-                .ifPresent(teleporter::playSound);
-            cancelled = true;
-            return true;
-        }
-
-        if (shouldCancel()) {
-            cancelled = true;
-=======
                     .ifPresent(teleporter::playSound);
->>>>>>> master
             return true;
         }
 
@@ -214,28 +155,7 @@ public class TimedTeleport extends Teleport {
     }
 
     private void sendStatusMessage(@NotNull MineDown message) {
-<<<<<<< HEAD
-        switch (plugin.getSettings().teleportWarmupDisplay) {
-            case ACTION_BAR: {
-                teleporter.sendActionBar(message);
-                break;
-            }
-            case SUBTITLE: {
-                teleporter.sendTitle(message, true);
-                break;
-            }
-            case TITLE: {
-                teleporter.sendTitle(message, false);
-                break;
-            }
-            case MESSAGE: {
-                teleporter.sendMessage(message);
-                break;
-            }
-        }
-=======
         teleporter.sendMessage(message, plugin.getSettings().getTeleportWarmupDisplay());
->>>>>>> master
     }
 
     private boolean hasTeleporterMoved() {

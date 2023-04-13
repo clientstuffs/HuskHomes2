@@ -74,8 +74,6 @@ public final class NormalDistributionEngine extends RandomTeleportEngine {
     }
 
     /**
-<<<<<<< HEAD
-=======
      * Generate a safe ground-level {@link Location} through a randomized normally-distributed radius and random angle
      *
      * @param world The world to generate the location in
@@ -87,7 +85,6 @@ public final class NormalDistributionEngine extends RandomTeleportEngine {
     }
 
     /**
->>>>>>> master
      * Generates a normally distributed radius between the spawnRadius and the maximum radius value,
      * using the provided standard deviation and mean.
      *
@@ -109,17 +106,6 @@ public final class NormalDistributionEngine extends RandomTeleportEngine {
      */
     private static float getRandomAngle() {
         return (float) (Math.random() * 360);
-    }
-
-    /**
-     * Generate a safe ground-level {@link Location} through a randomized normally-distributed radius and random angle
-     *
-     * @param world The world to generate the location in
-     * @return A generated location
-     */
-    private CompletableFuture<Optional<Location>> generateSafeLocation(@NotNull World world) {
-        return plugin.resolveSafeGroundLocation(generateLocation(
-            getOrigin(world), mean, standardDeviation, spawnRadius, radius));
     }
 
     @Override

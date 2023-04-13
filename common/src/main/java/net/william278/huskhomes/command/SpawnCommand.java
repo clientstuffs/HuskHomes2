@@ -26,6 +26,7 @@ import net.william278.huskhomes.teleport.TeleportBuilder;
 import net.william278.huskhomes.teleport.Teleportable;
 import net.william278.huskhomes.teleport.TeleportationException;
 import net.william278.huskhomes.user.CommandUser;
+import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -40,25 +41,6 @@ public class SpawnCommand extends Command {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (args.length > 0) {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/spawn")
-                .ifPresent(onlineUser::sendMessage);
-            return;
-        }
-
-        plugin.getSpawn().thenAccept(position -> {
-            if (position.isEmpty()) {
-                plugin.getLocales().getLocale("error_spawn_not_set")
-                    .ifPresent(onlineUser::sendMessage);
-                return;
-            }
-            Teleport.builder(plugin, onlineUser)
-                .setTarget(position.get())
-                .toTimedTeleport().thenAccept(TimedTeleport::execute);
-        });
-=======
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
         final Optional<? extends Position> spawn = plugin.getSpawn();
         if (spawn.isEmpty()) {
@@ -75,7 +57,6 @@ public class SpawnCommand extends Command {
         }
 
         this.teleportToSpawn(optionalTeleporter.get(), executor, spawn.get(), args);
->>>>>>> master
     }
 
     public void teleportToSpawn(@NotNull Teleportable teleporter, @NotNull CommandUser executor, @NotNull Position spawn,

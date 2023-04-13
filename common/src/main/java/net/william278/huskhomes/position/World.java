@@ -45,16 +45,6 @@ public class World {
     public World() {
     }
 
-<<<<<<< HEAD
-    @Override
-    public boolean equals(@NotNull Object obj) {
-        if (obj instanceof World) {
-            final var world = (World) obj;
-
-            return world.uuid.equals(uuid);
-        }
-        return super.equals(obj);
-=======
     @NotNull
     public static World from(@NotNull String name, @NotNull UUID uuid, @NotNull Environment environment) {
         return new World(name, uuid, environment);
@@ -102,7 +92,6 @@ public class World {
 
     public void setEnvironment(@Nullable Environment environment) {
         this.environment = environment;
->>>>>>> master
     }
 
     /**
@@ -114,15 +103,12 @@ public class World {
         THE_END,
         CUSTOM
     }
-<<<<<<< HEAD
-=======
 
     @Override
     public boolean equals(@NotNull Object obj) {
-        if (obj instanceof World world) {
-            return world.getUuid().equals(getUuid());
+        if (obj instanceof World) {
+            return ((World) obj).getUuid().equals(getUuid());
         }
         return super.equals(obj);
     }
->>>>>>> master
 }

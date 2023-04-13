@@ -22,10 +22,13 @@ package net.william278.huskhomes.command;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Warp;
 import net.william278.huskhomes.user.CommandUser;
+import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.util.ValidationException;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DelWarpCommand extends SavedPositionCommand<Warp> {
 
@@ -34,59 +37,6 @@ public class DelWarpCommand extends SavedPositionCommand<Warp> {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (args.length == 0) {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/delwarp <name>")
-                .ifPresent(onlineUser::sendMessage);
-            return;
-        }
-        if (args.length <= 2) {
-            final String warpName = args[0];
-            final boolean confirm = args.length == 2 && args[1].equalsIgnoreCase("confirm");
-            plugin.getSavedPositionManager().deleteWarp(warpName).thenAccept(deleted -> {
-                if (deleted) {
-                    plugin.getLocales().getLocale("warp_deleted", warpName)
-                        .ifPresent(onlineUser::sendMessage);
-                    return;
-                }
-                if (warpName.equalsIgnoreCase("all")) {
-                    deleteAllWarps(onlineUser, confirm);
-                    return;
-                }
-
-                plugin.getLocales().getLocale("error_warp_invalid", warpName)
-                    .ifPresent(onlineUser::sendMessage);
-            });
-        } else {
-            plugin.getLocales().getLocale("error_invalid_syntax", "/delwarp <name>")
-                .ifPresent(onlineUser::sendMessage);
-        }
-    }
-
-    /**
-     * Delete all the server warps
-     *
-     * @param deleter the player who is deleting the warps
-     * @param confirm whether to skip the confirmation prompt
-     */
-    private void deleteAllWarps(@NotNull OnlineUser deleter, final boolean confirm) {
-        if (!confirm) {
-            plugin.getLocales().getLocale("delete_all_warps_confirm")
-                .ifPresent(deleter::sendMessage);
-            return;
-        }
-
-        plugin.getSavedPositionManager().deleteAllWarps().thenAccept(deleted -> {
-            if (deleted == 0) {
-                plugin.getLocales().getLocale("error_no_warps_set")
-                    .ifPresent(deleter::sendMessage);
-                return;
-            }
-
-            plugin.getLocales().getLocale("delete_all_warps_success", Integer.toString(deleted))
-                .ifPresent(deleter::sendMessage);
-=======
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
         if (handleDeleteAll(executor, args)) {
             return;
@@ -112,20 +62,10 @@ public class DelWarpCommand extends SavedPositionCommand<Warp> {
             }
             plugin.getLocales().getLocale("warp_deleted", warp.getName())
                     .ifPresent(executor::sendMessage);
->>>>>>> master
         });
 
     }
 
-<<<<<<< HEAD
-    @Override
-    public @NotNull List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
-        return args.length > 1 ? Collections.emptyList() : plugin.getCache().warps
-            .stream()
-            .filter(s -> s.startsWith(args.length == 1 ? args[0] : ""))
-            .sorted()
-            .collect(Collectors.toList());
-=======
     private boolean handleDeleteAll(@NotNull CommandUser executor, @NotNull String[] args) {
         if (args.length >= 1 && args[0].equalsIgnoreCase("all")) {
             if (!parseStringArg(args, 1)
@@ -150,7 +90,6 @@ public class DelWarpCommand extends SavedPositionCommand<Warp> {
             return true;
         }
         return false;
->>>>>>> master
     }
 
 }

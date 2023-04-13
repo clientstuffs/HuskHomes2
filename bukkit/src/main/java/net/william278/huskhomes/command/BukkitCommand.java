@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BukkitCommand implements CommandExecutor, TabCompleter {
 
@@ -50,25 +51,7 @@ public class BukkitCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command,
                              @NotNull String label, @NotNull String[] args) {
-<<<<<<< HEAD
-        if (sender instanceof Player) {
-            final var player = (Player) sender;
-
-            this.command.onExecute(BukkitPlayer.adapt(player), args);
-        } else {
-            if (this.command instanceof ConsoleExecutable) {
-                final var consoleExecutable = (ConsoleExecutable) this.command;
-
-                consoleExecutable.onConsoleExecute(args);
-            } else {
-                plugin.getLoggingAdapter().log(Level.WARNING, plugin.getLocales()
-                    .getRawLocale("error_in_game_only")
-                    .orElse("Error: That command can only be run in-game."));
-            }
-        }
-=======
-        this.command.onExecuted(sender instanceof Player player ? BukkitUser.adapt(player) : plugin.getConsole(), args);
->>>>>>> master
+        this.command.onExecuted(sender instanceof Player ? BukkitUser.adapt(((Player) sender)) : plugin.getConsole(), args);
         return true;
     }
 
@@ -76,18 +59,11 @@ public class BukkitCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command,
                                       @NotNull String alias, @NotNull String[] args) {
-<<<<<<< HEAD
-        if (this.command instanceof TabCompletable) {
-            final var tabCompletable = (TabCompletable) this.command;
-
-            return tabCompletable.onTabComplete(args, (sender instanceof Player ? BukkitPlayer.adapt((Player) sender) : null));
-=======
-        if (!(this.command instanceof TabProvider provider)) {
+        if (!(this.command instanceof TabProvider)) {
             return List.of();
->>>>>>> master
         }
-        final CommandUser user = sender instanceof Player player ? BukkitUser.adapt(player) : plugin.getConsole();
-        return provider.getSuggestions(user, args);
+        final CommandUser user = sender instanceof Player ? BukkitUser.adapt(((Player) sender)) : plugin.getConsole();
+        return ((TabProvider) this.command).getSuggestions(user, args);
     }
 
     public void register() {
@@ -103,7 +79,7 @@ public class BukkitCommand implements CommandExecutor, TabCompleter {
                 .entrySet().stream()
                 .map((entry) -> addPermission(plugin, entry.getKey(), "", getPermissionDefault(entry.getValue())))
                 .filter(Objects::nonNull)
-                .toList();
+                .collect(Collectors.toList());
         if (!childNodes.isEmpty()) {
             addPermission(plugin, command.getPermission("*"), command.getUsage(), PermissionDefault.FALSE,
                     childNodes.toArray(new Permission[0]));
@@ -179,7 +155,9 @@ public class BukkitCommand implements CommandExecutor, TabCompleter {
         SPAWN_COMMAND(new SpawnCommand(BukkitHuskHomes.getInstance())),
         SET_SPAWN_COMMAND(new SetSpawnCommand(BukkitHuskHomes.getInstance())),
         BACK_COMMAND(new BackCommand(BukkitHuskHomes.getInstance())),
-        HUSKHOMES_COMMAND(new HuskHomesCommand(BukkitHuskHomes.getInstance()));
+        HUSKHOMES_COMMAND(new HuskHomesCommand(BukkitHuskHomes.getInstance())),
+        LEAVE_QUEUE_COMMAND(new LeaveQueueCommand(BukkitHuskHomes.getInstance())),
+        SERVER_COMMAND(new ServerCommand(BukkitHuskHomes.getInstance()));
 
         private final Command command;
 

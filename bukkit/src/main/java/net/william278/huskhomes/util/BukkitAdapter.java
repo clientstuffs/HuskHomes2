@@ -51,10 +51,6 @@ public final class BukkitAdapter {
         if (world == null) {
             return Optional.empty();
         }
-<<<<<<< HEAD
-        return Optional.of(new org.bukkit.Location(world, location.x, location.y, location.z,
-            location.yaw, location.pitch));
-=======
         return Optional.of(new org.bukkit.Location(
                 world,
                 location.getX(),
@@ -63,7 +59,6 @@ public final class BukkitAdapter {
                 location.getYaw(),
                 location.getPitch()
         ));
->>>>>>> master
     }
 
     /**
@@ -74,54 +69,37 @@ public final class BukkitAdapter {
      */
     public static Optional<Location> adaptLocation(@NotNull org.bukkit.Location location) {
         if (location.getWorld() == null) return Optional.empty();
-<<<<<<< HEAD
-        return Optional.of(new Location(location.getX(), location.getY(), location.getZ(),
-            location.getYaw(), location.getPitch(),
-            adaptWorld(location.getWorld()).orElse(new net.william278.huskhomes.position.World())));
-=======
         return Optional.of(Location.at(location.getX(), location.getY(), location.getZ(),
                 location.getYaw(), location.getPitch(),
                 adaptWorld(location.getWorld()).orElse(new net.william278.huskhomes.position.World())));
->>>>>>> master
     }
 
     public static Optional<World> adaptWorld(@Nullable org.bukkit.World world) {
         if (world == null) {
             return Optional.empty();
         }
-<<<<<<< HEAD
         final World.Environment environment;
         switch (world.getEnvironment()) {
             case NORMAL: {
-                environment = net.william278.huskhomes.position.World.Environment.OVERWORLD;
+                environment = World.Environment.OVERWORLD;
                 break;
             }
             case NETHER: {
-                environment = net.william278.huskhomes.position.World.Environment.NETHER;
+                environment = World.Environment.NETHER;
                 break;
             }
             case THE_END: {
-                environment = net.william278.huskhomes.position.World.Environment.THE_END;
+                environment = World.Environment.THE_END;
                 break;
             }
             case CUSTOM: {
-                environment = net.william278.huskhomes.position.World.Environment.CUSTOM;
+                environment = World.Environment.CUSTOM;
                 break;
             }
             default:
                 throw new UnsupportedOperationException();
         }
-        return Optional.of(new net.william278.huskhomes.position.World(world.getName(), world.getUID(), environment));
-=======
-        return Optional.of(World.from(world.getName(), world.getUID(),
-                switch (world.getEnvironment()) {
-                    case NORMAL -> World.Environment.OVERWORLD;
-                    case NETHER -> World.Environment.NETHER;
-                    case THE_END -> World.Environment.THE_END;
-                    case CUSTOM -> World.Environment.CUSTOM;
-                })
-        );
->>>>>>> master
+        return Optional.of(World.from(world.getName(), world.getUID(), environment));
     }
 
 }

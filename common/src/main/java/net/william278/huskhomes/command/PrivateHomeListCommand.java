@@ -44,7 +44,7 @@ public class PrivateHomeListCommand extends ListCommand {
     @Override
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
         final Optional<String> homeOwner = args.length > 0 ? parseStringArg(args, 0)
-                : executor instanceof OnlineUser user ? Optional.of(user.getUsername()) : Optional.empty();
+                : executor instanceof OnlineUser ? Optional.of(((OnlineUser) executor).getUsername()) : Optional.empty();
         final int pageNumber = parseIntArg(args, args.length > 1 ? 1 : 0).orElse(1);
         if (homeOwner.isEmpty()) {
             plugin.getLocales().getLocale("error_invalid_syntax", getUsage())
@@ -61,11 +61,12 @@ public class PrivateHomeListCommand extends ListCommand {
         final int page;
         if (targetUser.isEmpty()) {
             final Optional<Integer> pageNumberArg = parseIntArg(new String[]{homeOwner}, 0);
-            if (pageNumberArg.isEmpty() || !(executor instanceof OnlineUser onlineUser)) {
+            if (pageNumberArg.isEmpty() || !(executor instanceof OnlineUser)) {
                 plugin.getLocales().getLocale("error_player_not_found", homeOwner)
                         .ifPresent(executor::sendMessage);
                 return;
             }
+            OnlineUser onlineUser = (OnlineUser) executor;
             page = pageNumberArg.get();
             user = onlineUser;
         } else {
@@ -73,8 +74,9 @@ public class PrivateHomeListCommand extends ListCommand {
             page = pageNumber;
         }
 
-        if (executor instanceof OnlineUser onlineUser && !user.getUuid().equals(onlineUser.getUuid())
+        if (executor instanceof OnlineUser && !user.getUuid().equals(((OnlineUser) executor).getUuid())
             && !executor.hasPermission(getPermission("other"))) {
+            OnlineUser onlineUser = (OnlineUser) executor;
             plugin.getLocales().getLocale("error_no_permission")
                     .ifPresent(executor::sendMessage);
             return;

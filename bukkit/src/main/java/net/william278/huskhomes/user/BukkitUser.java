@@ -29,12 +29,14 @@ import net.william278.huskhomes.util.BukkitAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 /**
@@ -162,5 +164,37 @@ public class BukkitUser extends OnlineUser {
      */
     public Player getPlayer() {
         return player;
+    }
+
+    @NotNull
+    @Override
+    public OptionalInt getEffectivePermissionCount(@NotNull String permissionFormat) {
+        final var withoutNumber = permissionFormat.replace("{}", "");
+        var value = OptionalInt.empty();
+        for (final var permission : this.player.getEffectivePermissions()) {
+            if (!permission.getPermission().startsWith(withoutNumber)) {
+                continue;
+            }
+            final var onlyNumber = permission.getPermission().replace(withoutNumber, "");
+            try {
+                final var number = Integer.parseInt(onlyNumber);
+                if (value.isPresent()) {
+                    value = OptionalInt.of(Math.max(value.getAsInt(), number));
+                } else {
+                    value = OptionalInt.of(number);
+                }
+            } catch (final Exception ignored) {}
+        }
+        return value;
+    }
+
+    @Override
+    public Optional<Object> getMetadata(@NotNull String metadata) {
+        return this.player.getMetadata(metadata).stream().findFirst().map(MetadataValue::value);
+    }
+
+    @Override
+    public void putMetadata(@NotNull String metadata, @NotNull Object value) {
+        this.player.setMetadata(metadata, new FixedMetadataValue(this.plugin, value));
     }
 }

@@ -38,67 +38,25 @@ public class WarpListCommand extends ListCommand {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        switch (args.length) {
-            case 0: {
-                showWarpList(onlineUser, 1);
-                break;
-            }
-            case 1: {
-                try {
-                    int pageNumber = Integer.parseInt(args[0]);
-                    showWarpList(onlineUser, pageNumber);
-                } catch (NumberFormatException e) {
-                    plugin.getLocales().getLocale("error_invalid_syntax", "/warplist [page]")
-                        .ifPresent(onlineUser::sendMessage);
-                }
-                break;
-            }
-            default: {
-                plugin.getLocales().getLocale("error_invalid_syntax", "/warplist [page]")
-                    .ifPresent(onlineUser::sendMessage);
-                break;
-            }
-        }
-=======
     public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
         final int pageNumber = parseIntArg(args, 0).orElse(1);
         this.showWarpList(executor, pageNumber);
->>>>>>> master
     }
 
     protected void showWarpList(@NotNull CommandUser executor, int pageNumber) {
-        if (executor instanceof OnlineUser user && cachedLists.containsKey(user.getUuid())) {
-            executor.sendMessage(cachedLists.get(user.getUuid()).getNearestValidPage(pageNumber));
+        if (executor instanceof OnlineUser && cachedLists.containsKey(((OnlineUser) executor).getUuid())) {
+            executor.sendMessage(cachedLists.get(((OnlineUser) executor).getUuid()).getNearestValidPage(pageNumber));
             return;
         }
 
-<<<<<<< HEAD
-        // Dispatch the warp list event
-        plugin.getDatabase().getWarps()
-            .thenApply(warps -> warps.stream()
-                .filter(warp -> warp.hasPermission(plugin.getSettings().permissionRestrictWarps, onlineUser))
-                .collect(Collectors.toList()))
-            .thenAccept(warps -> {
-                if (warps.isEmpty()) {
-                    plugin.getLocales().getLocale("error_no_warps_set").ifPresent(onlineUser::sendMessage);
-                    return;
-                }
-                plugin.getCache().getWarpList(onlineUser, plugin.getLocales(), warps,
-                        plugin.getSettings().listItemsPerPage, pageNumber)
-                    .ifPresent(onlineUser::sendMessage);
-            });
-=======
         final List<Warp> warps = getItems(executor);
         plugin.fireEvent(plugin.getViewWarpListEvent(warps, executor),
                 (event) -> this.generateList(executor, event.getWarps()).ifPresent(homeList -> {
-                    if (executor instanceof OnlineUser onlineUser) {
-                        cachedLists.put(onlineUser.getUuid(), homeList);
+                    if (executor instanceof OnlineUser) {
+                        cachedLists.put(((OnlineUser) executor).getUuid(), homeList);
                     }
                     executor.sendMessage(homeList.getNearestValidPage(pageNumber));
                 }));
->>>>>>> master
     }
 
     private Optional<PaginatedList> generateList(@NotNull CommandUser executor, @NotNull List<Warp> warps) {

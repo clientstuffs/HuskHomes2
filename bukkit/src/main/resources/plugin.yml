@@ -81,12 +81,8 @@ commands:
   back:
     usage: /<command>
   huskhomes:
-<<<<<<< HEAD
-    usage: /huskhomes [about|help|reload|update|migrate]
+    usage: /<command> [about|help|reload|update]
   server:
     usage: /server <server_name>
   leavequeue:
     usage: /leavequeue
-=======
-    usage: /<command> [about|help|reload|update]
->>>>>>> master

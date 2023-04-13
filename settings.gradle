@@ -6,18 +6,12 @@ pluginManagement {
 }
 
 rootProject.name = 'HuskHomes'
-<<<<<<< HEAD
 
-include 'proto'
-include 'common'
-include 'bukkit'
-include 'velocity'
-=======
 include(
+        'proto',
         'common',
         'bukkit',
         'paper',
         'plugin',
-        'fabric'
+        'velocity'
 )
->>>>>>> master

@@ -1,15 +1,34 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.queue;
 
 import de.themoep.minedown.adventure.MineDown;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.grpc.GrpcClient;
-import net.william278.huskhomes.player.OnlineUser;
+import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.proto.Definition;
 import net.william278.huskhomes.proto.Queue;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TimedTeleport;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -60,28 +79,28 @@ public final class TeleportQueue {
     }
 
     public void join(@NotNull final Teleport teleport, @NotNull final String type) {
-        final var destination = Objects.requireNonNull(teleport.target, "Something went wrong!");
-        final var onlineUser = Objects.requireNonNull((OnlineUser) teleport.teleporter, "Something went wrong!");
+        final var destination = ((Position) Objects.requireNonNull(teleport.getTarget(), "Something went wrong!"));
+        final var onlineUser = Objects.requireNonNull((OnlineUser) teleport.getTeleporter(), "Something went wrong!");
         onlineUser.putMetadata(TimedTeleport.CANCEL_METADATA_KEY, true);
         this.implementor.getDatabase().setCurrentTeleport(onlineUser, teleport);
-        final var user = Definition.User.newBuilder().setName(onlineUser.username).setUuid(onlineUser.uuid.toString()).build();
+        final var user = Definition.User.newBuilder().setName(onlineUser.getUsername()).setUuid(onlineUser.getUuid().toString()).build();
         final var positionBuilder = Definition.NetworkPosition.newBuilder()
-            .setServer(destination.server.name);
-        if (destination.world != null) {
+            .setServer(destination.getServer());
+        if (destination.getWorld() != null) {
             positionBuilder
-                .setWorld(destination.world.name)
-                .setX(destination.x)
-                .setY(destination.y)
-                .setZ(destination.z)
-                .setYaw(destination.yaw)
-                .setPitch(destination.pitch);
+                .setWorld(destination.getWorld().getName())
+                .setX(destination.getX())
+                .setY(destination.getY())
+                .setZ(destination.getZ())
+                .setYaw(destination.getYaw())
+                .setPitch(destination.getPitch());
         }
         final var position = positionBuilder.build();
         final var priority = onlineUser
-            .getEffectivePermissionCount(Permission.QUEUE_PRIORITY.formatted(destination.server.name, "{}"))
+            .getEffectivePermissionCount("huskhomes.queue.priority."+destination.getServer()+".{}")
             .orElse(0);
         final var allPriority = onlineUser
-            .getEffectivePermissionCount(Permission.QUEUE_PRIORITY.formatted("*", "{}"))
+            .getEffectivePermissionCount("huskhomes.queue.priority.*.{}")
             .orElse(0);
         final var request = Queue.Join.Request.newBuilder()
             .setUser(user)
@@ -95,7 +114,7 @@ public final class TeleportQueue {
     public void leave(@NotNull final OnlineUser onlineUser) {
         onlineUser.putMetadata(TimedTeleport.CANCEL_METADATA_KEY, true);
         this.implementor.getDatabase().setCurrentTeleport(onlineUser, null);
-        final var user = Definition.User.newBuilder().setName(onlineUser.username).setUuid(onlineUser.uuid.toString()).build();
+        final var user = Definition.User.newBuilder().setName(onlineUser.getUsername()).setUuid(onlineUser.getUuid().toString()).build();
         final var request = Queue.Leave.Request.newBuilder().setUser(user).build();
         GrpcClient.queue().leave(request)
             .thenAccept(response -> {

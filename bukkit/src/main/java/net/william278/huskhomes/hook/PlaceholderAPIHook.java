@@ -60,29 +60,39 @@ public class PlaceholderAPIHook extends Hook {
 
             // Return the requested data
             final OnlineUser player = BukkitUser.adapt(offlinePlayer.getPlayer());
-            return switch (params) {
-                case "homes_count" -> String.valueOf(plugin.getManager().homes()
+            switch (params) {
+                case "homes_count":
+                    return String.valueOf(plugin.getManager().homes()
                         .getUserHomes()
                         .getOrDefault(player.getUsername(), List.of()).size());
-                case "max_homes" -> String.valueOf(plugin.getManager().homes().getMaxHomes(player));
-                case "max_public_homes" -> String.valueOf(plugin.getManager().homes().getMaxPublicHomes(player));
-                case "free_home_slots" -> String.valueOf(plugin.getManager().homes().getFreeHomes(player));
-                case "home_slots" -> String.valueOf(plugin.getSavedUser(player)
+                case "max_homes":
+                    return String.valueOf(plugin.getManager().homes().getMaxHomes(player));
+                case "max_public_homes":
+                    return String.valueOf(plugin.getManager().homes().getMaxPublicHomes(player));
+                case "free_home_slots":
+                    return String.valueOf(plugin.getManager().homes().getFreeHomes(player));
+                case "home_slots":
+                    return String.valueOf(plugin.getSavedUser(player)
                         .map(SavedUser::getHomeSlots)
                         .orElse(0));
-                case "homes_list" -> String.join(", ", plugin.getManager().homes()
+                case "homes_list":
+                    return String.join(", ", plugin.getManager().homes()
                         .getUserHomes()
                         .getOrDefault(player.getUsername(), List.of()));
-                case "public_homes_count" -> String.valueOf(plugin.getManager().homes()
+                case "public_homes_count":
+                    return String.valueOf(plugin.getManager().homes()
                         .getPublicHomes()
                         .getOrDefault(player.getUsername(), List.of()).size());
-                case "public_homes_list" -> String.join(", ", plugin.getManager().homes()
+                case "public_homes_list":
+                    return String.join(", ", plugin.getManager().homes()
                         .getPublicHomes()
                         .getOrDefault(player.getUsername(), List.of()));
-                case "ignoring_tp_requests" -> getBooleanValue(plugin.getManager().requests()
+                case "ignoring_tp_requests":
+                    return getBooleanValue(plugin.getManager().requests()
                         .isIgnoringRequests(player));
-                default -> null;
-            };
+                default:
+                    return null;
+            }
         }
 
         @Override

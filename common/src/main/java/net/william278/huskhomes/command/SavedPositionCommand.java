@@ -30,10 +30,13 @@ import net.william278.huskhomes.teleport.TeleportationException;
 import net.william278.huskhomes.user.CommandUser;
 import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class SavedPositionCommand<T extends SavedPosition> extends Command implements TabProvider {
 
@@ -92,16 +95,16 @@ public abstract class SavedPositionCommand<T extends SavedPosition> extends Comm
             }
 
             final Home home = optionalHome.get();
-            if (executor instanceof OnlineUser user && !home.isPublic() && !user.equals(home.getOwner())
-                && !user.hasPermission(getOtherPermission())) {
+            if (executor instanceof OnlineUser && !home.isPublic() && !executor.equals(home.getOwner())
+                && !executor.hasPermission(getOtherPermission())) {
                 plugin.getLocales().getLocale("error_public_home_invalid", ownerUsername, ownerHomeName)
                         .ifPresent(executor::sendMessage);
                 return Optional.empty();
             }
 
             return optionalHome;
-        } else if (executor instanceof OnlineUser owner) {
-            final Optional<Home> optionalHome = plugin.getDatabase().getHome(owner, homeName);
+        } else if (executor instanceof OnlineUser) {
+            final Optional<Home> optionalHome = plugin.getDatabase().getHome(((OnlineUser) executor), homeName);
             if (optionalHome.isEmpty()) {
                 plugin.getLocales().getLocale("error_home_invalid", homeName)
                         .ifPresent(executor::sendMessage);
@@ -117,8 +120,8 @@ public abstract class SavedPositionCommand<T extends SavedPosition> extends Comm
 
     private Optional<Warp> resolveWarp(@NotNull CommandUser executor, @NotNull String warpName) {
         final Optional<Warp> warp = plugin.getDatabase().getWarp(warpName);
-        if (warp.isPresent() && executor instanceof OnlineUser user && plugin.getSettings().doPermissionRestrictWarps()
-            && (!user.hasPermission(Warp.getWildcardPermission()) && !user.hasPermission(Warp.getPermission(warpName)))) {
+        if (warp.isPresent() && executor instanceof OnlineUser && plugin.getSettings().doPermissionRestrictWarps()
+            && (!executor.hasPermission(Warp.getWildcardPermission()) && !executor.hasPermission(Warp.getPermission(warpName)))) {
             plugin.getLocales().getLocale("error_warp_invalid", warpName)
                     .ifPresent(executor::sendMessage);
             return Optional.empty();
@@ -126,7 +129,8 @@ public abstract class SavedPositionCommand<T extends SavedPosition> extends Comm
         return warp;
     }
 
-    protected void teleport(@NotNull CommandUser executor, @NotNull Teleportable teleporter, @NotNull T position) {
+    protected void teleport(@NotNull CommandUser executor, @NotNull Teleportable teleporter, @NotNull T position,
+                            @Nullable final String queueType) {
         if (!teleporter.equals(executor) && !executor.hasPermission(getPermission("other"))) {
             plugin.getLocales().getLocale("error_no_permission")
                     .ifPresent(executor::sendMessage);
@@ -135,6 +139,7 @@ public abstract class SavedPositionCommand<T extends SavedPosition> extends Comm
 
         final TeleportBuilder builder = Teleport.builder(plugin)
                 .teleporter(teleporter)
+                .setQueueType(queueType)
                 .target(position);
         try {
             if (executor.equals(teleporter)) {
@@ -151,28 +156,34 @@ public abstract class SavedPositionCommand<T extends SavedPosition> extends Comm
     @NotNull
     public List<String> suggest(@NotNull CommandUser executor, @NotNull String[] args) {
         if (positionType == Home.class) {
-            return switch (args.length) {
-                case 0, 1 -> {
+            switch (args.length) {
+                case 0:
+                case 1:
                     if (args.length == 1 && args[0].contains(".")) {
                         if (executor.hasPermission(getOtherPermission())) {
-                            yield filter(plugin.getManager().homes().getUserHomeNames(), args);
+                            return filter(plugin.getManager().homes().getUserHomeNames(), args);
                         }
-                        yield filter(plugin.getManager().homes().getUserHomeNames(), args);
+                        return filter (plugin.getManager().homes().getUserHomeNames(), args);
                     }
-                    if (executor instanceof OnlineUser user) {
-                        yield filter(plugin.getManager().homes().getUserHomes().get(user.getUsername()), args);
+                    if (executor instanceof OnlineUser) {
+                        return filter (plugin.getManager().homes().getUserHomes().get(((OnlineUser) executor).getUsername()), args);
                     }
-                    yield filter(plugin.getManager().homes().getUserHomeNames(), args);
-                }
-                case 2 -> filter(arguments.stream().toList(), args);
-                default -> List.of();
-            };
+                    return filter(plugin.getManager().homes().getUserHomeNames(), args);
+                case 2:
+                    return filter(new ArrayList<>(arguments), args);
+                default:
+                    return List.of();
+            }
         } else {
-            return switch (args.length) {
-                case 0, 1 -> filter(plugin.getManager().warps().getUsableWarps(executor), args);
-                case 2 -> filter(arguments.stream().toList(), args);
-                default -> List.of();
-            };
+            switch (args.length) {
+                case 0:
+                case 1:
+                    return filter(plugin.getManager().warps().getUsableWarps(executor), args);
+                case 2:
+                    return filter(new ArrayList<>(arguments), args);
+                default:
+                    return List.of();
+            }
         }
     }
 

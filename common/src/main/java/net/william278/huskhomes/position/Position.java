@@ -41,14 +41,6 @@ public class Position extends Location implements Target {
         this.setServer(server);
     }
 
-<<<<<<< HEAD
-    public Position(@NotNull final Server server) {
-        this.server = server;
-    }
-
-    @SuppressWarnings("unused")
-    public Position() {
-=======
     @SuppressWarnings("unused")
     private Position() {
     }
@@ -72,7 +64,6 @@ public class Position extends Location implements Target {
     public void update(@NotNull Position newPosition) {
         super.update(newPosition);
         this.setServer(newPosition.getServer());
->>>>>>> master
     }
 
     /**
@@ -87,22 +78,6 @@ public class Position extends Location implements Target {
         this.server = server;
     }
 
-<<<<<<< HEAD
-    /**
-     * Update the position to match that of another position
-     *
-     * @param newPosition The position to update to
-     */
-    public void update(@NotNull Position newPosition) {
-        this.x = newPosition.x;
-        this.y = newPosition.y;
-        this.z = newPosition.z;
-        this.yaw = newPosition.yaw;
-        this.pitch = newPosition.pitch;
-        this.world = newPosition.world;
-        this.server = newPosition.server;
-    }
-=======
     @Override
     public String toString() {
         return "x: " + (int) getX() + ", " +
@@ -111,5 +86,4 @@ public class Position extends Location implements Target {
                 "(" + getWorld().getName() + " / " + getServer() + ")";
     }
 
->>>>>>> master
 }

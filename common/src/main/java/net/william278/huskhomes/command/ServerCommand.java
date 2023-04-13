@@ -1,66 +1,64 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.Position;
-import net.william278.huskhomes.position.Server;
 import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.teleport.Teleport;
-import net.william278.huskhomes.teleport.TeleportType;
-import net.william278.huskhomes.teleport.TimedTeleport;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.user.CommandUser;
+import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class ServerCommand extends CommandBase implements TabCompletable {
+public class ServerCommand extends InGameCommand {
 
     protected ServerCommand(@NotNull HuskHomes implementor) {
-        super("server", Permission.COMMAND_SERVER, implementor);
+        super("server", List.of(), "", implementor);
+        this.addAdditionalPermissions(Map.of("server", false));
     }
 
     @Override
-    public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
-        if (!this.plugin.getSettings().crossServer) {
+    public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
+        if (!this.plugin.getSettings().doCrossServer()) {
             return;
         }
         if (args.length == 1) {
             final String serverName = args[0];
-            if (!this.plugin.getCache().onlineServers.contains(serverName)) {
+            if (executor.getPosition().getServer().equalsIgnoreCase(serverName)) {
+                this.plugin.getLocales().getLocale("already_in_same_server").ifPresent(executor::sendMessage);
                 return;
             }
-            if (onlineUser.getPosition().server.name.equalsIgnoreCase(serverName)) {
-                this.plugin.getLocales().getLocale("already_in_same_server").ifPresent(onlineUser::sendMessage);
-                return;
-            }
-            final var server = new Server(serverName);
-            Teleport.builder(this.plugin, onlineUser)
-                .setTarget(new Position(0.0d, 0.0d, 0.0d, 0.0f, 0.0f, new World("", UUID.randomUUID()), server))
-                .setType(TeleportType.SERVER)
+            Teleport.builder(this.plugin)
+                .executor(executor)
+                .target(Position.at(0.0d, 0.0d, 0.0d, 0.0f, 0.0f, World.from("", UUID.randomUUID()), serverName))
+                .type(Teleport.Type.SERVER)
                 .setQueueType("server")
                 .toTimedTeleport()
-                .thenAccept(TimedTeleport::execute);
+                .execute();
         } else {
             this.plugin.getLocales().getLocale("error_invalid_syntax", "/server [server_name]")
-                .ifPresent(onlineUser::sendMessage);
+                .ifPresent(executor::sendMessage);
         }
-    }
-
-    @NotNull
-    @Override
-    public List<String> onTabComplete(@NotNull String[] args, @Nullable OnlineUser user) {
-        if (user == null) {
-            return Collections.emptyList();
-        }
-        return args.length > 1 ? Collections.emptyList() : this.plugin.getCache().onlineServers
-            .stream()
-            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
-            .sorted()
-            .collect(Collectors.toList());
     }
 }

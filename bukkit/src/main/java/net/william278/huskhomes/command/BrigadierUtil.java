@@ -44,15 +44,9 @@ public class BrigadierUtil {
             return;
         }
         try {
-<<<<<<< HEAD
-            CommodoreProvider.getCommodore(plugin).register(pluginCommand,
-                CommodoreFileReader.INSTANCE.parse(commandCommodore),
-                player -> player.hasPermission(command.permission));
-=======
             CommodoreProvider.getCommodore(plugin).register(bukkitCommand,
                     CommodoreFileReader.INSTANCE.parse(commandCommodore),
                     player -> player.hasPermission(command.getPermission()));
->>>>>>> master
         } catch (IOException e) {
             plugin.log(Level.SEVERE, "Failed to read command commodore completions for "
                                      + bukkitCommand.getName(), e);
