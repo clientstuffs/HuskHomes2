@@ -19,16 +19,20 @@
 
 package net.william278.huskhomes.command;
 
+import com.djrapitops.plan.extension.annotation.Tab;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.teleport.Teleport;
+import net.william278.huskhomes.user.CommandUser;
 import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class ServerCommand extends InGameCommand {
+public class ServerCommand extends InGameCommand implements TabProvider {
 
     protected ServerCommand(@NotNull HuskHomes implementor) {
         super("server", List.of(), "", implementor);
@@ -42,6 +46,9 @@ public class ServerCommand extends InGameCommand {
         }
         if (args.length == 1) {
             final String serverName = args[0];
+            if (!this.plugin.getGlobalPlayerList().containsKey(serverName)) {
+                return;
+            }
             if (executor.getPosition().getServer().equalsIgnoreCase(serverName)) {
                 this.plugin.getLocales().getLocale("already_in_same_server").ifPresent(executor::sendMessage);
                 return;
@@ -57,5 +64,15 @@ public class ServerCommand extends InGameCommand {
             this.plugin.getLocales().getLocale("error_invalid_syntax", "/server [server_name]")
                 .ifPresent(executor::sendMessage);
         }
+    }
+
+    @Nullable
+    @Override
+    public List<String> suggest(@NotNull CommandUser user, @NotNull String[] args) {
+        return args.length > 1 ? Collections.emptyList() : this.plugin.getGlobalPlayerList().keySet()
+            .stream()
+            .filter(s -> s.toLowerCase(Locale.ROOT).startsWith(args.length == 1 ? args[0].toLowerCase(Locale.ROOT) : ""))
+            .sorted()
+            .collect(Collectors.toList());
     }
 }
