@@ -19,7 +19,6 @@
 
 package net.william278.huskhomes.command;
 
-import com.djrapitops.plan.extension.annotation.Tab;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.World;
