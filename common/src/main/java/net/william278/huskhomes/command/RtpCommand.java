@@ -21,15 +21,12 @@ package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.hook.EconomyHook;
-import net.william278.huskhomes.player.UserData;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.teleport.TeleportBuilder;
 import net.william278.huskhomes.teleport.TeleportationException;
 import net.william278.huskhomes.user.CommandUser;
 import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.user.SavedUser;
-import net.william278.huskhomes.util.Permission;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
@@ -37,7 +34,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class RtpCommand extends Command {
 

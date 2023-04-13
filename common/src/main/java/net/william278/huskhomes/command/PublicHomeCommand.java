@@ -20,22 +20,10 @@
 package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.position.Home;
-import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.user.CommandUser;
-import net.william278.huskhomes.user.OnlineUser;
-import net.william278.huskhomes.util.Permission;
-import net.william278.huskhomes.util.RegexUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class PublicHomeCommand extends HomeCommand implements TabProvider {
 

@@ -20,9 +20,6 @@
 package net.william278.huskhomes.grpc;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import io.grpc.Grpc;
-import io.grpc.InsecureServerCredentials;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.ServerBuilder;
 import net.william278.huskhomes.grpc.service.QueueService;
 import net.william278.huskhomes.grpc.service.ServiceListener;

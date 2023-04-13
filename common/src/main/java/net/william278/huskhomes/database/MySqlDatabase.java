@@ -19,10 +19,8 @@
 
 package net.william278.huskhomes.database;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.player.UserData;
 import net.william278.huskhomes.position.*;
 import net.william278.huskhomes.teleport.Teleport;
 import net.william278.huskhomes.user.OnlineUser;
@@ -34,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 /**

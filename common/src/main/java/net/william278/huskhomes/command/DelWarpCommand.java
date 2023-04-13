@@ -22,13 +22,10 @@ package net.william278.huskhomes.command;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Warp;
 import net.william278.huskhomes.user.CommandUser;
-import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.util.ValidationException;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DelWarpCommand extends SavedPositionCommand<Warp> {
 

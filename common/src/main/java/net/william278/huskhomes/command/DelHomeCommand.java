@@ -26,10 +26,7 @@ import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.util.ValidationException;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DelHomeCommand extends SavedPositionCommand<Home> {
 

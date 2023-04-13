@@ -28,7 +28,6 @@ import net.william278.huskhomes.network.Message;
 import net.william278.huskhomes.network.Payload;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.user.OnlineUser;
-import net.william278.huskhomes.util.Permission;
 import net.william278.huskhomes.util.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

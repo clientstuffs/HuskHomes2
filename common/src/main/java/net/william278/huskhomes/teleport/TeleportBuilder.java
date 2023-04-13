@@ -25,12 +25,7 @@ import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 public class TeleportBuilder {
     private final HuskHomes plugin;

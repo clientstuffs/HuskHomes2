@@ -19,12 +19,8 @@
 
 package net.william278.huskhomes.position;
 
-import net.william278.huskhomes.user.OnlineUser;
-import net.william278.huskhomes.util.Permission;
-import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.UUID;
 
 /**

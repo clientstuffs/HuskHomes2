@@ -19,7 +19,6 @@
 
 package net.william278.huskhomes.hook;
 
-import com.flowpowered.math.vector.Vector2i;
 import de.bluecolored.bluemap.api.BlueMapAPI;
 import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
@@ -34,7 +33,6 @@ import net.william278.huskhomes.util.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,9 +41,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 /**

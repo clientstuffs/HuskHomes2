@@ -24,11 +24,8 @@ import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.config.Locales;
 import net.william278.huskhomes.hook.EconomyHook;
 import net.william278.huskhomes.position.Home;
-import net.william278.huskhomes.position.PositionMeta;
 import net.william278.huskhomes.user.CommandUser;
 import net.william278.huskhomes.user.OnlineUser;
-import net.william278.huskhomes.util.Permission;
-import net.william278.huskhomes.util.RegexUtil;
 import net.william278.huskhomes.util.ValidationException;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +33,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class EditHomeCommand extends SavedPositionCommand<Home> {
 

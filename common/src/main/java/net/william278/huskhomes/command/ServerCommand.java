@@ -23,13 +23,10 @@ import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.teleport.Teleport;
-import net.william278.huskhomes.user.CommandUser;
 import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ServerCommand extends InGameCommand {
 

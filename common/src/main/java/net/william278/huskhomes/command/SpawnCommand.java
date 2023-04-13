@@ -26,7 +26,6 @@ import net.william278.huskhomes.teleport.TeleportBuilder;
 import net.william278.huskhomes.teleport.Teleportable;
 import net.william278.huskhomes.teleport.TeleportationException;
 import net.william278.huskhomes.user.CommandUser;
-import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
