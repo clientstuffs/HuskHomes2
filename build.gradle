@@ -4,7 +4,6 @@ plugins {
     id 'java'
     id 'java-library'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'org.cadixdev.licenser' version '0.6.1' apply false
     id 'org.ajoberstar.grgit' version '5.0.0'
     id 'maven-publish'
     id 'idea'
@@ -13,7 +12,7 @@ plugins {
 group 'net.william278'
 version ext.plugin_version
 
-defaultTasks 'licenseFormat', 'build'
+defaultTasks 'build'
 
 ext {
     set 'version', version.toString()
@@ -25,7 +24,6 @@ ext {
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'com.github.johnrengelman.shadow'
-    apply plugin: 'org.cadixdev.licenser'
     apply plugin: 'java'
     apply plugin: 'java-library'
 
