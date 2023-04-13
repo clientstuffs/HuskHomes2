@@ -3,7 +3,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'java'
     id 'java-library'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'org.cadixdev.licenser' version '0.6.1' apply false
     id 'org.ajoberstar.grgit' version '5.0.0'
     id 'maven-publish'
     id 'idea'
@@ -12,17 +13,19 @@ plugins {
 group 'net.william278'
 version ext.plugin_version
 
+defaultTasks 'licenseFormat', 'build'
+
 ext {
     set 'version', version.toString()
     set 'jedis_version', jedis_version.toString()
     set 'sqlite_driver_version', sqlite_driver_version.toString()
     set 'mysql_driver_version', mysql_driver_version.toString()
-    set 'commons_text_version', commons_text_version.toString()
 }
 
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'org.cadixdev.licenser'
     apply plugin: 'java'
     apply plugin: 'java-library'
 
@@ -34,10 +37,12 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        maven { url 'https://maven.fabricmc.net/' }
         maven { url 'https://libraries.minecraft.net/' }
         maven { url 'https://api.modrinth.com/maven' }
-        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
         maven { url 'https://repo.papermc.io/repository/maven-public/' }
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+        maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
         maven { url 'https://repo.minebench.de/' }
         maven { url 'https://repo.alessiodp.com/releases/' }
         maven { url 'https://repo.mikeprimm.com/' }
@@ -46,6 +51,7 @@ allprojects {
 
     dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
         testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
     }
 
@@ -53,19 +59,35 @@ allprojects {
         useJUnitPlatform()
     }
 
+    license {
+        header = rootProject.file('HEADER')
+        include '**/*.java'
+        newLine = true
+    }
+
     processResources {
-        filesNotMatching(['**/*.png', '**/*.svg']) {
+        filesMatching(['**/*.json', '**/*.yml']) {
             filter ReplaceTokens as Class, beginToken: '${', endToken: '}',
                     tokens: rootProject.ext.properties
         }
     }
+
 }
 
 subprojects {
     version rootProject.version
     archivesBaseName = "${rootProject.name}-${project.name.capitalize()}"
+    compileJava.options.encoding = 'UTF-8'
 
-    if (['bukkit', 'velocity'].contains(project.name)) {
+    jar {
+        from '../LICENSE'
+    }
+
+    if (['paper', 'fabric'].contains(project.name)) {
+        compileJava.options.release.set 17
+    }
+
+    if (['bukkit', 'paper', 'plugin', 'fabric'].contains(project.name)) {
         shadowJar {
             mergeServiceFiles()
 
@@ -73,52 +95,36 @@ subprojects {
             archiveClassifier.set('')
         }
 
-        //java {
-        //    withSourcesJar()
-        //    withJavadocJar()
-        //}
+        if (['bukkit'].contains(project.name)) {
+            java {
+                withSourcesJar()
+                withJavadocJar()
+            }
+            sourcesJar {
+                destinationDirectory.set(file("$rootDir/target"))
+            }
+            javadocJar {
+                destinationDirectory.set(file("$rootDir/target"))
+            }
+            shadowJar.dependsOn(sourcesJar, javadocJar)
 
-        //sourcesJar {
-        //    destinationDirectory.set(file("$rootDir/target"))
-        //}
-
-        //javadocJar {
-        //    destinationDirectory.set(file("$rootDir/target"))
-        //}
-
-        //shadowJar.dependsOn(sourcesJar, javadocJar)
-
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    groupId = 'net.william278'
-                    artifactId = 'huskhomes'
-                    version = "$rootProject.version"
-                    artifact shadowJar
-                    //artifact javadocJar
-                    //artifact sourcesJar
+            publishing {
+                publications {
+                    mavenJava(MavenPublication) {
+                        groupId = 'net.william278'
+                        artifactId = 'huskhomes'
+                        version = "$rootProject.version"
+                        artifact shadowJar
+                        //artifact javadocJar
+                        //artifact sourcesJar
+                    }
                 }
             }
-        }
 
-        jar.dependsOn shadowJar
-        clean.delete "$rootDir/target"
+            jar.dependsOn shadowJar
+            clean.delete "$rootDir/target"
+        }
     }
 }
 
 logger.lifecycle("Building HuskHomes ${version} by William278")
-
-@SuppressWarnings('GrMethodMayBeStatic')
-def versionMetadata() {
-    // Get if there is a tag for this commit
-    def tag = grgit.tag.list().find { it.commit.id == grgit.head().id }
-    if (tag != null) {
-        return ''
-    }
-
-    // Otherwise, get the last commit hash and if it's a clean head
-    if (grgit == null) {
-        return System.getenv("GITHUB_RUN_NUMBER") ? 'build.' + System.getenv("GITHUB_RUN_NUMBER") : 'unknown'
-    }
-    return grgit.head().abbreviatedId + (grgit.status().clean ? '' : '-indev')
-}

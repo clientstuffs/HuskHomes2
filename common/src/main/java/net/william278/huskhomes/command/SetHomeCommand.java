@@ -1,27 +1,48 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.command;
 
 import de.themoep.minedown.adventure.MineDown;
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.config.Settings;
-import net.william278.huskhomes.player.OnlineUser;
-import net.william278.huskhomes.player.UserData;
 import net.william278.huskhomes.position.Home;
-import net.william278.huskhomes.position.PositionMeta;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.user.CommandUser;
+import net.william278.huskhomes.user.OnlineUser;
+import net.william278.huskhomes.util.ValidationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+<<<<<<< HEAD
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+=======
+>>>>>>> master
 
-public class SetHomeCommand extends CommandBase {
+public class SetHomeCommand extends SetPositionCommand {
 
-    protected SetHomeCommand(@NotNull HuskHomes implementor) {
-        super("sethome", Permission.COMMAND_SET_HOME, implementor);
+    protected SetHomeCommand(@NotNull HuskHomes plugin) {
+        super("sethome", plugin);
     }
 
     @Override
+<<<<<<< HEAD
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         plugin.getDatabase().getHomes(onlineUser).thenAcceptAsync(homes -> {
             switch (args.length) {
@@ -43,10 +64,30 @@ public class SetHomeCommand extends CommandBase {
                         .ifPresent(onlineUser::sendMessage);
                     break;
                 }
+=======
+    public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
+        if (executor instanceof OnlineUser user && args.length == 0 && createDefaultHome(user)) {
+            return;
+        }
+        super.execute(executor, args);
+    }
+
+    @Override
+    protected void execute(@NotNull OnlineUser setter, @NotNull String name) {
+        plugin.fireEvent(plugin.getHomeCreateEvent(setter, name, setter.getPosition(), setter), (event) -> {
+            try {
+                plugin.getManager().homes().createHome(setter, event.getName(), event.getPosition());
+            } catch (ValidationException e) {
+                e.dispatchHomeError(setter, false, plugin, event.getName());
+                return;
+>>>>>>> master
             }
+            plugin.getLocales().getLocale("set_home_success", event.getName())
+                    .ifPresent(setter::sendMessage);
         });
     }
 
+<<<<<<< HEAD
     /**
      * Attempts to set a home by given name for the {@link OnlineUser}.
      * <p>
@@ -151,6 +192,18 @@ public class SetHomeCommand extends CommandBase {
 
 
         });
+=======
+    private boolean createDefaultHome(@NotNull OnlineUser user) {
+        final List<Home> homes = plugin.getDatabase().getHomes(user);
+        final Optional<String> name = homes.isEmpty() ? Optional.of("home") :
+                (homes.size() == 1 && plugin.getSettings().doOverwriteExistingHomesWarps())
+                        ? Optional.of(homes.get(0).getName()) : Optional.empty();
+        if (name.isPresent()) {
+            this.execute(user, "home");
+            return true;
+        }
+        return false;
+>>>>>>> master
     }
 
 }

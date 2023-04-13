@@ -1,3 +1,22 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.random;
 
 import net.william278.huskhomes.HuskHomes;
@@ -13,19 +32,19 @@ import java.util.concurrent.CompletableFuture;
 /**
  * A random teleport engine that uses a Gaussian normal distribution to generate random positions.
  */
-public class NormalDistributionEngine extends RandomTeleportEngine {
+public final class NormalDistributionEngine extends RandomTeleportEngine {
 
-    protected final int radius;
-    protected final int spawnRadius;
+    private final int radius;
+    private final int spawnRadius;
     private final float mean;
     private final float standardDeviation;
 
-    public NormalDistributionEngine(@NotNull HuskHomes implementor) {
-        super(implementor, "Normal Distribution");
-        this.radius = implementor.getSettings().rtpRadius;
-        this.spawnRadius = implementor.getSettings().rtpSpawnRadius;
-        this.mean = implementor.getSettings().rtpDistributionMean;
-        this.standardDeviation = implementor.getSettings().rtpDistributionStandardDeviation;
+    public NormalDistributionEngine(@NotNull HuskHomes plugin) {
+        super(plugin, "Normal Distribution");
+        this.radius = plugin.getSettings().getRtpRadius();
+        this.spawnRadius = plugin.getSettings().getRtpSpawnRadius();
+        this.mean = plugin.getSettings().getRtpDistributionMean();
+        this.standardDeviation = plugin.getSettings().getRtpDistributionStandardDeviation();
     }
 
     /**
@@ -36,8 +55,8 @@ public class NormalDistributionEngine extends RandomTeleportEngine {
      * @return A generated location
      */
     @NotNull
-    protected static Location generateLocation(@NotNull Location origin, float mean, float standardDeviation,
-                                               float spawnRadius, float maxRadius) {
+    public static Location generateLocation(@NotNull Location origin, float mean, float standardDeviation,
+                                            float spawnRadius, float maxRadius) {
         // Generate random values
         final float radius = getDistributedRadius(mean, standardDeviation, spawnRadius, maxRadius);
         final float angle = getRandomAngle();
@@ -46,10 +65,29 @@ public class NormalDistributionEngine extends RandomTeleportEngine {
         final float z = (float) (radius * Math.cos(angle));
         final float x = (float) (radius * Math.sin(angle));
 
-        return new Location(Math.round(origin.x) + x, 128d, Math.round(origin.z) + z, origin.world);
+        return Location.at(
+                Math.round(origin.getX()) + x,
+                128d,
+                Math.round(origin.getZ()) + z,
+                origin.getWorld()
+        );
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Generate a safe ground-level {@link Location} through a randomized normally-distributed radius and random angle
+     *
+     * @param world The world to generate the location in
+     * @return A generated location
+     */
+    private CompletableFuture<Optional<Location>> generateSafeLocation(@NotNull World world) {
+        return plugin.findSafeGroundLocation(generateLocation(
+                getCenterPoint(world), mean, standardDeviation, spawnRadius, radius));
+    }
+
+    /**
+>>>>>>> master
      * Generates a normally distributed radius between the spawnRadius and the maximum radius value,
      * using the provided standard deviation and mean.
      *
@@ -85,15 +123,18 @@ public class NormalDistributionEngine extends RandomTeleportEngine {
     }
 
     @Override
-    protected Optional<Position> generatePosition(@NotNull World world, @NotNull String[] args) {
-        Optional<Location> location = generateSafeLocation(world).join();
-        int attempts = 0;
-        while (location.isEmpty()) {
-            location = generateSafeLocation(world).join();
-            if (attempts > randomTimeout) {
-                return Optional.empty();
+    public CompletableFuture<Optional<Position>> getRandomPosition(@NotNull World world, @NotNull String[] args) {
+        return plugin.supplyAsync(() -> {
+            Optional<Location> location = generateSafeLocation(world).join();
+            int attempts = 0;
+            while (location.isEmpty()) {
+                location = generateSafeLocation(world).join();
+                if (attempts >= maxAttempts) {
+                    return Optional.empty();
+                }
+                attempts++;
             }
-        }
-        return location.map(resolved -> new Position(resolved, plugin.getServerName()));
+            return location.map(resolved -> Position.at(resolved, plugin.getServerName()));
+        });
     }
 }

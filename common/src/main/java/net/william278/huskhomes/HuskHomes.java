@@ -1,10 +1,35 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.kyori.adventure.key.Key;
+import net.william278.annotaml.Annotaml;
 import net.william278.desertwell.UpdateChecker;
 import net.william278.desertwell.Version;
 import net.william278.huskhomes.command.CommandBase;
 import net.william278.huskhomes.config.CachedSpawn;
+import net.william278.huskhomes.command.Command;
 import net.william278.huskhomes.config.Locales;
+import net.william278.huskhomes.config.Server;
 import net.william278.huskhomes.config.Settings;
 import net.william278.huskhomes.database.Database;
 import net.william278.huskhomes.event.EventDispatcher;
@@ -16,35 +41,51 @@ import net.william278.huskhomes.network.Messenger;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.*;
 import net.william278.huskhomes.queue.TeleportQueue;
+import net.william278.huskhomes.config.Spawn;
+import net.william278.huskhomes.database.Database;
+import net.william278.huskhomes.event.EventDispatcher;
+import net.william278.huskhomes.hook.*;
+import net.william278.huskhomes.manager.Manager;
+import net.william278.huskhomes.network.Broker;
+import net.william278.huskhomes.position.Location;
+import net.william278.huskhomes.position.Position;
+import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.random.RandomTeleportEngine;
-import net.william278.huskhomes.request.RequestManager;
-import net.william278.huskhomes.util.Logger;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.user.ConsoleUser;
+import net.william278.huskhomes.user.OnlineUser;
+import net.william278.huskhomes.user.SavedUser;
+import net.william278.huskhomes.user.User;
+import net.william278.huskhomes.util.TaskRunner;
+import net.william278.huskhomes.util.ThrowingConsumer;
+import net.william278.huskhomes.util.UnsafeBlocks;
+import net.william278.huskhomes.util.Validator;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.stream.Stream;
 
 /**
  * Represents a cross-platform instance of the plugin
  */
-public interface HuskHomes {
+public interface HuskHomes extends TaskRunner, EventDispatcher {
 
     int SPIGOT_RESOURCE_ID = 83767;
 
-    /**
-     * The platform plugin console logger
-     *
-     * @return the {@link Logger} implementation to use
-     */
     @NotNull
-    Logger getLoggingAdapter();
+    ConsoleUser getConsole();
 
     /**
      * The {@link Set} of online {@link OnlineUser}s on this server
@@ -52,7 +93,40 @@ public interface HuskHomes {
      * @return a {@link Set} of currently online {@link OnlineUser}s
      */
     @NotNull
-    List<OnlineUser> getOnlinePlayers();
+    List<OnlineUser> getOnlineUsers();
+
+    @NotNull
+    Set<SavedUser> getSavedUsers();
+
+    default Optional<SavedUser> getSavedUser(@NotNull User user) {
+        return getSavedUsers().stream()
+                .filter(savedUser -> savedUser.getUser().equals(user))
+                .findFirst();
+    }
+
+    default void editUserData(@NotNull User user, @NotNull Consumer<SavedUser> editor) {
+        runAsync(() -> getSavedUser(user)
+                .ifPresent(result -> {
+                    editor.accept(result);
+                    getDatabase().updateUserData(result);
+                }));
+    }
+
+    /**
+     * Initialize a faucet of the plugin
+     *
+     * @param name   the name of the faucet
+     * @param runner a runnable for initializing the faucet
+     */
+    default void initialize(@NotNull String name, @NotNull ThrowingConsumer<HuskHomes> runner) {
+        log(Level.INFO, "Initializing " + name + "...");
+        try {
+            runner.accept(this);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to initialize " + name, e);
+        }
+        log(Level.INFO, "Successfully initialized " + name);
+    }
 
     /**
      * Finds a local {@link OnlineUser} by their name. Auto-completes partially typed names for the closest match
@@ -62,35 +136,12 @@ public interface HuskHomes {
      */
     @NotNull
     default Optional<OnlineUser> findOnlinePlayer(@NotNull String playerName) {
-        return getOnlinePlayers().stream()
-            .filter(user -> user.username.equalsIgnoreCase(playerName))
-            .findFirst()
-            .or(() -> getOnlinePlayers().stream()
-                .filter(user -> user.username.toLowerCase(Locale.ROOT).startsWith(playerName.toLowerCase(Locale.ROOT)))
-                .findFirst());
-    }
-
-    /**
-     * Looks for a player logged in either on this server or the network of connected servers, by approximate name.
-     * Auto-completes partially typed names for the closest match.
-     *
-     * @param requester        the player requesting the player to be found
-     * @param targetPlayerName the name of the player to find
-     * @return an {@link Optional} containing the {@link OnlineUser} if found, or an empty {@link Optional} if not found
-     */
-    @NotNull
-    default CompletableFuture<Optional<String>> findPlayer(@NotNull OnlineUser requester, @NotNull String targetPlayerName) {
-        if (requester.username.equalsIgnoreCase(targetPlayerName)) {
-            return CompletableFuture.completedFuture(Optional.of(requester.username));
-        }
-        final Optional<OnlineUser> localPlayer = findOnlinePlayer(targetPlayerName);
-        if (localPlayer.isPresent()) {
-            return CompletableFuture.completedFuture(Optional.of(localPlayer.get().username));
-        }
-        if (getSettings().crossServer) {
-            return getMessenger().findPlayer(requester, targetPlayerName);
-        }
-        return CompletableFuture.completedFuture(Optional.empty());
+        return getOnlineUsers().stream()
+                .filter(user -> user.getUsername().equalsIgnoreCase(playerName))
+                .findFirst()
+                .or(() -> getOnlineUsers().stream()
+                        .filter(user -> user.getUsername().toLowerCase().startsWith(playerName.toLowerCase()))
+                        .findFirst());
     }
 
     /**
@@ -101,6 +152,8 @@ public interface HuskHomes {
     @NotNull
     Settings getSettings();
 
+    void setSettings(@NotNull Settings settings);
+
     /**
      * The plugin messages loaded from file
      *
@@ -108,6 +161,41 @@ public interface HuskHomes {
      */
     @NotNull
     Locales getLocales();
+
+    void setLocales(@NotNull Locales locales);
+
+    /**
+     * The local {@link Spawn} location of this server, as cached to disk
+     *
+     * @return the {@link Spawn} location data
+     * @see #getSpawn() for the canonical spawn point to use
+     */
+    Optional<Spawn> getServerSpawn();
+
+    void setServerSpawn(@NotNull Spawn spawn);
+
+    /**
+     * The canonical spawn {@link Position} of this server, if it has been set
+     *
+     * @return the {@link Position} of the spawn, or an empty {@link Optional} if it has not been set
+     */
+    default Optional<Position> getSpawn() {
+        return getSettings().doCrossServer() && getSettings().isGlobalSpawn()
+                ? getDatabase().getWarp(getSettings().getGlobalSpawnName()).map(warp -> (Position) warp)
+                : getServerSpawn().map(spawn -> spawn.getPosition(getServerName()));
+    }
+
+    /**
+     * Returns the {@link Server} the plugin is on
+     *
+     * @return The {@link Server} object
+     */
+    @NotNull
+    String getServerName();
+
+    void setServer(@NotNull Server server);
+
+    void setUnsafeBlocks(@NotNull UnsafeBlocks unsafeBlocks);
 
     /**
      * The {@link Database} that stores persistent plugin data
@@ -118,35 +206,28 @@ public interface HuskHomes {
     Database getDatabase();
 
     /**
-     * The {@link Cache} that holds cached data
+     * The {@link Validator} for validating thome names and descriptions
      *
-     * @return the plugin {@link Cache}
+     * @return the {@link Validator} instance
      */
     @NotNull
-    Cache getCache();
+    Validator getValidator();
 
     /**
-     * The {@link RequestManager} that manages player requests
+     * The {@link Manager} that manages home, warp and user data
      *
-     * @return the plugin {@link RequestManager}
-     */
-    @NotNull RequestManager getRequestManager();
-
-    /**
-     * The {@link SavedPositionManager} that manages setting homes and warps
-     *
-     * @return the {@link SavedPositionManager} implementation
+     * @return the {@link Manager} implementation
      */
     @NotNull
-    SavedPositionManager getSavedPositionManager();
+    Manager getManager();
 
     /**
-     * The {@link Messenger} that sends cross-network messages
+     * The {@link Broker} that sends cross-network messages
      *
-     * @return the {@link Messenger} implementation
+     * @return the {@link Broker} implementation
      */
     @NotNull
-    Messenger getMessenger() throws HuskHomesException;
+    Broker getMessenger();
 
     /**
      * The {@link TeleportQueue} that manages queues
@@ -154,7 +235,7 @@ public interface HuskHomes {
      * @return the {@link TeleportQueue} implementation
      */
     @NotNull
-    TeleportQueue getTeleportQueue() throws HuskHomesException;
+    TeleportQueue getTeleportQueue();
 
     /**
      * The {@link RandomTeleportEngine} that manages random teleports
@@ -171,101 +252,37 @@ public interface HuskHomes {
      */
     void setRandomTeleportEngine(@NotNull RandomTeleportEngine randomTeleportEngine);
 
-    /**
-     * The {@link EventDispatcher} that dispatches API events
-     *
-     * @return the {@link EventDispatcher} implementation
-     */
-    @NotNull
-    EventDispatcher getEventDispatcher();
 
     /**
-     * The list of available {@link Migrator}s
+     * Update the {@link Spawn} position to a location on the server
      *
-     * @return the list of available {@link Migrator}
-     */
-    List<Migrator> getMigrators();
-
-    /**
-     * The local {@link CachedSpawn} location of this server, as cached to disk
-     *
-     * @return the {@link CachedSpawn} location data
-     * @see #getSpawn() for the canonical spawn point to use
-     */
-    Optional<CachedSpawn> getLocalCachedSpawn();
-
-    /**
-     * The canonical spawn {@link Position} of this server, if it has been set
-     *
-     * @return the {@link Position} of the spawn, or an empty {@link Optional} if it has not been set
-     */
-    default CompletableFuture<Optional<? extends Position>> getSpawn() {
-        return CompletableFuture.supplyAsync(() -> getSettings().crossServer && getSettings().globalSpawn
-            ? getDatabase().getWarp(getSettings().globalSpawnName).join()
-            : getLocalCachedSpawn().flatMap(spawn -> spawn.getPosition(getServerName())));
-    }
-
-    /**
-     * Returns a future returning the latest plugin {@link Version} if the plugin is out-of-date
-     *
-     * @return a {@link CompletableFuture} returning the latest {@link Version} if the current one is out-of-date
-     */
-    default CompletableFuture<Optional<Version>> getLatestVersionIfOutdated() {
-        final UpdateChecker updateChecker = UpdateChecker.create(getPluginVersion(), SPIGOT_RESOURCE_ID);
-        return updateChecker.isUpToDate().thenApply(upToDate -> {
-            if (upToDate) {
-                return Optional.empty();
-            } else {
-                return Optional.of(updateChecker.getLatestVersion().join());
-            }
-        });
-    }
-
-    /**
-     * Update the {@link CachedSpawn} position to a location on the server
-     *
-     * @param location the new {@link CachedSpawn} location
+     * @param location the new {@link Spawn} location
      */
     void setServerSpawn(@NotNull Location location);
 
     /**
-     * Set of active {@link PluginHook}s running on the server
+     * Set of active {@link Hook}s running on the server
      *
-     * @return the {@link Set} of active {@link PluginHook}s
+     * @return the {@link Set} of active {@link Hook}s
      */
     @NotNull
-    Set<PluginHook> getPluginHooks();
+    List<Hook> getHooks();
 
-    /**
-     * Finds the {@link PluginHook} of the given class instance from the set of active {@link PluginHook}s
-     *
-     * @param hookClass the class of the {@link PluginHook} to get
-     * @param <H>       the type of the {@link PluginHook}
-     * @return the {@link PluginHook} instance, or an empty {@link Optional} if not found
-     */
-    default <H extends PluginHook> Optional<H> getHook(@NotNull Class<H> hookClass) {
-        return getPluginHooks().stream()
-            .filter(hook -> hook.getClass().isInstance(hookClass))
-            .findFirst()
-            .map(hookClass::cast);
+    void setHooks(@NotNull List<Hook> hooks);
+
+    default <T extends Hook> Optional<T> getHook(@NotNull Class<T> hookClass) {
+        return getHooks().stream()
+                .filter(hook -> hookClass.isAssignableFrom(hook.getClass()))
+                .map(hookClass::cast)
+                .findFirst();
     }
 
-    /**
-     * Gets the {@link MapHook} being used to display public homes and warps on a web map, if there is one, and it is enabled
-     *
-     * @return the {@link MapHook} optionally being used
-     */
-    default Optional<MapHook> getMapHook() {
-        return getSettings().doMapHook ? getHook(MapHook.class) : Optional.empty();
-    }
-
-    /**
-     * Gets the {@link EconomyHook} being used to charge players for commands, if there is one, and it is enabled
-     *
-     * @return the {@link EconomyHook} optionally being used
-     */
     default Optional<EconomyHook> getEconomyHook() {
-        return getSettings().economy ? getHook(EconomyHook.class) : Optional.empty();
+        return getHook(EconomyHook.class);
+    }
+
+    default Optional<MapHook> getMapHook() {
+        return getHook(MapHook.class);
     }
 
     /**
@@ -276,9 +293,9 @@ public interface HuskHomes {
      * @return {@code true} if the action passes the check, {@code false} if the user has insufficient funds
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    default boolean validateEconomyCheck(@NotNull OnlineUser player, @NotNull Settings.EconomyAction action) {
+    default boolean validateEconomyCheck(@NotNull OnlineUser player, @NotNull EconomyHook.Action action) {
         final Optional<Double> cost = getSettings().getEconomyCost(action).map(Math::abs);
-        if (cost.isPresent() && !player.hasPermission(Permission.BYPASS_ECONOMY_CHECKS.node)) {
+        if (cost.isPresent() && !player.hasPermission(EconomyHook.BYPASS_PERMISSION)) {
             final Optional<EconomyHook> hook = getEconomyHook();
             if (hook.isPresent()) {
                 if (cost.get() > hook.get().getPlayerBalance(player)) {
@@ -297,11 +314,11 @@ public interface HuskHomes {
      * @param player the player to deduct the cost from if needed
      * @param action the action to deduct the cost from if needed
      */
-    default void performEconomyTransaction(@NotNull OnlineUser player, @NotNull Settings.EconomyAction action) {
-        if (!getSettings().economy) return;
+    default void performEconomyTransaction(@NotNull OnlineUser player, @NotNull EconomyHook.Action action) {
+        if (!getSettings().doEconomy()) return;
         final Optional<Double> cost = getSettings().getEconomyCost(action).map(Math::abs);
 
-        if (cost.isPresent() && !player.hasPermission(Permission.BYPASS_ECONOMY_CHECKS.node)) {
+        if (cost.isPresent() && !player.hasPermission(EconomyHook.BYPASS_PERMISSION)) {
             final Optional<EconomyHook> hook = getEconomyHook();
             if (hook.isPresent()) {
                 hook.get().changePlayerBalance(player, -cost.get());
@@ -318,15 +335,7 @@ public interface HuskHomes {
      * @return a {@link CompletableFuture} that will complete with an optional of the safe ground position, if it is
      * possible to find one
      */
-    CompletableFuture<Optional<Location>> resolveSafeGroundLocation(@NotNull Location location);
-
-    /**
-     * Returns the {@link Server} the plugin is on
-     *
-     * @return The {@link Server} object
-     */
-    @NotNull
-    Server getServerName();
+    CompletableFuture<Optional<Location>> findSafeGroundLocation(@NotNull Location location);
 
     /**
      * Returns a resource read from the plugin resources folder
@@ -359,22 +368,136 @@ public interface HuskHomes {
      * @return the plugin {@link Version}
      */
     @NotNull
-    Version getPluginVersion();
+    Version getVersion();
 
     /**
      * Returns a list of enabled commands
      *
-     * @return A list of registered and enabled {@link CommandBase}s
+     * @return A list of registered and enabled {@link Command}s
      */
     @NotNull
-    List<CommandBase> getCommands();
+    List<Command> getCommands();
+
+    default <T extends Command> Optional<T> getCommand(@NotNull Class<T> type) {
+        return getCommands().stream()
+                .filter(command -> command.getClass() == type)
+                .findFirst()
+                .map(type::cast);
+    }
+
+    @NotNull
+    List<Command> registerCommands();
+
+    default void registerHooks() {
+        setHooks(new ArrayList<>());
+
+        if (getSettings().doMapHook()) {
+            if (isDependencyLoaded("Dynmap")) {
+                getHooks().add(new DynmapHook(this));
+            } else if (isDependencyLoaded("BlueMap")) {
+                getHooks().add(new BlueMapHook(this));
+            }
+        }
+        if (isDependencyLoaded("Plan")) {
+            getHooks().add(new PlanHook(this));
+        }
+    }
+
+    boolean isDependencyLoaded(@NotNull String name);
+
+    @NotNull
+    Map<String, List<String>> getGlobalPlayerList();
+
+    @NotNull
+    default List<String> getPlayerList() {
+        return Stream.concat(
+                getGlobalPlayerList().values().stream().flatMap(Collection::stream),
+                getLocalPlayerList().stream()
+        ).distinct().sorted().toList();
+    }
+
+    default void setPlayerList(@NotNull String server, @NotNull List<String> players) {
+        getGlobalPlayerList().values().forEach(list -> {
+            list.removeAll(players);
+            list.removeAll(getLocalPlayerList());
+        });
+        getGlobalPlayerList().put(server, players);
+    }
+
+    @NotNull
+    default List<String> getLocalPlayerList() {
+        return getOnlineUsers().stream()
+                .map(OnlineUser::getUsername)
+                .toList();
+    }
+
+    @NotNull
+    Set<UUID> getCurrentlyOnWarmup();
+
+    /**
+     * Returns if the given user is currently warming up to teleport to a home.
+     *
+     * @param userUuid The user to check.
+     * @return If the user is currently warming up.
+     */
+    default boolean isWarmingUp(@NotNull UUID userUuid) {
+        return this.getCurrentlyOnWarmup().contains(userUuid);
+    }
 
     /**
      * Reloads the {@link Settings} and {@link Locales} from their respective config files
      *
-     * @return a {@link CompletableFuture} that will be completed when the plugin reload is complete and if it was successful
+     * @return {@code true} if the reload was successful, {@code false} otherwise
      */
-    boolean reload();
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    default boolean loadConfigs() {
+        try {
+            // Load settings
+            setSettings(Annotaml.create(new File(getDataFolder(), "config.yml"), Settings.class).get());
+
+            // Load locales from language preset default
+            final Locales languagePresets = Annotaml.create(Locales.class, Objects.requireNonNull(getResource("locales/" + getSettings().getLanguage() + ".yml"))).get();
+            setLocales(Annotaml.create(new File(getDataFolder(), "messages_" + getSettings().getLanguage() + ".yml"), languagePresets).get());
+
+            // Load server from file
+            if (getSettings().doCrossServer()) {
+                setServer(Annotaml.create(new File(getDataFolder(), "server.yml"), Server.class).get());
+            } else {
+                setServer(new Server(Server.getDefaultServerName()));
+            }
+
+            // Load spawn location from file
+            final File spawnFile = new File(getDataFolder(), "spawn.yml");
+            if (spawnFile.exists()) {
+                setServerSpawn(Annotaml.create(spawnFile, Spawn.class).get());
+            }
+
+            // Load unsafe blocks from resources
+            final InputStream blocksResource = getResource("safety/unsafe_blocks.yml");
+            setUnsafeBlocks(Annotaml.create(new UnsafeBlocks(), Objects.requireNonNull(blocksResource)).get());
+
+            return true;
+        } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            log(Level.SEVERE, "Failed to reload HuskHomes config or messages file", e);
+        }
+        return false;
+    }
+
+    @NotNull
+    default UpdateChecker getUpdateChecker() {
+        return UpdateChecker.create(getVersion(), SPIGOT_RESOURCE_ID);
+    }
+
+    default void checkForUpdates() {
+        if (getSettings().doCheckForUpdates()) {
+            getUpdateChecker().isUpToDate().thenAccept(updated -> {
+                if (!updated) {
+                    getUpdateChecker().getLatestVersion().thenAccept(latest -> log(Level.WARNING,
+                            "A new version of HuskTowns is available: v" + latest + " (running v" + getVersion() + ")"));
+                }
+            });
+        }
+    }
 
     /**
      * Returns if the block, by provided identifier, is unsafe
@@ -390,5 +513,39 @@ public interface HuskHomes {
      * @param metricsId the bStats id for the plugin
      */
     void registerMetrics(int metricsId);
+
+    /**
+     * Initialize plugin messaging channels
+     */
+    void initializePluginChannels();
+
+    /**
+     * Log a message to the console
+     *
+     * @param level      the level to log at
+     * @param message    the message to log
+     * @param exceptions any exceptions to log
+     */
+    void log(@NotNull Level level, @NotNull String message, @NotNull Throwable... exceptions);
+
+    /**
+     * Create a resource key namespaced with the plugin id
+     *
+     * @param data the string ID elements to join
+     * @return the key
+     */
+    @NotNull
+    default Key getKey(@NotNull String... data) {
+        if (data.length == 0) {
+            throw new IllegalArgumentException("Cannot create a key with no data");
+        }
+        @Subst("foo") final String joined = String.join("/", data);
+        return Key.key("huskhomes", joined);
+    }
+
+    @NotNull
+    default Gson getGson() {
+        return new GsonBuilder().create();
+    }
 
 }

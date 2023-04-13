@@ -1,86 +1,93 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.position;
 
+import com.google.gson.annotations.Expose;
+import net.william278.huskhomes.teleport.Target;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Represents a position - a {@link Location} somewhere on the proxy network or server
  */
-public class Position extends Location {
+public class Position extends Location implements Target {
 
-    /**
-     * The {@link Server} the position is on
-     */
-    public Server server;
+    @Expose
+    private String server;
 
-    public Position(double x, double y, double z, float yaw, float pitch,
-                    @NotNull World world, @NotNull Server server) {
+    protected Position(double x, double y, double z, float yaw, float pitch, @NotNull World world, @NotNull String server) {
         super(x, y, z, yaw, pitch, world);
-        this.server = server;
+        this.setServer(server);
     }
 
-    public Position(@NotNull Location location, @NotNull Server server) {
-        super(location.x, location.y, location.z, location.yaw, location.pitch, location.world);
-        this.server = server;
+    protected Position(@NotNull Location location, @NotNull String server) {
+        super(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), location.getWorld());
+        this.setServer(server);
     }
 
+<<<<<<< HEAD
     public Position(@NotNull final Server server) {
         this.server = server;
     }
 
     @SuppressWarnings("unused")
     public Position() {
+=======
+    @SuppressWarnings("unused")
+    private Position() {
+    }
+
+    @NotNull
+    public static Position at(double x, double y, double z, float yaw, float pitch, @NotNull World world, @NotNull String server) {
+        return new Position(x, y, z, yaw, pitch, world, server);
+    }
+
+    @NotNull
+    public static Position at(double x, double y, double z, @NotNull World world, @NotNull String server) {
+        return Position.at(x, y, z, 0, 0, world, server);
+    }
+
+    @NotNull
+    public static Position at(@NotNull Location location, @NotNull String server) {
+        return new Position(location, server);
+    }
+
+    @Override
+    public void update(@NotNull Position newPosition) {
+        super.update(newPosition);
+        this.setServer(newPosition.getServer());
+>>>>>>> master
     }
 
     /**
-     * Parses the position from a set of values
-     *
-     * @param args       The values to parse
-     * @param relativeTo The {@link Position} to use as a reference for relative coordinates
-     * @return The position if it could be parsed, otherwise an empty optional
+     * The name of the server the position is on
      */
-    public static Optional<Position> parse(@NotNull String[] args, @NotNull Position relativeTo) {
-        // Validate argument length
-        if (args.length < 3 || args.length > 5) {
-            return Optional.empty();
-        }
-
-        // Parse, handle relatives, and return, catching NumberFormatExceptions and returning an empty optional
-        try {
-            final double x = parseCoordinate(args[0], relativeTo.x);
-            final double y = parseCoordinate(args[1], relativeTo.y);
-            final double z = parseCoordinate(args[2], relativeTo.z);
-            final World world = args.length > 3 ? new World(args[3], UUID.randomUUID()) : relativeTo.world;
-            final Server server = args.length > 4 ? new Server(args[4]) : relativeTo.server;
-            return Optional.of(new Position(x, y, z, relativeTo.yaw, relativeTo.pitch, world, server));
-        } catch (NumberFormatException ignored) {
-            return Optional.empty();
-        }
+    @NotNull
+    public String getServer() {
+        return server;
     }
 
-    /**
-     * Parses a coordinate double value from a string
-     *
-     * @param value        The string to parse
-     * @param currentValue The current value of the coordinate, for handling relatives
-     * @return The parsed coordinate
-     * @throws NumberFormatException If the string could not be parsed
-     */
-    private static double parseCoordinate(@NotNull String value, double currentValue) throws NumberFormatException {
-        // Future: Consider supporting ^ ^ ^ (position-relative-to-facing)
-        if (value.startsWith("~")) {
-            if (value.length() == 1) {
-                return currentValue;
-            } else {
-                return currentValue + Double.parseDouble(value.substring(1));
-            }
-        } else {
-            return Double.parseDouble(value);
-        }
+    public void setServer(@NotNull String server) {
+        this.server = server;
     }
 
+<<<<<<< HEAD
     /**
      * Update the position to match that of another position
      *
@@ -95,4 +102,14 @@ public class Position extends Location {
         this.world = newPosition.world;
         this.server = newPosition.server;
     }
+=======
+    @Override
+    public String toString() {
+        return "x: " + (int) getX() + ", " +
+                "y: " + (int) getY() + ", " +
+                "z: " + (int) getZ() + " " +
+                "(" + getWorld().getName() + " / " + getServer() + ")";
+    }
+
+>>>>>>> master
 }

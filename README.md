@@ -1,7 +1,7 @@
 <p align="center">
     <img src="images/banner.png" alt="HuskHomes" />
-    <a href="https://github.com/WiIIiam278/HuskHomes2/actions/workflows/java_ci.yml">
-        <img src="https://img.shields.io/github/actions/workflow/status/WiIIiam278/HuskHomes2/java_ci.yml?branch=master&logo=github"/>
+    <a href="https://github.com/WiIIiam278/HuskHomes2/actions/workflows/ci.yml">
+        <img src="https://img.shields.io/github/actions/workflow/status/WiIIiam278/HuskHomes2/ci.yml?branch=master&logo=github"/>
     </a> 
     <a href="https://jitpack.io/#net.william278/HuskHomes2">
         <img src="https://img.shields.io/jitpack/version/net.william278/HuskHomes2?color=%2300fb9a&label=api&logo=gradle" />
@@ -25,7 +25,7 @@
 </p>
 <br/>
 
-**HuskHomes** is a powerful, intuitive and flexible teleportation plugin for Spigot-based Minecraft servers. The plugin supports a wide array of features; from teleporting between players, teleport requests, public and private homes, warps, random teleporting and more. 
+**HuskHomes** is a powerful, intuitive and flexible teleportation plugin for Spigot and Fabric-based Minecraft servers. The plugin supports a wide array of features; from teleporting between players, teleport requests, public and private homes, warps, random teleporting and more. 
 
 All of this is supported on standalone and cross-server setups; players can set home and teleport on and between multiple servers on a proxy network.
 
@@ -43,7 +43,7 @@ All of this is supported on standalone and cross-server setups; players can set 
 **⭐ Extensible API & open-source** &mdash; Still not enough? Extend the plugin with the HuskHomes API. Or, submit a pull request—we're open-source!
 
 ## Building
-To build HuskHomes, simply run the following in the root of the repository:
+HuskHomes requires Java 17 to build. To build, simply run the following in the root of the repository:
 
 ```bash
 ./gradlew clean build
@@ -62,7 +62,7 @@ Translations of the plugin locales are welcome to help make the plugin more acce
 
 ## Links
 - [Docs](https://william278.net/docs/huskhomes/) &mdash; Read the plugin documentation!
-- [Spigot](https://www.spigotmc.org/resources/huskhomes.83767/) &mdash; View the Spigot resource page (Also: [Polymart](https://polymart.org/resource/huskhomes.284/), [Modrinth](https://modrinth.com/plugin/huskhomes))
+- [Spigot](https://www.spigotmc.org/resources/huskhomes.83767/) &mdash; View the Spigot resource page (Also: [Polymart](https://polymart.org/resource/huskhomes.284/), [Modrinth](https://modrinth.com/plugin/huskhomes), [CurseForge](https://www.curseforge.com/minecraft/mc-mods/huskhomes/))
 - [Issues](https://github.com/WiIIiam278/HuskHomes2/issues) &mdash; File a bug report or feature request
 - [Discord](https://discord.gg/tVYhJfyDWG) &mdash; Get help, ask questions
 - [bStats](https://bstats.org/plugin/bukkit/HuskHomes/8430) &mdash; View plugin metrics

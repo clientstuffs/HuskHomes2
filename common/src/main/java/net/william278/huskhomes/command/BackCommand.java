@@ -1,20 +1,45 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.config.Settings;
-import net.william278.huskhomes.player.OnlineUser;
+import net.william278.huskhomes.hook.EconomyHook;
+import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.teleport.Teleport;
-import net.william278.huskhomes.teleport.TimedTeleport;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.teleport.TeleportationException;
+import net.william278.huskhomes.user.OnlineUser;
 import org.jetbrains.annotations.NotNull;
 
-public class BackCommand extends CommandBase {
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-    protected BackCommand(@NotNull HuskHomes implementor) {
-        super("back", Permission.COMMAND_BACK, implementor);
+public class BackCommand extends InGameCommand {
+
+    protected BackCommand(@NotNull HuskHomes plugin) {
+        super("back", List.of(), "", plugin);
+        addAdditionalPermissions(Map.of("death", false));
     }
 
     @Override
+<<<<<<< HEAD
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         plugin.getDatabase().getLastPosition(onlineUser).thenAccept(lastPosition ->
             lastPosition.ifPresentOrElse(position -> Teleport.builder(plugin, onlineUser)
@@ -23,6 +48,27 @@ public class BackCommand extends CommandBase {
                     .toTimedTeleport()
                     .thenApply(TimedTeleport::execute),
                 () -> plugin.getLocales().getLocale("error_no_last_position").ifPresent(onlineUser::sendMessage)));
+=======
+    public void execute(@NotNull OnlineUser executor, @NotNull String[] args) {
+        final Optional<Position> lastPosition = plugin.getDatabase().getLastPosition(executor);
+        if (lastPosition.isEmpty()) {
+            plugin.getLocales().getLocale("error_no_last_position")
+                    .ifPresent(executor::sendMessage);
+            return;
+        }
+
+        try {
+            Teleport.builder(plugin)
+                    .teleporter(executor)
+                    .target(lastPosition.get())
+                    .economyActions(EconomyHook.Action.BACK_COMMAND)
+                    .type(Teleport.Type.BACK)
+                    .toTimedTeleport()
+                    .execute();
+        } catch (TeleportationException e) {
+            e.displayMessage(executor, plugin, args);
+        }
+>>>>>>> master
     }
 
 }

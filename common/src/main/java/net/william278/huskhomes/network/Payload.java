@@ -1,36 +1,56 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.network;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import net.william278.huskhomes.position.Position;
-import net.william278.huskhomes.request.TeleportRequest;
-import net.william278.huskhomes.teleport.TeleportResult;
+import net.william278.huskhomes.teleport.TeleportRequest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
- * Represents a payload sent in a cross-server {@link Request}
+ * Represents a payload sent in a cross-server {@link Message}
  */
 public class Payload {
 
-    /**
-     * A position field
-     */
     @Nullable
-    public Position position;
+    @Expose
+    private Position position;
 
-    /**
-     * A teleport result field
-     */
     @Nullable
-    @SerializedName("teleport_result")
-    public TeleportResult resultState;
-
-    /**
-     * A teleport request field
-     */
-    @Nullable
+    @Expose
     @SerializedName("teleport_request")
-    public TeleportRequest teleportRequest;
+    private TeleportRequest teleportRequest;
+
+    @Nullable
+    @Expose
+    private String string;
+
+    @Nullable
+    @Expose
+    @SerializedName("string_list")
+    private List<String> stringList;
 
     private Payload() {
     }
@@ -59,19 +79,6 @@ public class Payload {
     }
 
     /**
-     * Returns a payload containing a {@link TeleportResult}
-     *
-     * @param resultState the teleport to send
-     * @return a payload containing the teleport result
-     */
-    @NotNull
-    public static Payload withTeleportResult(@NotNull TeleportResult resultState) {
-        final Payload payload = new Payload();
-        payload.resultState = resultState;
-        return payload;
-    }
-
-    /**
      * Returns a payload containing a {@link TeleportRequest}
      *
      * @param teleportRequest the teleport to send
@@ -84,4 +91,59 @@ public class Payload {
         return payload;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * A string field
+     */
+    @NotNull
+    public static Payload withString(@NotNull String target) {
+        final Payload payload = new Payload();
+        payload.string = target;
+        return payload;
+    }
+
+    /**
+     * A string list field
+     */
+    @NotNull
+    public static Payload withStringList(@NotNull List<String> target) {
+        final Payload payload = new Payload();
+        payload.stringList = target;
+        return payload;
+    }
+
+    private Payload() {
+    }
+
+    /**
+     * A position field
+     */
+    public Optional<Position> getPosition() {
+        return Optional.ofNullable(position);
+    }
+
+
+    /**
+     * A teleport request field
+     */
+    public Optional<TeleportRequest> getTeleportRequest() {
+        return Optional.ofNullable(teleportRequest);
+    }
+
+    /**
+     * A string field
+     */
+    public Optional<String> getString() {
+        return Optional.ofNullable(string);
+    }
+
+    /**
+     * A string list field
+     */
+    public Optional<List<String>> getStringList() {
+        return Optional.ofNullable(stringList);
+    }
+
+>>>>>>> master
 }

@@ -1,9 +1,28 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.listener;
 
 import net.william278.huskhomes.BukkitHuskHomes;
-import net.william278.huskhomes.player.BukkitPlayer;
-import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.position.Position;
+import net.william278.huskhomes.user.BukkitUser;
+import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.util.BukkitAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,22 +45,22 @@ public class BukkitEventListener extends EventListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        super.handlePlayerJoin(BukkitPlayer.adapt(event.getPlayer()));
+        super.handlePlayerJoin(BukkitUser.adapt(event.getPlayer()));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerLeave(PlayerQuitEvent event) {
-        super.handlePlayerLeave(BukkitPlayer.adapt(event.getPlayer()));
+        super.handlePlayerLeave(BukkitUser.adapt(event.getPlayer()));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerDeath(PlayerDeathEvent event) {
-        super.handlePlayerDeath(BukkitPlayer.adapt(event.getEntity()));
+        super.handlePlayerDeath(BukkitUser.adapt(event.getEntity()));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        super.handlePlayerRespawn(BukkitPlayer.adapt(event.getPlayer()));
+        super.handlePlayerRespawn(BukkitUser.adapt(event.getPlayer()));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -53,16 +72,20 @@ public class BukkitEventListener extends EventListener implements Listener {
         if (!(event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND
               || event.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN)) return;
 
-        final BukkitPlayer bukkitPlayer = BukkitPlayer.adapt(player);
+        final BukkitUser bukkitUser = BukkitUser.adapt(player);
         BukkitAdapter.adaptLocation(event.getFrom()).ifPresent(sourceLocation ->
+<<<<<<< HEAD
             handlePlayerTeleport(bukkitPlayer, new Position(sourceLocation, plugin.getServerName())));
+=======
+                handlePlayerTeleport(bukkitUser, Position.at(sourceLocation, plugin.getServerName())));
+>>>>>>> master
     }
 
     //todo When defining paper-plugin.yml files gets merged, use the PlayerSetSpawnEvent in the paper module
     // (https://jd.papermc.io/paper/1.19/com/destroystokyo/paper/event/player/PlayerSetSpawnEvent.html)
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerUpdateRespawnLocation(PlayerInteractEvent event) {
-        if (!(plugin.getSettings().crossServer && plugin.getSettings().globalRespawning)) return;
+        if (!(plugin.getSettings().doCrossServer() && plugin.getSettings().isGlobalRespawning())) return;
         if (event.getClickedBlock() == null) return;
         if (!(event.getClickedBlock().getBlockData() instanceof Bed
               || event.getClickedBlock().getBlockData() instanceof RespawnAnchor)) return;
@@ -72,11 +95,19 @@ public class BukkitEventListener extends EventListener implements Listener {
 
         // Update the player's respawn location
         BukkitAdapter.adaptLocation(location).ifPresent(adaptedLocation -> {
+<<<<<<< HEAD
             final OnlineUser onlineUser = BukkitPlayer.adapt(event.getPlayer());
             super.handlePlayerUpdateSpawnPoint(onlineUser, new Position(
                 adaptedLocation.x, adaptedLocation.y, adaptedLocation.z,
                 adaptedLocation.yaw, adaptedLocation.pitch,
                 adaptedLocation.world, plugin.getServerName()));
+=======
+            final OnlineUser onlineUser = BukkitUser.adapt(event.getPlayer());
+            super.handlePlayerUpdateSpawnPoint(onlineUser, Position.at(
+                    adaptedLocation.getX(), adaptedLocation.getY(), adaptedLocation.getZ(),
+                    adaptedLocation.getYaw(), adaptedLocation.getPitch(),
+                    adaptedLocation.getWorld(), plugin.getServerName()));
+>>>>>>> master
         });
     }
 

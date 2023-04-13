@@ -1,9 +1,27 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.command;
 
 import me.lucko.commodore.CommodoreProvider;
 import me.lucko.commodore.file.CommodoreFileReader;
 import net.william278.huskhomes.BukkitHuskHomes;
-import org.bukkit.command.PluginCommand;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -16,22 +34,28 @@ public class BrigadierUtil {
      * Uses commodore to register command completions
      *
      * @param plugin        instance of the registering Bukkit plugin
-     * @param pluginCommand the Bukkit PluginCommand to register completions for
-     * @param command       the {@link CommandBase} to register completions for
+     * @param bukkitCommand the Bukkit PluginCommand to register completions for
+     * @param command       the {@link Command} to register completions for
      */
-    protected static void registerCommodore(@NotNull BukkitHuskHomes plugin, @NotNull PluginCommand pluginCommand,
-                                            @NotNull CommandBase command) {
-        final InputStream commandCommodore = plugin.getResource("commodore/" + pluginCommand.getName() + ".commodore");
+    protected static void registerCommodore(@NotNull BukkitHuskHomes plugin, @NotNull org.bukkit.command.Command bukkitCommand,
+                                            @NotNull Command command) {
+        final InputStream commandCommodore = plugin.getResource("commodore/" + bukkitCommand.getName() + ".commodore");
         if (commandCommodore == null) {
             return;
         }
         try {
+<<<<<<< HEAD
             CommodoreProvider.getCommodore(plugin).register(pluginCommand,
                 CommodoreFileReader.INSTANCE.parse(commandCommodore),
                 player -> player.hasPermission(command.permission));
+=======
+            CommodoreProvider.getCommodore(plugin).register(bukkitCommand,
+                    CommodoreFileReader.INSTANCE.parse(commandCommodore),
+                    player -> player.hasPermission(command.getPermission()));
+>>>>>>> master
         } catch (IOException e) {
-            plugin.getLoggingAdapter().log(Level.SEVERE, "Failed to read command commodore completions for "
-                                                         + pluginCommand.getName(), e);
+            plugin.log(Level.SEVERE, "Failed to read command commodore completions for "
+                                     + bukkitCommand.getName(), e);
         }
     }
 

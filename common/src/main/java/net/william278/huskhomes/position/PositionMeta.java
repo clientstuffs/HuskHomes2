@@ -1,3 +1,22 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.position;
 
 import com.google.common.reflect.TypeToken;
@@ -14,43 +33,28 @@ import java.util.Map;
  */
 public class PositionMeta {
 
-    /**
-     * The name of a position
-     */
-    @NotNull
-    public String name;
+    private String name;
+    private String description;
+    private Map<String, String> tags;
+    private Instant creationTime;
 
-    /**
-     * A description of a position
-     */
-    @NotNull
-    public String description;
-
-    /**
-     * Map of metadata tags for a position
-     */
-    @NotNull
-    public Map<String, String> tags;
-
-    /**
-     * The time the position was created
-     */
-    @NotNull
-    public Instant creationTime;
-
-    public PositionMeta(@NotNull String name, @NotNull String description, @NotNull Instant creationTime,
-                        @Nullable String serializedTags) {
-        this.name = name;
-        this.description = description;
-        this.creationTime = creationTime;
-        this.tags = deserializeTags(serializedTags);
+    private PositionMeta(@NotNull String name, @NotNull String description,
+                         @NotNull Instant creationTime, @Nullable String serializedTags) {
+        this.setName(name);
+        this.setDescription(description);
+        this.setCreationTime(creationTime);
+        this.setTags(deserializeTags(serializedTags));
     }
 
-    public PositionMeta(@NotNull String name, @NotNull String description) {
-        this.name = name;
-        this.description = description;
-        this.creationTime = Instant.now();
-        this.tags = new HashMap<>();
+    @NotNull
+    public static PositionMeta from(@NotNull String name, @NotNull String description,
+                                    @NotNull Instant creationTime, @Nullable String serializedTags) {
+        return new PositionMeta(name, description, creationTime, serializedTags);
+    }
+
+    @NotNull
+    public static PositionMeta create(@NotNull String name, @NotNull String description) {
+        return PositionMeta.from(name, description, Instant.now(), "");
     }
 
     /**
@@ -59,6 +63,7 @@ public class PositionMeta {
      * @param serializedTags The JSON string to deserialize
      * @return The deserialized {@link Map}
      */
+    @NotNull
     private static Map<String, String> deserializeTags(@Nullable String serializedTags) {
         try {
             if (serializedTags == null || serializedTags.isBlank()) {
@@ -80,14 +85,59 @@ public class PositionMeta {
     @Nullable
     public String getSerializedTags() {
         try {
-            if (tags.isEmpty()) {
+            if (getTags().isEmpty()) {
                 return null;
             }
-            return new Gson().toJson(tags);
+            return new Gson().toJson(getTags());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
+    /**
+     * The name of a position
+     */
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * A description of a position
+     */
+    @NotNull
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(@Nullable String description) {
+        this.description = description;
+    }
+
+    /**
+     * Map of metadata tags for a position
+     */
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
+    /**
+     * The time the position was created
+     */
+    @NotNull
+    public Instant getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Instant creationTime) {
+        this.creationTime = creationTime;
+    }
 }

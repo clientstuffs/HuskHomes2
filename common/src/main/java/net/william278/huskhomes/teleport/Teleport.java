@@ -1,29 +1,60 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.teleport;
 
 import net.william278.huskhomes.HuskHomes;
+import net.william278.huskhomes.command.BackCommand;
 import net.william278.huskhomes.config.Settings;
+<<<<<<< HEAD
 import net.william278.huskhomes.network.Payload;
 import net.william278.huskhomes.network.Request;
 import net.william278.huskhomes.player.OnlineUser;
 import net.william278.huskhomes.player.User;
 import net.william278.huskhomes.position.Position;
 import net.william278.huskhomes.util.Permission;
+=======
+import net.william278.huskhomes.event.ITeleportEvent;
+import net.william278.huskhomes.hook.EconomyHook;
+import net.william278.huskhomes.network.Message;
+import net.william278.huskhomes.network.Payload;
+import net.william278.huskhomes.position.Position;
+import net.william278.huskhomes.user.OnlineUser;
+import net.william278.huskhomes.util.ThrowingConsumer;
+>>>>>>> master
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+<<<<<<< HEAD
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+=======
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+>>>>>>> master
 
-/**
- * Represents a teleport in the process of being executed
- *
- * @since 3.1
- */
 public class Teleport {
 
+<<<<<<< HEAD
     public static final String CANCEL_METADATA_KEY = "TeleportCancel";
 
     /**
@@ -74,28 +105,45 @@ public class Teleport {
                        @NotNull TeleportType type, @NotNull Set<Settings.EconomyAction> economyActions,
                        final boolean updateLastPosition, @Nullable final String queueType, @NotNull HuskHomes plugin) {
         this.teleporter = teleporter;
+=======
+    protected final HuskHomes plugin;
+    protected final OnlineUser executor;
+    protected final Teleportable teleporter;
+    protected final Target target;
+    protected final Type type;
+    protected final List<EconomyHook.Action> economyActions;
+    private final boolean async;
+    protected final boolean updateLastPosition;
+
+    protected Teleport(@NotNull OnlineUser executor, @NotNull Teleportable teleporter, @NotNull Target target,
+                       @NotNull Type type, boolean updateLastPosition, @NotNull List<EconomyHook.Action> actions,
+                       @NotNull HuskHomes plugin) {
+        this.plugin = plugin;
+>>>>>>> master
         this.executor = executor;
+        this.teleporter = teleporter;
         this.target = target;
         this.type = type;
+<<<<<<< HEAD
         this.economyActions = economyActions;
         this.plugin = plugin;
         this.updateLastPosition = updateLastPosition;
         this.queueType = queueType;
+=======
+        this.economyActions = actions;
+        this.async = plugin.getSettings().doAsynchronousTeleports();
+        this.updateLastPosition = updateLastPosition && plugin.getCommand(BackCommand.class)
+                .map(command -> executor.hasPermission(command.getPermission()))
+                .orElse(false);
+>>>>>>> master
     }
 
-    /**
-     * Create a teleport builder with an executor to carry it out
-     *
-     * @param plugin   Instance of the implementing HuskHomes plugin
-     * @param executor The {@link OnlineUser} on this server executing the teleport.
-     *                 Not necessarily the person being teleported, which can be set independently with
-     *                 {{@link TeleportBuilder#setTeleporter(User)}}
-     * @return A new {@link TeleportBuilder} instance
-     */
-    public static TeleportBuilder builder(@NotNull HuskHomes plugin, @NotNull OnlineUser executor) {
-        return new TeleportBuilder(plugin, executor);
+    @NotNull
+    public static TeleportBuilder builder(@NotNull HuskHomes plugin) {
+        return new TeleportBuilder(plugin);
     }
 
+<<<<<<< HEAD
     /**
      * Execute this teleport
      *
@@ -119,9 +167,42 @@ public class Teleport {
             if (!plugin.validateEconomyCheck(executor, economyAction)) {
                 return CompletableFuture.completedFuture(TeleportResult.CANCELLED_ECONOMY)
                     .thenApply(resultState -> CompletedTeleport.from(resultState, this));
+=======
+    public void execute() throws TeleportationException {
+        final Optional<OnlineUser> localTeleporter = resolveLocalTeleporter();
+
+        // Validate economy actions
+        validateEconomyActions();
+
+        // Teleport a user on another server
+        if (localTeleporter.isEmpty()) {
+            final Username teleporter = (Username) this.teleporter;
+            if (!plugin.getSettings().doCrossServer()) {
+                throw new TeleportationException(TeleportationException.Type.TELEPORTER_NOT_FOUND);
+>>>>>>> master
             }
+
+            fireEvent((event) -> {
+                executeEconomyActions();
+                if (target instanceof Username username) {
+                    Message.builder()
+                            .type(Message.Type.TELEPORT_TO_NETWORKED_USER)
+                            .target(teleporter.name())
+                            .payload(Payload.withString(username.name()))
+                            .build().send(plugin.getMessenger(), executor);
+                    return;
+                }
+
+                Message.builder()
+                        .type(Message.Type.TELEPORT_TO_POSITION)
+                        .target(teleporter.name())
+                        .payload(Payload.withPosition((Position) target))
+                        .build().send(plugin.getMessenger(), executor);
+            });
+            return;
         }
 
+<<<<<<< HEAD
         if (shouldCancel()) {
             return CompletableFuture.completedFuture(CompletedTeleport.from(TeleportResult.CANCELLED, this));
         }
@@ -278,3 +359,135 @@ public class Teleport {
         return user.getMetadata(CANCEL_METADATA_KEY).filter(Boolean.class::isInstance).map(Boolean.class::cast).orElse(false);
     }
 }
+=======
+        // Teleport a local user
+        final OnlineUser teleporter = localTeleporter.get();
+        if (target instanceof Username username) {
+            final Optional<OnlineUser> localTarget = username.name().equals("@s")
+                    ? Optional.of(executor) : username.findLocally(plugin);
+            if (localTarget.isPresent()) {
+                fireEvent((event) -> {
+                    executeEconomyActions();
+                    if (updateLastPosition) {
+                        plugin.getDatabase().setLastPosition(teleporter, teleporter.getPosition());
+                    }
+
+                    teleporter.teleportLocally(localTarget.get().getPosition(), async);
+                    this.displayTeleportingComplete(teleporter);
+                });
+                return;
+            }
+
+            if (plugin.getSettings().doCrossServer()) {
+                fireEvent((event) -> {
+                    executeEconomyActions();
+                    Message.builder()
+                            .type(Message.Type.TELEPORT_TO_NETWORKED_POSITION)
+                            .target(username.name())
+                            .build().send(plugin.getMessenger(), executor);
+                });
+                return;
+            }
+
+            throw new TeleportationException(TeleportationException.Type.TARGET_NOT_FOUND);
+        }
+
+        fireEvent((event) -> {
+            executeEconomyActions();
+            if (updateLastPosition) {
+                plugin.getDatabase().setLastPosition(teleporter, teleporter.getPosition());
+            }
+
+            final Position target = (Position) this.target;
+            if (!plugin.getSettings().doCrossServer() || target.getServer().equals(plugin.getServerName())) {
+                teleporter.teleportLocally(target, async);
+                this.displayTeleportingComplete(teleporter);
+                return;
+            }
+
+            plugin.getDatabase().setCurrentTeleport(teleporter, this);
+            plugin.getMessenger().changeServer(teleporter, target.getServer());
+        });
+    }
+
+    @NotNull
+    private Optional<OnlineUser> resolveLocalTeleporter() throws TeleportationException {
+        if (this.teleporter instanceof Username username) {
+            return username.findLocally(plugin);
+        }
+        return Optional.of((OnlineUser) this.teleporter);
+    }
+
+    public void displayTeleportingComplete(@NotNull OnlineUser teleporter) {
+        plugin.getLocales().getLocale("teleporting_complete")
+                .ifPresent(teleporter::sendMessage);
+        plugin.getSettings().getSoundEffect(Settings.SoundEffectAction.TELEPORTATION_COMPLETE)
+                .ifPresent(teleporter::playSound);
+    }
+
+    // Fire the teleport event
+    private void fireEvent(@NotNull ThrowingConsumer<ITeleportEvent> afterFired) {
+        plugin.fireEvent(plugin.getTeleportEvent(this), afterFired);
+    }
+
+    // Check economy actions
+    protected void validateEconomyActions() throws TeleportationException {
+        if (economyActions.stream()
+                .map(action -> plugin.validateEconomyCheck(executor, action))
+                .anyMatch(result -> !result)) {
+            throw new TeleportationException(TeleportationException.Type.ECONOMY_ACTION_FAILED);
+        }
+    }
+
+    // Perform transactions on economy actions
+    private void executeEconomyActions() {
+        economyActions.forEach(action -> plugin.performEconomyTransaction(executor, action));
+    }
+
+    @NotNull
+    public Type getType() {
+        return type;
+    }
+
+    @NotNull
+    public Teleportable getTeleporter() {
+        return teleporter;
+    }
+
+    @NotNull
+    public Target getTarget() {
+        return target;
+    }
+
+    /**
+     * Represents the type of teleport being used
+     */
+    public enum Type {
+        TELEPORT(0),
+        RESPAWN(1),
+        BACK(2);
+
+        private final int typeId;
+
+        Type(final int typeId) {
+            this.typeId = typeId;
+        }
+
+        /**
+         * Returns a {@link Type} by its type id.
+         *
+         * @param typeId The type id of the {@link Type} to return.
+         * @return The {@link Type} of the given type id.
+         */
+        public static Optional<Type> getTeleportType(int typeId) {
+            return Arrays.stream(values())
+                    .filter(type -> type.getTypeId() == typeId)
+                    .findFirst();
+        }
+
+        public int getTypeId() {
+            return typeId;
+        }
+    }
+}
+>>>>>>> master

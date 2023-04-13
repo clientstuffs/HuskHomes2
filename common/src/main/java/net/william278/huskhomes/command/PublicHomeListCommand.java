@@ -1,23 +1,45 @@
+/*
+ * This file is part of HuskHomes, licensed under the Apache License 2.0.
+ *
+ *  Copyright (c) William278 <will27528@gmail.com>
+ *  Copyright (c) contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package net.william278.huskhomes.command;
 
 import net.william278.huskhomes.HuskHomes;
-import net.william278.huskhomes.player.OnlineUser;
+import net.william278.huskhomes.config.Locales;
 import net.william278.huskhomes.position.Home;
-import net.william278.huskhomes.util.Permission;
+import net.william278.huskhomes.user.CommandUser;
+import net.william278.huskhomes.user.OnlineUser;
+import net.william278.paginedown.PaginatedList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class PublicHomeListCommand extends CommandBase implements ConsoleExecutable {
+public class PublicHomeListCommand extends ListCommand {
 
-    protected PublicHomeListCommand(@NotNull HuskHomes implementor) {
-        super("publichomelist", Permission.COMMAND_HOME, implementor, "phomelist", "phomes");
+
+    protected PublicHomeListCommand(@NotNull HuskHomes plugin) {
+        super("phomelist", List.of("phomes", "publichomelist"), "[page]", plugin);
     }
 
     @Override
+<<<<<<< HEAD
     public void onExecute(@NotNull OnlineUser onlineUser, @NotNull String[] args) {
         switch (args.length) {
             case 0: {
@@ -40,20 +62,20 @@ public class PublicHomeListCommand extends CommandBase implements ConsoleExecuta
                 break;
             }
         }
+=======
+    public void execute(@NotNull CommandUser executor, @NotNull String[] args) {
+        final int pageNumber = parseIntArg(args, 0).orElse(1);
+        this.showPublicHomeList(executor, pageNumber);
+>>>>>>> master
     }
 
-    /**
-     * Show a (cached) list of public homes
-     *
-     * @param onlineUser the user to display the homes to
-     * @param pageNumber page number to display
-     */
-    private void showPublicHomeList(@NotNull OnlineUser onlineUser, int pageNumber) {
-        if (plugin.getCache().publicHomeLists.containsKey(onlineUser.uuid)) {
-            onlineUser.sendMessage(plugin.getCache().publicHomeLists.get(onlineUser.uuid).getNearestValidPage(pageNumber));
+    protected void showPublicHomeList(@NotNull CommandUser executor, int pageNumber) {
+        if (executor instanceof OnlineUser user && cachedLists.containsKey(user.getUuid())) {
+            executor.sendMessage(cachedLists.get(user.getUuid()).getNearestValidPage(pageNumber));
             return;
         }
 
+<<<<<<< HEAD
         plugin.getDatabase().getPublicHomes().thenAcceptAsync(publicHomes -> {
             if (publicHomes.isEmpty()) {
                 plugin.getLocales().getLocale("error_no_public_homes_set").ifPresent(onlineUser::sendMessage);
@@ -65,27 +87,40 @@ public class PublicHomeListCommand extends CommandBase implements ConsoleExecuta
                 .ifPresent(onlineUser::sendMessage);
         });
 
+=======
+        final List<Home> homes = plugin.getDatabase().getPublicHomes();
+        plugin.fireEvent(plugin.getViewHomeListEvent(homes, executor, true),
+                (event) -> this.generateList(executor, event.getHomes()).ifPresent(homeList -> {
+                    if (executor instanceof OnlineUser onlineUser) {
+                        cachedLists.put(onlineUser.getUuid(), homeList);
+                    }
+                    executor.sendMessage(homeList.getNearestValidPage(pageNumber));
+                }));
+>>>>>>> master
     }
 
-    @Override
-    public void onConsoleExecute(@NotNull String[] args) {
-        CompletableFuture.runAsync(() -> {
-            final List<Home> homes = plugin.getDatabase().getPublicHomes().join();
-            StringJoiner rowJoiner = new StringJoiner("\t");
+    private Optional<PaginatedList> generateList(@NotNull CommandUser executor, @NotNull List<Home> publicHomes) {
+        if (publicHomes.isEmpty()) {
+            plugin.getLocales().getLocale("error_no_public_homes_set")
+                    .ifPresent(executor::sendMessage);
+            return Optional.empty();
+        }
 
-            plugin.getLoggingAdapter().log(Level.INFO, "List of " + homes.size() + " public homes:");
-            for (int i = 0; i < homes.size(); i++) {
-                final String ownerUsername = homes.get(i).owner.username;
-                final String homeName = homes.get(i).meta.name;
-                final String home = ownerUsername + "." + homeName;
-                int spacingSize = (16 - ownerUsername.length()) + 17;
-                rowJoiner.add(home.length() < spacingSize ? home + " ".repeat(spacingSize - home.length()) : home);
-                if ((i + 1) % 3 == 0) {
-                    plugin.getLoggingAdapter().log(Level.INFO, rowJoiner.toString());
-                    rowJoiner = new StringJoiner("\t");
-                }
-            }
-            plugin.getLoggingAdapter().log(Level.INFO, rowJoiner.toString());
-        });
+        final PaginatedList homeList = PaginatedList.of(publicHomes.stream().map(home ->
+                        plugin.getLocales()
+                                .getRawLocale("public_home_list_item",
+                                        Locales.escapeText(home.getMeta().getName()),
+                                        home.getOwner().getUsername() + "." + Locales.escapeText(home.getMeta().getName()),
+                                        Locales.escapeText(home.getOwner().getUsername()),
+                                        Locales.escapeText(plugin.getLocales().wrapText(home.getMeta().getDescription(), 40)))
+                                .orElse(home.getName())).sorted().collect(Collectors.toList()),
+                plugin.getLocales()
+                        .getBaseList(plugin.getSettings().getListItemsPerPage())
+                        .setHeaderFormat(plugin.getLocales().getRawLocale("public_home_list_page_title",
+                                        "%first_item_on_page_index%", "%last_item_on_page_index%", "%total_items%")
+                                .orElse(""))
+                        .setCommand("/huskhomes:phomelist").build());
+        return Optional.of(homeList);
     }
+
 }
