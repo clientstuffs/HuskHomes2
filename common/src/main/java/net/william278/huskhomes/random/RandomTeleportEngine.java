@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Represents an engine for generating random position targets
+ * Represents an engine for generating random position targets.
  */
 public abstract class RandomTeleportEngine {
 
@@ -37,7 +37,7 @@ public abstract class RandomTeleportEngine {
     public long maxAttempts = 12;
 
     /**
-     * Constructor for a random teleport engine
+     * Constructor for a random teleport engine.
      *
      * @param plugin The HuskHomes plugin instance
      * @param name   The name of the implementing random teleport engine
@@ -53,27 +53,36 @@ public abstract class RandomTeleportEngine {
     }
 
     /**
-     * Get the origin position (spawn) of this server
+     * Get the origin (center) position for the world.
      *
+     * <p>Note that this will return the {@link HuskHomes#getServerSpawn() server spawn position} if it is in the same
+     * world as the world passed to this method, otherwise it will return a position at 0, 128, 0 on the provided world.
+     *
+     * @param world The world to get the origin position for
      * @return The origin position
      */
     @NotNull
     protected Position getCenterPoint(@NotNull World world) {
         return plugin.getServerSpawn()
-                .map(s -> s.getPosition(plugin.getServerName()))
-                .orElse(Position.at(0d, 128d, 0d, 0f, 0f,
-                        world, plugin.getServerName()));
+                .map(spawn -> spawn.getPosition(plugin.getServerName()))
+                .flatMap(position -> {
+                    if (position.getWorld().equals(world)) {
+                        return Optional.of(position);
+                    }
+                    return Optional.empty();
+                })
+                .orElse(Position.at(0d, 128d, 0d, world, plugin.getServerName()));
     }
 
     /**
      * Gets a random position in the {@link World}, or {@link Optional#empty()} if no position could be found in
-     * the configured number of attempts
+     * the configured number of attempts.
      *
      * @param world The world to find a random position in
      * @param args  The arguments to pass to the random teleport engine
-     * @return The position, optionally, which will be empty if the random teleport engine timed out after a
-     * {@link #maxAttempts configured number of attempts}
+     * @return An Optional position, if one could be found in the {@link #maxAttempts max attempts}
      */
-    public abstract CompletableFuture<Optional<Position>> getRandomPosition(@NotNull World world, @NotNull String[] args);
+    public abstract CompletableFuture<Optional<Position>> getRandomPosition(@NotNull World world,
+                                                                            @NotNull String[] args);
 
 }

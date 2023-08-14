@@ -94,7 +94,7 @@ public class WarpsManager {
     }
 
     /**
-     * Cached warp names
+     * Cached warp names.
      */
     @NotNull
     public List<String> getWarps() {
@@ -112,7 +112,8 @@ public class WarpsManager {
                 .toList();
     }
 
-    public void createWarp(@NotNull String name, @NotNull Position position, boolean overwrite) throws ValidationException {
+    public void createWarp(@NotNull String name, @NotNull Position position,
+                           boolean overwrite) throws ValidationException {
         final Optional<Warp> existingWarp = plugin.getDatabase().getWarp(name);
         if (existingWarp.isPresent() && !overwrite) {
             throw new ValidationException(ValidationException.Type.NAME_TAKEN);
@@ -124,13 +125,8 @@ public class WarpsManager {
 
         final Warp warp = existingWarp
                 .map(existing -> {
-                    existing.setX(position.getX());
-                    existing.setY(position.getY());
-                    existing.setZ(position.getZ());
-                    existing.setWorld(position.getWorld());
-                    existing.setServer(position.getServer());
-                    existing.setYaw(position.getYaw());
-                    existing.setPitch(position.getPitch());
+                    existing.getMeta().setName(name);
+                    existing.update(position);
                     return existing;
                 })
                 .orElse(Warp.from(position, PositionMeta.create(name, "")));

@@ -29,6 +29,7 @@ import net.william278.huskhomes.config.Server;
 import net.william278.huskhomes.config.Settings;
 import net.william278.huskhomes.config.Spawn;
 import net.william278.huskhomes.database.Database;
+import net.william278.huskhomes.database.H2Database;
 import net.william278.huskhomes.database.MySqlDatabase;
 import net.william278.huskhomes.database.SqLiteDatabase;
 import net.william278.huskhomes.event.SpongeEventDispatcher;
@@ -48,9 +49,11 @@ import net.william278.huskhomes.user.OnlineUser;
 import net.william278.huskhomes.user.SavedUser;
 import net.william278.huskhomes.user.SpongeUser;
 import net.william278.huskhomes.util.SpongeSafetyResolver;
-import net.william278.huskhomes.util.SpongeTaskRunner;
+import net.william278.huskhomes.util.SpongeTask;
 import net.william278.huskhomes.util.UnsafeBlocks;
 import net.william278.huskhomes.util.Validator;
+import org.bstats.charts.SimplePie;
+import org.bstats.sponge.Metrics;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Game;
@@ -61,6 +64,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
@@ -81,16 +85,14 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Plugin("huskhomes")
-public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafetyResolver, SpongeEventDispatcher, RawPlayDataHandler<EngineConnection> {
+public class SpongeHuskHomes implements HuskHomes, SpongeTask.Supplier, SpongeSafetyResolver, SpongeEventDispatcher,
+        RawPlayDataHandler<EngineConnection> {
 
+    /**
+     * Metrics ID for <a href="https://bstats.org/plugin/sponge/HuskHomes/18423">HuskHomes on Sponge</a>.
+     */
+    private static final int METRICS_ID = 18423;
     private static final ResourceKey PLUGIN_MESSAGE_CHANNEL_KEY = ResourceKey.of("bungeecord", "main");
-
-    // Instance of the plugin
-    private static SpongeHuskHomes instance;
-
-    public static SpongeHuskHomes getInstance() {
-        return instance;
-    }
 
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -99,6 +101,8 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
     private PluginContainer pluginContainer;
     @Inject
     private Game game;
+    @Inject
+    private Metrics.Factory metricsFactory;
 
     private Set<SavedUser> savedUsers;
     private Settings settings;
@@ -120,8 +124,6 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
 
     @Listener
     public void onConstructPlugin(final ConstructPluginEvent event) {
-        instance = this;
-
         // Get plugin version from mod container
         this.savedUsers = new HashSet<>();
         this.globalPlayerList = new HashMap<>();
@@ -138,8 +140,9 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
         // Initialize the database
         initialize(getSettings().getDatabaseType().getDisplayName() + " database connection", (plugin) -> {
             this.database = switch (getSettings().getDatabaseType()) {
-                case MYSQL -> new MySqlDatabase(this);
+                case MYSQL, MARIADB -> new MySqlDatabase(this);
                 case SQLITE -> new SqLiteDatabase(this);
+                case H2 -> new H2Database(this);
             };
 
             database.initialize();
@@ -156,6 +159,7 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
             });
         }
 
+        // Check for updates
         this.checkForUpdates();
     }
 
@@ -178,12 +182,32 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
             this.registerHooks();
 
             if (hooks.size() > 0) {
-                hooks.forEach(Hook::initialize);
+                hooks.forEach(hook -> {
+                    try {
+                        hook.initialize();
+                    } catch (Throwable e) {
+                        log(Level.WARNING, "Failed to initialize " + hook.getName() + " hook", e);
+                    }
+                });
                 log(Level.INFO, "Registered " + hooks.size() + " mod hooks: " + hooks.stream()
                         .map(Hook::getName)
                         .collect(Collectors.joining(", ")));
             }
         });
+
+        // Hook into bStats
+        initialize("metrics", (plugin) -> this.registerMetrics(METRICS_ID));
+    }
+
+    @Listener
+    public void onShutdown(final StoppingEngineEvent<org.spongepowered.api.Server> event) {
+        if (database != null) {
+            database.terminate();
+        }
+        if (broker != null) {
+            broker.close();
+        }
+        cancelTasks();
     }
 
     @Listener
@@ -201,7 +225,7 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
     @Override
     public List<OnlineUser> getOnlineUsers() {
         return game.server().onlinePlayers().stream()
-                .map(SpongeUser::adapt)
+                .map(user -> SpongeUser.adapt(user, this))
                 .collect(Collectors.toList());
     }
 
@@ -241,6 +265,29 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
     @Override
     public void setServerSpawn(@NotNull Spawn spawn) {
         this.serverSpawn = spawn;
+    }
+
+    @Override
+    public void setServerSpawn(@NotNull Location location) {
+        try {
+            // Create or update the spawn.yml file
+            final File spawnFile = new File(getDataFolder(), "spawn.yml");
+            if (spawnFile.exists() && !spawnFile.delete()) {
+                log(Level.WARNING, "Failed to delete the existing spawn.yml file");
+            }
+            this.serverSpawn = Annotaml.create(spawnFile, new Spawn(location)).get();
+
+            // Update the world spawn location, too
+            game.server().worldManager().worlds().forEach(world -> {
+                if (world.properties().key().asString().equals(location.getWorld().getName())) {
+                    world.properties().setSpawnPosition(Vector3i.from(
+                            (int) location.getX(), (int) location.getY(), (int) location.getZ())
+                    );
+                }
+            });
+        } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            log(Level.WARNING, "Failed to save the server spawn.yml file", e);
+        }
     }
 
     @NotNull
@@ -303,24 +350,6 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
         this.randomTeleportEngine = randomTeleportEngine;
     }
 
-    @Override
-    public void setServerSpawn(@NotNull Location location) {
-        try {
-            this.serverSpawn = Annotaml.create(new File(getDataFolder(), "spawn.yml"), new Spawn(location)).get();
-
-            // Update the world spawn location, too
-            game.server().worldManager().worlds().forEach(world -> {
-                if (world.properties().key().asString().equals(location.getWorld().getName())) {
-                    world.properties().setSpawnPosition(Vector3i.from(
-                            (int) location.getX(), (int) location.getY(), (int) location.getZ())
-                    );
-                }
-            });
-        } catch (IOException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            log(Level.WARNING, "Failed to save the server spawn.yml file", e);
-        }
-    }
-
     @NotNull
     @Override
     public List<Hook> getHooks() {
@@ -378,13 +407,10 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
 
     @NotNull
     public List<SpongeCommand> registerCommands(@NotNull RegisterCommandEvent<Raw> event) {
-        final List<SpongeCommand> commands = new ArrayList<>();
-        for (SpongeCommand.Type type : SpongeCommand.Type.values()) {
-            final SpongeCommand command = new SpongeCommand(type.getCommand(), this);
-            commands.add(command);
-            command.registerCommand(event);
-        }
-        return commands;
+        return SpongeCommand.Type.getCommands(getPlugin()).stream()
+                .map(command -> new SpongeCommand(command, this))
+                .peek(command -> command.registerCommand(event))
+                .toList();
     }
 
     public void registerPermissions() {
@@ -410,7 +436,30 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
 
     @Override
     public void registerMetrics(int metricsId) {
-        // No metrics for Sponge
+        if (!getVersion().getMetadata().isBlank()) {
+            return;
+        }
+
+        try {
+            final Metrics metrics = metricsFactory.make(METRICS_ID);
+            metrics.addCustomChart(new SimplePie("bungee_mode",
+                    () -> Boolean.toString(getSettings().doCrossServer())));
+            if (getSettings().doCrossServer()) {
+                metrics.addCustomChart(new SimplePie("messenger_type",
+                        () -> getSettings().getBrokerType().getDisplayName()));
+            }
+            metrics.addCustomChart(new SimplePie("language",
+                    () -> getSettings().getLanguage().toLowerCase()));
+            metrics.addCustomChart(new SimplePie("database_type",
+                    () -> getSettings().getDatabaseType().getDisplayName()));
+            metrics.addCustomChart(new SimplePie("using_economy",
+                    () -> Boolean.toString(getSettings().doEconomy())));
+            metrics.addCustomChart(new SimplePie("using_map",
+                    () -> Boolean.toString(getSettings().doMapHook())));
+            getMapHook().ifPresent(hook -> metrics.addCustomChart(new SimplePie("map_type", hook::getName)));
+        } catch (Throwable e) {
+            log(Level.WARNING, "Failed to register bStats metrics (" + e.getMessage() + ")");
+        }
     }
 
     @Override
@@ -434,7 +483,8 @@ public class SpongeHuskHomes implements HuskHomes, SpongeTaskRunner, SpongeSafet
         // Read the message and handle
         final SpongeUser user = (SpongeUser) playerConnection.get();
         final String channel = pluginMessage.readUTF();
-        if (broker instanceof PluginMessageBroker messenger && getSettings().getBrokerType() == Broker.Type.PLUGIN_MESSAGE) {
+        if (broker instanceof PluginMessageBroker messenger
+                && getSettings().getBrokerType() == Broker.Type.PLUGIN_MESSAGE) {
             messenger.onReceive(channel, user, pluginMessage.readBytes(pluginMessage.available()));
         }
     }

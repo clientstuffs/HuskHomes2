@@ -4,20 +4,21 @@ author: 'William278'
 website: 'https://william278.net/'
 main: 'net.william278.huskhomes.BukkitHuskHomes'
 version: '${version}'
-api-version: 1.16
+api-version: '1.16'
 softdepend:
   - Vault
-  - RedisEconomy
   - PlaceholderAPI
   - dynmap
   - BlueMap
+  - Pl3xMap
   - Plan
-loadbefore:
   - Essentials
 libraries:
   - 'redis.clients:jedis:${jedis_version}'
   - 'com.mysql:mysql-connector-j:${mysql_driver_version}'
+  - 'org.mariadb.jdbc:mariadb-java-client:${mariadb_driver_version}'
   - 'org.xerial:sqlite-jdbc:${sqlite_driver_version}'
+  - 'com.h2database:h2:${h2_driver_version}'
 
 commands:
   home:
@@ -26,46 +27,46 @@ commands:
     usage: /<command> <name>
   homelist:
     usage: /<command> [player] [page]
-    aliases: [homes]
+    aliases: [ homes ]
   delhome:
     usage: /<command> <name>
   edithome:
     usage: /<command> <name> [rename|description|relocate|privacy] [args]
   phome:
     usage: /<command> [<owner_name>.<home_name>]
-    aliases:  [publichome]
+    aliases: [ publichome ]
   phomelist:
     usage: /<command> [page]
-    aliases:  [publichomelist, phomes]
+    aliases: [ publichomelist, phomes ]
   warp:
     usage: /<command> <name>
   setwarp:
     usage: /<command> <name>
   warplist:
     usage: /<command> [page]
-    aliases: [warps]
+    aliases: [ warps ]
   delwarp:
     usage: /<command> <name>
   editwarp:
     usage: /<command> <name> [rename|description|relocate] [args]
   tp:
     usage: /<command> <target> [destination]
-    aliases: [tpo]
+    aliases: [ tpo ]
   tphere:
     usage: /<command> <player>
-    aliases: [tpohere]
+    aliases: [ tpohere ]
   tpa:
     usage: /<command> <player>
   tpahere:
     usage: /<command> <player>
   tpaccept:
     usage: /<command> [player]
-    aliases: [tpyes]
+    aliases: [ tpyes ]
   tpdecline:
     usage: /<command> [player]
-    aliases: [tpdeny, tpno]
+    aliases: [ tpdeny, tpno ]
   rtp:
-    usage: /<command> [player]
+    usage: /<command> [player] [world]
   tpignore:
     usage: /<command>
   tpoffline:
@@ -81,4 +82,4 @@ commands:
   back:
     usage: /<command>
   huskhomes:
-    usage: /<command> [about|help|reload|update]
+    usage: /<command> [about|help|reload|import|update]

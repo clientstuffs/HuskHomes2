@@ -22,6 +22,7 @@ package net.william278.huskhomes.util;
 import io.papermc.lib.PaperLib;
 import net.william278.huskhomes.position.Location;
 import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,31 +38,70 @@ public interface BukkitSafetyResolver extends SafetyResolver {
             return CompletableFuture.completedFuture(Optional.empty());
         }
 
-        return PaperLib.getChunkAtAsync(bukkitLocation).thenApply(Chunk::getChunkSnapshot).thenApply(snapshot -> {
-            final int chunkX = bukkitLocation.getBlockX() & 0xF;
-            final int chunkZ = bukkitLocation.getBlockZ() & 0xF;
+        // Ensure the location is within the world border
+        if (!bukkitLocation.getWorld().getWorldBorder().isInside(bukkitLocation)) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
 
-            for (int dX = -1; dX <= 2; dX++) {
-                for (int dZ = -1; dZ <= 2; dZ++) {
-                    final int x = chunkX + dX;
-                    final int z = chunkZ + dZ;
-                    if (x < 0 || x >= 16 || z < 0 || z >= 16) {
-                        continue;
+        // Search nearby blocks for a safe location
+        return PaperLib.getChunkAtAsync(bukkitLocation)
+                .thenApply(Chunk::getChunkSnapshot)
+                .thenApply(snapshot -> findSafeLocationNear(
+                        location,
+                        snapshot,
+                        bukkitLocation.getWorld().getMinHeight()
+                ));
+    }
+
+    /**
+     * Search for a safe ground location near the given location.
+     *
+     * @param location The location to search around
+     * @param chunk    The chunk snapshot to search
+     * @param minY     The minimum Y value of the world
+     * @return An optional safe location, within 4 blocks of the given location
+     */
+    private Optional<Location> findSafeLocationNear(@NotNull Location location, @NotNull ChunkSnapshot chunk,
+                                                    int minY) {
+        final int chunkX = ((int) location.getX()) & 0xF;
+        final int chunkZ = ((int) location.getZ()) & 0xF;
+
+        for (int dx = -SEARCH_RADIUS; dx <= SEARCH_RADIUS; dx++) {
+            for (int dz = -SEARCH_RADIUS; dz <= SEARCH_RADIUS; dz++) {
+                final int x = chunkX + dx;
+                final int z = chunkZ + dz;
+                if (x < 0 || x >= 16 || z < 0 || z >= 16) {
+                    continue;
+                }
+                final int y = Math.max((minY + 1), chunk.getHighestBlockYAt(x, z)) + 1;
+                final Material blockType = chunk.getBlockType(x, y - 1, z);
+                final Material bodyBlockType = chunk.getBlockType(x, y, z);
+                final Material headBlockType = chunk.getBlockType(x, y + 1, z);
+                if (isBlockSafeForStanding(blockType.getKey().toString())
+                        && isBlockSafeForOccupation(bodyBlockType.getKey().toString())
+                        && isBlockSafeForOccupation(headBlockType.getKey().toString())) {
+                    double locx = Math.floor(location.getX()) + dx;
+                    if (locx < 0) {
+                        locx += 1.5d;
+                    } else {
+                        locx = locx + 0.5d;
                     }
-                    final int y = snapshot.getHighestBlockYAt(x, z);
-                    final Material blockType = snapshot.getBlockType(chunkX, y, chunkZ);
-                    if (isBlockSafe(blockType.getKey().toString())) {
-                        return Optional.of(Location.at(
-                                (location.getX() + dX) + 0.5d,
-                                y + 1.25d,
-                                (location.getZ() + dZ) + 0.5d,
-                                location.getWorld()
-                        ));
+                    double locz = Math.floor(location.getZ()) + dz;
+                    if (locz < 0) {
+                        locz += 1.5d;
+                    } else {
+                        locz = locz + 0.5d;
                     }
+                    return Optional.of(Location.at(
+                            locx,
+                            y,
+                            locz,
+                            location.getWorld()
+                    ));
                 }
             }
-            return Optional.empty();
-        });
+        }
+        return Optional.empty();
     }
 
 }

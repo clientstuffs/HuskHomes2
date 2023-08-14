@@ -24,10 +24,15 @@ import net.william278.huskhomes.position.Home;
 import net.william278.huskhomes.position.SavedPosition;
 import net.william278.huskhomes.position.Warp;
 import net.william278.huskhomes.user.User;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A hook for a mapping plugin, such as Dynmap
+ * A hook for a mapping plugin, such as Dynmap.
  */
 public abstract class MapHook extends Hook {
 
@@ -39,7 +44,7 @@ public abstract class MapHook extends Hook {
     }
 
     /**
-     * Populate the map with public homes and warps
+     * Populate the map with public homes and warps.
      */
     protected void populateMap() {
         if (plugin.getSettings().doPublicHomesOnMap()) {
@@ -55,47 +60,47 @@ public abstract class MapHook extends Hook {
     }
 
     /**
-     * Update a home, adding it to the map if it exists, or updating it on the map if it doesn't
+     * Update a home, adding it to the map if it exists, or updating it on the map if it doesn't.
      *
      * @param home the home to update
      */
     public abstract void updateHome(@NotNull Home home);
 
     /**
-     * Removes a home from the map
+     * Removes a home from the map.
      *
      * @param home the home to remove
      */
     public abstract void removeHome(@NotNull Home home);
 
     /**
-     * Clears homes owned by a player from the map
+     * Clears homes owned by a player from the map.
      *
      * @param user the player whose homes to clear
      */
     public abstract void clearHomes(@NotNull User user);
 
     /**
-     * Update a warp, adding it to the map if it exists, or updating it on the map if it doesn't
+     * Update a warp, adding it to the map if it exists, or updating it on the map if it doesn't.
      *
      * @param warp the warp to update
      */
     public abstract void updateWarp(@NotNull Warp warp);
 
     /**
-     * Removes a warp from the map
+     * Removes a warp from the map.
      *
      * @param warp the warp to remove
      */
     public abstract void removeWarp(@NotNull Warp warp);
 
     /**
-     * Clears all warps from the map
+     * Clears all warps from the map.
      */
     public abstract void clearWarps();
 
     /**
-     * Returns if the position is valid to be set on this server
+     * Returns if the position is valid to be set on this server.
      *
      * @param position the position to check
      * @return if the position is valid
@@ -134,4 +139,81 @@ public abstract class MapHook extends Hook {
                 .orElse("Warps");
     }
 
+    /**
+     * Creates an HTML Dynmap marker information popup widget.
+     */
+    protected static class MarkerInformationPopup {
+        @NotNull
+        private final String title;
+
+        @Nullable
+        private String thumbnail;
+
+        @NotNull
+        private final Map<String, String> fields;
+
+        private MarkerInformationPopup(@NotNull String title) {
+            this.title = title;
+            this.fields = new HashMap<>();
+        }
+
+        @NotNull
+        protected static DynmapHook.MarkerInformationPopup warp(@NotNull Warp warp, @NotNull String thumbnail,
+                                                                @NotNull HuskHomes plugin) {
+            return MarkerInformationPopup.create(warp.getName())
+                    .thumbnail(thumbnail)
+                    .field("Description", plugin.getLocales().wrapText(warp.getMeta().getDescription(), 60))
+                    .field("Location", warp.toString())
+                    .field("Command", "/warp " + warp.getSafeIdentifier());
+        }
+
+        @NotNull
+        protected static DynmapHook.MarkerInformationPopup publicHome(@NotNull Home home, @NotNull String thumbnail,
+                                                                      @NotNull HuskHomes plugin) {
+            return MarkerInformationPopup.create(home.getName())
+                    .thumbnail(thumbnail)
+                    .field("Owner", home.getOwner().getUsername())
+                    .field("Description", plugin.getLocales().wrapText(home.getMeta().getDescription(), 60))
+                    .field("Location", home.toString())
+                    .field("Command", "/phome " + home.getSafeIdentifier());
+        }
+
+        @NotNull
+        protected static DynmapHook.MarkerInformationPopup create(@NotNull String title) {
+            return new MarkerInformationPopup(title);
+        }
+
+        @NotNull
+        protected DynmapHook.MarkerInformationPopup thumbnail(@NotNull String thumbnail) {
+            this.thumbnail = thumbnail;
+            return this;
+        }
+
+        @NotNull
+        protected DynmapHook.MarkerInformationPopup field(@NotNull String key, @NotNull String value) {
+            fields.put(key, value);
+            return this;
+        }
+
+        @NotNull
+        protected String toHtml() {
+            final StringBuilder html = new StringBuilder();
+            html.append("<div class=\"infowindow\">");
+            if (thumbnail != null) {
+                html.append("<img src=\"")
+                        .append(thumbnail)
+                        .append(".png\" class=\"thumbnail\"/>")
+                        .append("&nbsp;");
+            }
+            html.append("<span style=\"font-weight: bold;\">")
+                    .append(StringEscapeUtils.escapeHtml4(title))
+                    .append("</span><br/>");
+            fields.forEach((key, value) -> html.append("<span style=\"font-weight: bold;\">")
+                    .append(StringEscapeUtils.escapeHtml4(key))
+                    .append(": </span><span>")
+                    .append(StringEscapeUtils.escapeHtml4(value))
+                    .append("</span><br/>"));
+            return html.toString();
+        }
+    }
 }

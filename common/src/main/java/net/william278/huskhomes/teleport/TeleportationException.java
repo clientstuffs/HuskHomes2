@@ -23,25 +23,19 @@ import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.user.CommandUser;
 import org.jetbrains.annotations.NotNull;
 
-public class TeleportationException extends IllegalArgumentException {
+public class TeleportationException extends IllegalStateException {
 
-    public TeleportationException(@NotNull Type error) {
-        super("Error during teleport operation: " + error.name());
+    private final HuskHomes plugin;
+    private final Type type;
+
+    public TeleportationException(@NotNull Type cause, @NotNull HuskHomes plugin) {
+        super("Error executing teleport: " + cause.name());
+        this.type = cause;
+        this.plugin = plugin;
     }
 
-    public enum Type {
-        TELEPORTER_NOT_FOUND,
-        TARGET_NOT_FOUND,
-        ALREADY_WARMING_UP,
-        ECONOMY_ACTION_FAILED,
-        WARMUP_ALREADY_MOVING,
-        WORLD_NOT_FOUND,
-        ILLEGAL_TARGET_COORDINATES,
-        CANNOT_TELEPORT_TO_SELF
-    }
-
-    public void displayMessage(@NotNull CommandUser user, @NotNull HuskHomes plugin, @NotNull String[] args) {
-        switch (Type.valueOf(getMessage().split(": ")[1])) {
+    public void displayMessage(@NotNull CommandUser user, @NotNull String... args) {
+        switch (type) {
             case TELEPORTER_NOT_FOUND, TARGET_NOT_FOUND -> plugin.getLocales()
                     .getLocale("error_player_not_found", args)
                     .ifPresent(user::sendMessage);
@@ -60,6 +54,30 @@ public class TeleportationException extends IllegalArgumentException {
             case WORLD_NOT_FOUND -> plugin.getLocales()
                     .getLocale("error_invalid_world")
                     .ifPresent(user::sendMessage);
+            default -> {
+                // Silent; no message
+            }
         }
     }
+
+    @NotNull
+    @SuppressWarnings("unused")
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * Represents different causes of {@link TeleportationException}s.
+     */
+    public enum Type {
+        TELEPORTER_NOT_FOUND,
+        TARGET_NOT_FOUND,
+        ALREADY_WARMING_UP,
+        TRANSACTION_FAILED,
+        WARMUP_ALREADY_MOVING,
+        WORLD_NOT_FOUND,
+        ILLEGAL_TARGET_COORDINATES,
+        CANNOT_TELEPORT_TO_SELF
+    }
+
 }

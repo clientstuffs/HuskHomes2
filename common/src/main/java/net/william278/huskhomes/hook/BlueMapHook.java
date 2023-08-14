@@ -24,12 +24,12 @@ import de.bluecolored.bluemap.api.BlueMapMap;
 import de.bluecolored.bluemap.api.BlueMapWorld;
 import de.bluecolored.bluemap.api.markers.MarkerSet;
 import de.bluecolored.bluemap.api.markers.POIMarker;
+import net.william278.desertwell.util.ThrowingConsumer;
 import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.position.Home;
 import net.william278.huskhomes.position.Warp;
 import net.william278.huskhomes.position.World;
 import net.william278.huskhomes.user.User;
-import net.william278.huskhomes.util.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,12 +39,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
- * Hook to display warps and public homes on <a href="https://github.com/BlueMap-Minecraft/BlueMap">BlueMap</a> maps
+ * Hook to display warps and public homes on <a href="https://github.com/BlueMap-Minecraft/BlueMap">BlueMap</a> maps.
  */
 public class BlueMapHook extends MapHook {
 
@@ -58,20 +58,20 @@ public class BlueMapHook extends MapHook {
     @Override
     public void initialize() {
         BlueMapAPI.onEnable(api -> {
-            this.publicHomesMarkerSets = new HashMap<>();
-            this.warpsMarkerSets = new HashMap<>();
+            this.publicHomesMarkerSets = new ConcurrentHashMap<>();
+            this.warpsMarkerSets = new ConcurrentHashMap<>();
 
             for (World world : plugin.getWorlds()) {
                 this.editMapWorld(world, (mapWorld -> {
-                    final MarkerSet publicHomeMarkers = MarkerSet.builder().label(getPublicHomesMarkerSetName()).build();
+                    final MarkerSet homeMarkers = MarkerSet.builder().label(getPublicHomesMarkerSetName()).build();
                     final MarkerSet warpsMarkers = MarkerSet.builder().label(getWarpsMarkerSetName()).build();
 
                     for (BlueMapMap map : mapWorld.getMaps()) {
-                        map.getMarkerSets().put(getPublicHomesKey(), publicHomeMarkers);
+                        map.getMarkerSets().put(getPublicHomesKey(), homeMarkers);
                         map.getMarkerSets().put(getWarpsKey(), warpsMarkers);
                     }
 
-                    publicHomesMarkerSets.put(world.getName(), publicHomeMarkers);
+                    publicHomesMarkerSets.put(world.getName(), homeMarkers);
                     warpsMarkerSets.put(world.getName(), warpsMarkers);
                 }));
             }
