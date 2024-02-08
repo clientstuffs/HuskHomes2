@@ -24,7 +24,7 @@ import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.kyori.adventure.audience.Audience;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -42,13 +42,11 @@ import java.util.*;
 
 public class FabricUser extends OnlineUser {
 
-    private final FabricHuskHomes plugin;
     private final ServerPlayerEntity player;
 
     private FabricUser(@NotNull ServerPlayerEntity player, @NotNull FabricHuskHomes plugin) {
-        super(player.getUuid(), player.getEntityName());
+        super(player.getUuid(), player.getEntityName(), plugin);
         this.player = player;
-        this.plugin = plugin;
     }
 
     @NotNull
@@ -94,14 +92,14 @@ public class FabricUser extends OnlineUser {
 
     @Override
     public boolean hasPermission(@NotNull String node) {
-        final boolean requiresOp = Boolean.TRUE.equals(plugin.getPermissions().getOrDefault(node, true));
-        return Permissions.check(player, node, !requiresOp || player.hasPermissionLevel(3));
+        boolean op = Boolean.TRUE.equals(((FabricHuskHomes) plugin).getPermissions().getOrDefault(node, true));
+        return Permissions.check(player, node, !op || player.hasPermissionLevel(3));
     }
 
     @Override
     @NotNull
     public Map<String, Boolean> getPermissions() {
-        return plugin.getPermissions().entrySet().stream()
+        return ((FabricHuskHomes) plugin).getPermissions().entrySet().stream()
                 .filter(entry -> Permissions.check(player, entry.getKey(), entry.getValue()))
                 .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
     }
@@ -131,6 +129,7 @@ public class FabricUser extends OnlineUser {
             throw new TeleportationException(TeleportationException.Type.ILLEGAL_TARGET_COORDINATES, plugin);
         }
 
+        player.dismountVehicle();
         FabricDimensions.teleport(
                 player,
                 server.getWorld(server.getWorldRegistryKeys().stream()
@@ -150,9 +149,9 @@ public class FabricUser extends OnlineUser {
     @Override
     public void sendPluginMessage(@NotNull String channel, byte[] message) {
         final PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeIdentifier(parseIdentifier(channel));
         buf.writeBytes(message);
-        final CustomPayloadS2CPacket packet = new CustomPayloadS2CPacket(parseIdentifier(channel), buf);
-        player.networkHandler.sendPacket(packet);
+        player.networkHandler.sendPacket(new CustomPayloadS2CPacket(buf));
     }
 
     @Override

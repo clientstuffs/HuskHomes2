@@ -37,12 +37,10 @@ import java.util.Optional;
 public class SpongeUser extends OnlineUser {
 
     private final ServerPlayer player;
-    private final SpongeHuskHomes plugin;
 
     private SpongeUser(@NotNull ServerPlayer player, @NotNull SpongeHuskHomes plugin) {
-        super(player.uniqueId(), player.name());
+        super(player.uniqueId(), player.name(), plugin);
         this.player = player;
-        this.plugin = plugin;
     }
 
     /**
@@ -113,13 +111,14 @@ public class SpongeUser extends OnlineUser {
             if (serverLocation.isEmpty()) {
                 return;
             }
+            player.vehicle().ifPresent(vehicle -> vehicle.get().passengers().remove(player));
             player.setLocation(serverLocation.get());
         });
     }
 
     @Override
     public void sendPluginMessage(@NotNull String channel, byte[] message) {
-        plugin.getPluginMessageChannel().sendTo(player, channelBuf -> channelBuf.writeBytes(message));
+        ((SpongeHuskHomes) plugin).getPluginMessageChannel().sendTo(player, buf -> buf.writeBytes(message));
     }
 
     @Override

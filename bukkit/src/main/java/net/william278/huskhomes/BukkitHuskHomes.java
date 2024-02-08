@@ -19,6 +19,8 @@
 
 package net.william278.huskhomes;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.william278.annotaml.Annotaml;
 import net.william278.desertwell.util.Version;
@@ -65,6 +67,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import space.arim.morepaperlib.MorePaperLib;
+import space.arim.morepaperlib.commands.CommandRegistration;
 import space.arim.morepaperlib.scheduling.GracefulScheduling;
 
 import java.io.File;
@@ -163,7 +166,7 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         initialize("hooks", (plugin) -> {
             this.registerHooks();
 
-            if (hooks.size() > 0) {
+            if (!hooks.isEmpty()) {
                 hooks.forEach(hook -> {
                     try {
                         hook.initialize();
@@ -177,11 +180,11 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
             }
         });
 
-        // Register events
-        initialize("events", (plugin) -> this.eventListener = new BukkitEventListener(this));
+        // Register event listener
+        initialize("events", (plugin) -> this.eventListener = getListener().register(this));
 
         // Register commands
-        initialize("commands", (plugin) -> this.commands = registerCommands());
+        initialize("commands", (plugin) -> this.commands = BukkitCommand.Type.getCommands(this));
 
         // Initialize the API
         initialize("API", (plugin) -> HuskHomesAPI.register(this));
@@ -191,9 +194,10 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         this.checkForUpdates();
     }
 
+    // Register the event listener
     @NotNull
-    public List<Command> registerCommands() {
-        return BukkitCommand.Type.getCommands(this);
+    protected BukkitEventListener getListener() {
+        return new BukkitEventListener(this);
     }
 
     @Override
@@ -242,15 +246,6 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         cancelTasks();
     }
 
-    /**
-     * Returns the adventure Bukkit audiences.
-     *
-     * @return The adventure Bukkit audiences
-     */
-    public BukkitAudiences getAudiences() {
-        return audiences;
-    }
-
     @Override
     @NotNull
     public ConsoleUser getConsole() {
@@ -263,6 +258,12 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
         return Bukkit.getOnlinePlayers().stream()
                 .map(player -> (OnlineUser) BukkitUser.adapt(player, this))
                 .toList();
+    }
+
+    @NotNull
+    @Override
+    public Audience getAudience(@NotNull UUID user) {
+        return audiences.player(user);
     }
 
     @NotNull
@@ -483,8 +484,18 @@ public class BukkitHuskHomes extends JavaPlugin implements HuskHomes, BukkitTask
     }
 
     @NotNull
+    public AudienceProvider getAudiences() {
+        return audiences;
+    }
+
+    @NotNull
     public GracefulScheduling getScheduler() {
         return paperLib.scheduling();
+    }
+
+    @NotNull
+    public CommandRegistration getCommandRegistrar() {
+        return paperLib.commandRegistration();
     }
 
     @Override

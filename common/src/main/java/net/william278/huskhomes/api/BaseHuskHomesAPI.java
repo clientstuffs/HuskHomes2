@@ -225,12 +225,12 @@ public abstract class BaseHuskHomesAPI {
      * @since 4.0
      */
     public final void editUserData(@NotNull String username, @NotNull Consumer<SavedUser> editor) {
-        plugin.getSavedUsers().stream().findAny().ifPresent(savedUser -> {
-            if (savedUser.getUsername().equalsIgnoreCase(username)) {
-                editor.accept(savedUser);
-                saveUserData(savedUser);
-            }
-        });
+        plugin.getSavedUsers().stream()
+                .filter(u -> u.getUsername().equalsIgnoreCase(username)).findFirst()
+                .ifPresent(savedUser -> {
+                    editor.accept(savedUser);
+                    saveUserData(savedUser);
+                });
     }
 
     /**
@@ -241,12 +241,14 @@ public abstract class BaseHuskHomesAPI {
      * @since 4.0
      */
     public final void editUserData(@NotNull UUID uuid, @NotNull Consumer<SavedUser> editor) {
-        plugin.getSavedUsers().stream().findAny().ifPresent(savedUser -> {
-            if (savedUser.getUser().getUuid().equals(uuid)) {
-                editor.accept(savedUser);
-                saveUserData(savedUser);
-            }
-        });
+        plugin.getSavedUsers().stream()
+                .filter(u -> u.getUserUuid().equals(uuid)).findFirst()
+                .ifPresent(savedUser -> {
+                    if (savedUser.getUser().getUuid().equals(uuid)) {
+                        editor.accept(savedUser);
+                        saveUserData(savedUser);
+                    }
+                });
     }
 
     /**
@@ -317,14 +319,38 @@ public abstract class BaseHuskHomesAPI {
 
     /**
      * Create a home for a given user with the specified name and position.
+     * The returned future may complete exceptionally with a {@link net.william278.huskhomes.util.ValidationException}
+     * if the home could not be created.
      *
      * @param owner    The {@link User} to create the home for
      * @param name     The name of the home
      * @param position The {@link Position} of the home
-     * @since 4.0
+     * @return a {@link CompletableFuture} that will complete with the created {@link Home}.
+     * @since 4.5
      */
-    public void createHome(@NotNull User owner, @NotNull String name, @NotNull Position position) {
-        plugin.runAsync(() -> plugin.getManager().homes().createHome(owner, name, position, false, false));
+    public CompletableFuture<Home> createHome(@NotNull User owner, @NotNull String name, @NotNull Position position) {
+        return createHome(owner, name, position, false, false, false);
+    }
+
+    /**
+     * Create a home for a given user with the specified name and position.
+     * The returned future may complete exceptionally with a {@link net.william278.huskhomes.util.ValidationException}
+     * if the home could not be created.
+     *
+     * @param owner              The {@link User} to create the home for
+     * @param name               The name of the home
+     * @param position           The {@link Position} of the home
+     * @param overwrite          Whether to overwrite an existing home with the same name
+     * @param buyAdditionalSlots Whether to buy additional home slots if the user has reached their maximum
+     * @param ignoreMaxHomes     Whether to ignore the maximum number of homes a user can have
+     * @return a {@link CompletableFuture} that will complete with the created {@link Home}.
+     * @since 4.5.1
+     */
+    public CompletableFuture<Home> createHome(@NotNull User owner, @NotNull String name, @NotNull Position position,
+                                              boolean overwrite, boolean buyAdditionalSlots, boolean ignoreMaxHomes) {
+        return plugin.supplyAsync(() -> plugin.getManager().homes().createHome(
+                owner, name, position, overwrite, buyAdditionalSlots, ignoreMaxHomes
+        ));
     }
 
     /**
@@ -527,10 +553,11 @@ public abstract class BaseHuskHomesAPI {
      *
      * @param name     The name of the warp
      * @param position The {@link Position} of the warp
-     * @since 4.0
+     * @return A {@link CompletableFuture} that will complete with the created {@link Warp}
+     * @since 4.5
      */
-    public final void createWarp(@NotNull String name, @NotNull Position position) {
-        plugin.runAsync(() -> plugin.getManager().warps().createWarp(name, position));
+    public final CompletableFuture<Warp> createWarp(@NotNull String name, @NotNull Position position) {
+        return plugin.supplyAsync(() -> plugin.getManager().warps().createWarp(name, position));
     }
 
     /**

@@ -26,7 +26,8 @@ import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.TitlePart;
+import net.kyori.adventure.title.Title;
+import net.william278.huskhomes.HuskHomes;
 import net.william278.huskhomes.config.Locales;
 import net.william278.huskhomes.position.Location;
 import net.william278.huskhomes.position.Position;
@@ -42,8 +43,11 @@ import java.util.*;
  */
 public abstract class OnlineUser extends User implements Teleportable, CommandUser {
 
-    public OnlineUser(@NotNull UUID uuid, @NotNull String username) {
+    protected final HuskHomes plugin;
+
+    protected OnlineUser(@NotNull UUID uuid, @NotNull String username, @NotNull HuskHomes plugin) {
         super(uuid, username);
+        this.plugin = plugin;
     }
 
     /**
@@ -90,9 +94,11 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
      * @param subTitle whether to send the title as a subtitle ({@code true} for a subtitle, {@code false} for a title)
      */
     public void sendTitle(@NotNull MineDown mineDown, boolean subTitle) {
-        getAudience().sendTitlePart(subTitle ? TitlePart.SUBTITLE : TitlePart.TITLE, mineDown
-                .disable(MineDownParser.Option.SIMPLE_FORMATTING)
-                .replace().toComponent());
+        final Component message = mineDown.disable(MineDownParser.Option.SIMPLE_FORMATTING).replace().toComponent();
+        getAudience().showTitle(Title.title(
+                subTitle ? Component.empty() : message,
+                subTitle ? message : Component.empty()
+        ));
     }
 
     /**
@@ -155,7 +161,7 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
      * @param soundEffect the sound effect to play. If the sound name is invalid, the sound will not play
      * @implNote If the key is invalid, it will be substituted with {@code minecraft:block.note_block.banjo}
      */
-    public void playSound(@Subst(Key.MINECRAFT_NAMESPACE + "block.note_block.banjo")
+    public void playSound(@Subst(Key.MINECRAFT_NAMESPACE + ":block.note_block.banjo")
                           @NotNull String soundEffect) throws IllegalArgumentException {
         try {
             getAudience().playSound(
@@ -173,7 +179,9 @@ public abstract class OnlineUser extends User implements Teleportable, CommandUs
      * @return the adventure {@link Audience} for this player
      */
     @NotNull
-    public abstract Audience getAudience();
+    public Audience getAudience() {
+        return plugin.getAudience(getUuid());
+    }
 
     /**
      * Teleport a player to the specified local {@link Location}.
